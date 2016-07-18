@@ -1,0 +1,26 @@
+{
+    "framework": "jasmine",
+    "libs": [],
+    "coverageFilters": [],
+    "scenarios": [
+        {
+            "libs": [],
+            "coverageFilters": [],
+            "directory": "unit",
+            "name": "Unit Tests"
+        },
+        {
+            "libs": [],
+            "coverageFilters": [],
+            "directory": "uiunit",
+            "name": "UI Unit Tests"
+        },
+        {
+            "libs": [],
+            "coverageFilters": [],
+            "directory": "End-To-End Tests",
+            "name": "Ext-to-End Tests",
+            "launch": true
+        }
+    ]
+}

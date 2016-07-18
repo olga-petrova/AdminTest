@@ -1,0 +1,53 @@
+{
+    "frameworks": {
+        "ext": "ext"
+    },
+    "build": {
+        "dir": "${workspace.dir}/build"
+    },
+    "packages": {
+        "dir": "${workspace.dir}/packages/local,${workspace.dir}/packages",
+        "extract": "${workspace.dir}/packages/remote"
+    },
+    "tests": {
+        "browser": {
+            "farms": [
+                {
+                    "name": "Sause Labs",
+                    "type": "saucelabs",
+                    "username": "olga.petrova@sencha.com",
+                    "accessKey": "84a82c07-a38c-41dc-a126-ff991c7b8c00",
+                    "host": "ondemand.saucelabs.com",
+                    "port": 80,
+                    "sessionLimit": 10,
+                    "pools": [
+                        {
+                            "name": "IE",
+                            "path": "../../../../../bin/Sencha/BrowserFarms/IE.json"
+                        },
+                        {
+                            "name": "FF",
+                            "path": "../../../../../bin/Sencha/BrowserFarms/FF.json"
+                        }
+                    ]
+                },
+                {
+                    "name": "WebDriver",
+                    "type": "generic",
+                    "host": "127.0.0.1",
+                    "port": 4444,
+                    "autoStartTunnel": false,
+                    "pools": [
+                        {
+                            "name": "WebDriverPool",
+                            "path": "../SenchaTest/SenchaTestOfficialDemo/SenchaTestDemo/AdminDashboard/WebDriver Browsers.json"
+                        }
+                    ]
+                }
+            ]
+        },
+        "archiveServer": "http://localhost:1903",
+        "archiveRoot": "/developers"
+    },
+    "name": "AdminTest"
+}
