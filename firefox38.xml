@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<testsuites>
+  <properties>
+    <property name="browser.name" value="Firefox 47.0 / Mac OS X 10.10"/>
+    <property name="browser.fullName" value="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:47.0) Gecko/20100101 Firefox/47.0"/>
+  </properties>
+  <testsuite name="view.dashboard.todowindow.TodoWindow js" tests="6" errors="0" failed="1">
+    <testcase name="TODO window UI unit test suite.ToDo window should open" classname="firefox38..UI Unit Tests.view.dashboard.todowindow.TodoWindow js"/>
+    <testcase name="TODO window UI unit test suite.ToDo window should match the expected screenshot" classname="firefox38..UI Unit Tests.view.dashboard.todowindow.TodoWindow js">
+      <failure message="Expected screenshot todowindow to match baseline."/>
+    </testcase>
+    <testcase name="TODO window UI unit test suite.ToDo window should close on cancel button click" classname="firefox38..UI Unit Tests.view.dashboard.todowindow.TodoWindow js"/>
+    <testcase name="TODO window UI unit test suite.Save button should not be disabled initially" classname="firefox38..UI Unit Tests.view.dashboard.todowindow.TodoWindow js"/>
+    <testcase name="TODO window UI unit test suite.Save button should be disabled when textfield is empty" classname="firefox38..UI Unit Tests.view.dashboard.todowindow.TodoWindow js"/>
+    <testcase name="TODO window UI unit test suite.ToDo window should save ToDo and close on save button click" classname="firefox38..UI Unit Tests.view.dashboard.todowindow.TodoWindow js"/>
+  </testsuite>
+</testsuites>

@@ -4,12 +4,8 @@
     <property name="browser.name" value="Firefox 47.0 / Mac OS X 10.10"/>
     <property name="browser.fullName" value="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:47.0) Gecko/20100101 Firefox/47.0"/>
   </properties>
-  <testsuite name="view.dashboard.todowindow.TodoWindow js" tests="6" errors="0" failed="0">
-    <testcase name="TODO window UI unit test suite.ToDo window should open" classname="firefox42..UI Unit Tests.view.dashboard.todowindow.TodoWindow js"/>
-    <testcase name="TODO window UI unit test suite.ToDo window should match the expected screenshot" classname="firefox42..UI Unit Tests.view.dashboard.todowindow.TodoWindow js"/>
-    <testcase name="TODO window UI unit test suite.ToDo window should close on cancel button click" classname="firefox42..UI Unit Tests.view.dashboard.todowindow.TodoWindow js"/>
-    <testcase name="TODO window UI unit test suite.Save button should not be disabled initially" classname="firefox42..UI Unit Tests.view.dashboard.todowindow.TodoWindow js"/>
-    <testcase name="TODO window UI unit test suite.Save button should be disabled when textfield is empty" classname="firefox42..UI Unit Tests.view.dashboard.todowindow.TodoWindow js"/>
-    <testcase name="TODO window UI unit test suite.ToDo window should save ToDo and close on save button click" classname="firefox42..UI Unit Tests.view.dashboard.todowindow.TodoWindow js"/>
+  <testsuite name="store.Todo js" tests="2" errors="0" failed="0">
+    <testcase name="ToDo store unit test suite.should be able to add new ToDo item" classname="firefox42..Unit Tests.store.Todo js"/>
+    <testcase name="ToDo store unit test suite.should not add duplicated item" classname="firefox42..Unit Tests.store.Todo js"/>
   </testsuite>
 </testsuites>

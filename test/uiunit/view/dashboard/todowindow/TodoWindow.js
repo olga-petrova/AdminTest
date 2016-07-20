@@ -1,6 +1,9 @@
 describe("TODO window UI unit test suite", function() {
     var toDoWindow,
     Dash = {
+        toDoWindow: function () {
+            return ST.component('todowindow');    
+        },
         saveButton: function () {
             return ST.button('#saveButton');
         },
@@ -10,21 +13,22 @@ describe("TODO window UI unit test suite", function() {
     };
     
     //create todo window
-    beforeEach(function (done) {
+    beforeEach(function () {
         toDoWindow = Ext.create('Admin.view.dashboard.todowindow.TodoWindow');
         toDoWindow.show();
-
-        Ext.defer(done, 500); 
     });
     
     //destroy todo window
-    afterEach(function (done) {
+    afterEach(function () {
         toDoWindow = Ext.destroy(toDoWindow);
-        Ext.defer(done, 500);
     });
     
     it('ToDo window should open', function () {
-        expect(toDoWindow.el).toBeTruthy();
+        Dash.toDoWindow()
+        .rendered()
+        .and(function (window) {
+            expect(window.el).toBeTruthy();    
+        });
     });
     
     it("ToDo window should match the expected screenshot", function(done) {
@@ -33,9 +37,12 @@ describe("TODO window UI unit test suite", function() {
 
         
     it('ToDo window should close on cancel button click', function (done) {
-        toDoWindow.on('close', done);
-        Dash.cancelButton().click();
-        
+        Dash.toDoWindow()
+        .rendered()
+        .and(function (window) {
+            window.on('close', done);
+            Dash.cancelButton().click();
+        });
     });  
     
     it('Save button should not be disabled initially', function () {
@@ -43,8 +50,12 @@ describe("TODO window UI unit test suite", function() {
     });
     
     it('Save button should be disabled when textfield is empty', function () {
-        toDoWindow.getViewModel().set('todoText', '');
-        expect(Dash.saveButton().disabled(400)).toBeTruthy();
+        Dash.toDoWindow()
+        .rendered()
+        .and(function (window) {
+            window.getViewModel().set('todoText', '');
+            expect(Dash.saveButton().disabled(400)).toBeTruthy();
+        });
     });
     
     
@@ -56,17 +67,22 @@ describe("TODO window UI unit test suite", function() {
         toDoStore.on('load', function () {
             itemsCount = toDoStore.getCount();   
         });
-        //mock ViewModel 
-        toDoWindow.getViewModel().set('todos', toDoStore);
-        toDoWindow.getViewModel().set('todoText', 'myText');
-        //check count of items on window's close    
-        toDoWindow.on('close', function () {
-            expect(toDoStore.getCount()).toBe(itemsCount + 1);
-            toDoStore = Ext.destroy(toDoStore);
-            done();
+        Dash.toDoWindow()
+        .rendered()
+        .and(function (window) {
+            //mock ViewModel 
+            window.getViewModel().set('todos', toDoStore);
+            window.getViewModel().set('todoText', 'myText');
+            
+            //check count of items on window's close    
+            window.on('close', function () {
+                expect(toDoStore.getCount()).toBe(itemsCount + 1);
+                toDoStore = Ext.destroy(toDoStore);
+                done();
+            });
+            //click save button
+            Dash.saveButton().click();
         });
-        //click save button
-        Dash.saveButton().click();
     });
     
 });
