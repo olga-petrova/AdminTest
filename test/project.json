@@ -23,5 +23,6 @@
             "launch": true
         }
     ],
-    "launchAppWatch": true
+    "launchAppWatch": false,
+    "subjectUrl": "http://localhost:1841/"
 }
