@@ -22,6 +22,5 @@
             "name": "Ext-to-End Tests",
             "launch": true
         }
-    ],
-    "subjectUrl": "http://localhost:1841/"
+    ]
 }
