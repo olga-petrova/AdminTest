@@ -22,5 +22,6 @@
             "name": "Ext-to-End Tests",
             "launch": true
         }
-    ]
+    ],
+    "launchAppWatch": true
 }
