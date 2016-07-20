@@ -1,0 +1,22 @@
+{
+  "name": "exporter",
+  "namespace": "Ext",
+  "format": "1",
+  "version": "6.0.2.275",
+  "compatVersion": "6.0.0",
+  "creator": "Sencha",
+  "summary": "Exports data to formats like Excel",
+  "detailedDescription": "Utilities and plugins to export data in formats such as Excel and download them client-side",
+  "type": "code",
+  "framework": "ext",
+  "toolkit": "classic",
+  "output": "${package.dir}/build",
+  "sass": {
+    "namespace": "Ext",
+    "etc": "${package.dir}/sass/etc/all.scss",
+    "var": "${package.dir}/sass/var",
+    "src": "${package.dir}/sass/src"
+  },
+  "classpath": "${package.dir}/src",
+  "overrides": "${package.dir}/overrides"
+}

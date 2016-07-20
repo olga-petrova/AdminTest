@@ -1,0 +1,190 @@
+/* http://localhost:1841/packages/pivot/sass/src/pivot/Grid.scss:4 */
+.x-column-header-inner .x-grid-row-expander {
+    /**
+*   These are css patches to fix issues in ExtJS
+*/
+    float: none !important;
+    background-repeat: no-repeat;
+    background-position: 0 2px;
+    font-size: 13px;
+    line-height: 15px;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/Grid.scss:12 */
+.x-column-header-last {
+    border-right: 1px solid #cfcfcf;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/Grid.scss:15 */
+.x-rtl.x-column-header-last {
+    border-left: 1px solid #cfcfcf;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/Grid.scss:61 */
+.x-pivot-grid-group-header {
+    /**
+ * Common classes
+ *
+ */
+    background: #f5f5f5;
+    border-width: 0 1px;
+    border-style: solid;
+    border-color: #cfcfcf;
+    white-space: nowrap;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/Grid.scss:70 */
+.x-pivot-grid-group-header-collapsible {
+    cursor: pointer;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/Grid.scss:75 */
+.x-pivot-grid-group-header-collapsible .x-pivot-grid-group-title {
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-image: url(images/group-collapse.png);
+    padding: 0 0 0 14px;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/Grid.scss:84 */
+.x-rtl.x-grid-view .x-pivot-grid-group-header-collapsible .x-pivot-grid-group-title {
+    background-position: right center;
+    padding: 0 14px 0 0;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/Grid.scss:89 */
+.x-pivot-grid-group-title {
+    color: #01060a;
+    font: bold 13px/15px helvetica, arial, verdana, sans-serif;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/Grid.scss:95 */
+.x-pivot-grid-group-header-collapsed .x-pivot-grid-group-title {
+    background-image: url(images/group-expand.png);
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/Grid.scss:102 */
+.x-pivot-grid-group-total .x-grid-cell-inner,
+.x-pivot-grid-group-total .x-column-header-inner {
+    font: bold 13px/15px helvetica, arial, verdana, sans-serif;
+    color: #01060a;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/Grid.scss:108 */
+.x-pivot-grid-group-total .x-grid-cell {
+    font: bold 13px/15px helvetica, arial, verdana, sans-serif;
+    border-color: #cfcfcf;
+    border-style: solid;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/Grid.scss:122 */
+.x-pivot-grid-grand-total .x-grid-cell-inner,
+.x-pivot-grid-grand-total .x-column-header-inner {
+    font: bold 13px/15px helvetica, arial, verdana, sans-serif;
+    color: #01060a;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/Grid.scss:128 */
+.x-pivot-grid-grand-total .x-grid-cell {
+    font: bold 13px/15px helvetica, arial, verdana, sans-serif;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/Grid.scss:143 */
+.x-grid-with-row-lines .x-pivot-grid-outline-cell-hidden {
+    /**
+ * Outline view classes
+ *
+ */
+    border-bottom-width: 0px;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/Grid.scss:148 */
+.x-grid-with-col-lines .x-pivot-grid-outline-cell-hidden {
+    border-right-width: 0px;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/Grid.scss:162 */
+.x-pivot-grid-group-header-compact {
+    /**
+ * Compact view classes
+ *
+ */
+    border: none;
+    background: transparent;
+    border-width: 0 !important;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/Grid.scss:167 */
+.x-pivot-grid-group-header-compact .x-grid-cell-inner {
+    border-width: 0 1px 0;
+    border-style: solid;
+    border-color: #cfcfcf;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/plugin/configurator/Column.scss:1 */
+.x-pivot-grid-config-column {
+    cursor: pointer;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/plugin/configurator/Column.scss:4 */
+.x-pivot-grid-config-column .x-pivot-grid-config-column-btn {
+    height: 16px;
+    float: left;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/plugin/configurator/Column.scss:9 */
+.x-pivot-grid-config-column .x-column-header-sort-ASC,
+.x-pivot-grid-config-column .x-column-header-sort-DESC {
+    background-color: transparent !important;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/plugin/configurator/Column.scss:16 */
+.x-pivot-grid-config-column-inner {
+    padding: 3px;
+    border: 1px solid #cfcfcf;
+    margin: 1px;
+    font: 300 13px/15px helvetica, arial, verdana, sans-serif;
+    background-image: none;
+    background-color: #fff;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/plugin/configurator/Column.scss:31 */
+.x-pivot-grid-config-column-btn-image {
+    padding: 0 13px 0 0;
+    background-position: right center;
+    background-repeat: no-repeat;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/plugin/configurator/Column.scss:37 */
+.x-pivot-grid-config-column-btn-customize {
+    background-image: url(images/gear-small.png);
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/plugin/configurator/Column.scss:41 */
+.x-pivot-grid-config-column-btn-sort-asc {
+    background-image: url(images/sort_asc.png);
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/plugin/configurator/Column.scss:45 */
+.x-pivot-grid-config-column-btn-sort-desc {
+    background-image: url(images/sort_desc.png);
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/plugin/configurator/Column.scss:49 */
+.x-pivot-grid-config-column-btn-sort-clear {
+    background-image: url(images/sort-clear.png);
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/plugin/configurator/Column.scss:53 */
+.x-pivot-grid-config-column-btn-filter-set {
+    background-image: url(images/filtered.png);
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/plugin/configurator/Column.scss:57 */
+.x-pivot-grid-config-column-btn-filter-clear {
+    background-image: url(images/filter-clear.png);
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/plugin/configurator/Container.scss:1 */
+.x-pivot-grid-config-container-header {
+    padding: 2px;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/plugin/configurator/Container.scss:4 */
+.x-pivot-grid-config-container-header .x-panel-header-title {
+    font: 300 13px/15px helvetica, arial, verdana, sans-serif;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/plugin/configurator/Container.scss:8 */
+.x-pivot-grid-config-container-header.x-header-noborder {
+    padding: 2px;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/plugin/configurator/Container.scss:12 */
+.x-pivot-grid-config-container-body {
+    background-color: white;
+    border: 0 solid #cfcfcf;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/plugin/configurator/Container.scss:16 */
+.x-pivot-grid-config-container-body-tr {
+    border-width: 1px 1px 0 0;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/plugin/configurator/Container.scss:19 */
+.x-pivot-grid-config-container-body-bl {
+    border-width: 0 0 1px 1px;
+}
+/* http://localhost:1841/packages/pivot/sass/src/pivot/plugin/configurator/Container.scss:23 */
+.x-pivot-grid-config-container-hint {
+    color: darkgray;
+    padding: 5px;
+}
