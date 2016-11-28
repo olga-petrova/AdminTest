@@ -1,0 +1,165 @@
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/packages/pivot/modern/sass/src/pivot/Grid.scss:2 */
+.x-pivot-grid-group-header-collapsible .x-pivot-grid-group {
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-image: url(images/group-collapse.png);
+    padding: 0 0 0 16px;
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/packages/pivot/modern/sass/src/pivot/Grid.scss:11 */
+.x-pivot-grid-group-title {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/packages/pivot/modern/sass/src/pivot/Grid.scss:18 */
+.x-pivot-grid-group-header-collapsed .x-pivot-grid-group {
+    background-image: url(images/group-expand.png);
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/packages/pivot/modern/sass/src/pivot/plugin/configurator/Column.scss:2 */
+.x-pivot-grid-config-column .x-dock {
+    display: flex;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    width: 100%;
+    padding-right: 16px;
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/packages/pivot/modern/sass/src/pivot/plugin/configurator/Column.scss:9 */
+.x-pivot-grid-config-column .x-dock .x-pivot-grid-config-column-btn {
+    margin-left: 16px;
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/packages/pivot/modern/sass/src/pivot/plugin/configurator/Column.scss:15 */
+.x-pivot-grid-config-column-btn {
+    height: 16px;
+    width: 16px;
+    font-size: 18px;
+    color: rgba(17, 17, 17, 0.38);
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/packages/pivot/modern/sass/src/pivot/plugin/configurator/Column.scss:28 */
+.x-pivot-grid-config-column-btn-delete {
+    font-family: 'Material Icons';
+    line-height: 1;
+    color: #c62828;
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/ext/modern/theme-base/sass/etc/mixins/font-icon.scss:129 */
+.x-pivot-grid-config-column-btn-delete:before {
+    content: 'remove_circle';
+    font-feature-settings: 'liga';
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/packages/pivot/modern/sass/src/pivot/plugin/configurator/Column.scss:33 */
+.x-pivot-grid-config-column-btn-move {
+    font-family: 'Material Icons';
+    line-height: 1;
+    color: #b0b0b0;
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/ext/modern/theme-base/sass/etc/mixins/font-icon.scss:129 */
+.x-pivot-grid-config-column-btn-move:before {
+    content: 'reorder';
+    font-feature-settings: 'liga';
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/packages/pivot/modern/sass/src/pivot/plugin/configurator/Column.scss:38 */
+.x-pivot-grid-config-column-btn-sort-asc {
+    font-family: 'Material Icons';
+    line-height: 1;
+    color: #b0b0b0;
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/ext/modern/theme-base/sass/etc/mixins/font-icon.scss:129 */
+.x-pivot-grid-config-column-btn-sort-asc:before {
+    content: 'arrow_upward';
+    font-feature-settings: 'liga';
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/packages/pivot/modern/sass/src/pivot/plugin/configurator/Column.scss:43 */
+.x-pivot-grid-config-column-btn-sort-desc {
+    font-family: 'Material Icons';
+    line-height: 1;
+    color: #b0b0b0;
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/ext/modern/theme-base/sass/etc/mixins/font-icon.scss:129 */
+.x-pivot-grid-config-column-btn-sort-desc:before {
+    content: 'arrow_downward';
+    font-feature-settings: 'liga';
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/packages/pivot/modern/sass/src/pivot/plugin/configurator/Column.scss:49 */
+.x-pivot-grid-config-column-filter .x-list-item-body {
+    font-style: italic;
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/packages/pivot/modern/sass/src/pivot/plugin/configurator/Container.scss:1 */
+.x-pivot-grid-config-container {
+    border: solid transparent;
+    border-width: 0 0 0 1px;
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/packages/pivot/modern/sass/src/pivot/plugin/configurator/Container.scss:7 */
+.x-pivot-grid-left-indicator {
+    font-family: 'Material Icons';
+    line-height: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/ext/modern/theme-base/sass/etc/mixins/font-icon.scss:129 */
+.x-pivot-grid-left-indicator:before {
+    content: 'arrow_forward';
+    font-feature-settings: 'liga';
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/packages/pivot/modern/sass/src/pivot/plugin/configurator/Container.scss:13 */
+.x-pivot-grid-right-indicator {
+    font-family: 'Material Icons';
+    line-height: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/ext/modern/theme-base/sass/etc/mixins/font-icon.scss:129 */
+.x-pivot-grid-right-indicator:before {
+    content: 'arrow_back';
+    font-feature-settings: 'liga';
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/packages/pivot/modern/sass/src/pivot/plugin/configurator/Container.scss:20 */
+.x-pivot-drag-proxy-placeholder {
+    z-index: 1000000!important;
+    pointer-events: none;
+    position: absolute;
+    border: solid transparent;
+    border-width: 1px;
+    padding: 5px;
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/packages/pivot/modern/sass/src/pivot/plugin/configurator/Container.scss:30 */
+.x-pivot-drag-proxy-placeholder-valid {
+    color: green;
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/packages/pivot/modern/sass/src/pivot/plugin/configurator/Container.scss:31 */
+.x-pivot-drag-proxy-placeholder-valid .x-pivot-drag-placeholder-icon {
+    font-family: 'Material Icons';
+    line-height: 1;
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/ext/modern/theme-base/sass/etc/mixins/font-icon.scss:129 */
+.x-pivot-drag-proxy-placeholder-valid .x-pivot-drag-placeholder-icon:before {
+    content: 'check';
+    font-feature-settings: 'liga';
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/packages/pivot/modern/sass/src/pivot/plugin/configurator/Container.scss:36 */
+.x-pivot-drag-proxy-placeholder-invalid {
+    color: red;
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/packages/pivot/modern/sass/src/pivot/plugin/configurator/Container.scss:37 */
+.x-pivot-drag-proxy-placeholder-invalid .x-pivot-drag-placeholder-icon {
+    font-family: 'Material Icons';
+    line-height: 1;
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/ext/modern/theme-base/sass/etc/mixins/font-icon.scss:129 */
+.x-pivot-drag-proxy-placeholder-invalid .x-pivot-drag-placeholder-icon:before {
+    content: 'remove';
+    font-feature-settings: 'liga';
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/packages/pivot/modern/sass/src/pivot/plugin/configurator/Container.scss:43 */
+.x-drag-dragging {
+    pointer-events: auto;
+}
+/* C:/BuildAgent/work/1a5a8a89c52bf869/sencha/packages/pivot/modern/sass/src/pivot/plugin/configurator/Panel.scss:1 */
+.x-pivot-grid-config-panel {
+    border: solid transparent;
+    border-width: 0 0 0 1px;
+}

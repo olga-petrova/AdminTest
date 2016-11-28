@@ -26,16 +26,23 @@ Ext.define('Ext.grid.cell.Text', {
          * a separate config to avoid writting the same formatted result to the DOM.
          * @protected
          */
-        rawValue: null
+        rawValue: null,
+
+        /**
+         * @cfg {String} zeroValue
+         *
+         * A replacement value for 0.
+         */
+        zeroValue: '0'
     },
 
     updateRawValue: function (rawValue) {
         var dom = this.innerElement.dom;
 
         if (this.getEncodeHtml()) {
-            dom.textContent = rawValue;
+            dom.textContent = rawValue || '';
         } else {
-            dom.innerHTML = rawValue;
+            dom.innerHTML = rawValue || '';
         }
     },
 
@@ -44,6 +51,15 @@ Ext.define('Ext.grid.cell.Text', {
     },
 
     writeValue: function() {
-        this.setRawValue(this.getValue());
+        var me = this,
+            v = me.getValue(),
+            format = me.getColumn().getFormatter();
+
+        if(v === 0) {
+            v = me.getZeroValue();
+        }else if(typeof format === 'function'){
+            v = format(v);
+        }
+        me.setRawValue(v);
     }
 });

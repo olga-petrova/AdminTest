@@ -122,11 +122,15 @@ Ext.define('Ext.chart.axis.sprite.Axis', {
 
                 /**
                  * @cfg {Number} min The minimum value of the axis.
+                 * `min` and {@link #max} attributes represent the effective range of the axis
+                 * after segmentation, layout, and range reconciliation between axes.
                  */
                 min: 'number',
 
                 /**
                  * @cfg {Number} max The maximum value of the axis.
+                 * {@link #min} and `max` attributes represent the effective range of the axis
+                 * after segmentation, layout, and range reconciliation between axes.
                  */
                 max: 'number',
 
@@ -1037,19 +1041,19 @@ Ext.define('Ext.chart.axis.sprite.Axis', {
         }
     },
 
-    render: function (surface, ctx, clipRect) {
+    render: function (surface, ctx, rect) {
         var me = this,
             layoutContext = me.getLayoutContext();
 
         if (layoutContext) {
-            if (false === me.renderLabels(surface, ctx, layoutContext, clipRect)) {
+            if (false === me.renderLabels(surface, ctx, layoutContext, rect)) {
                 return false;
             }
             ctx.beginPath();
-            me.renderTicks(surface, ctx, layoutContext, clipRect);
-            me.renderAxisLine(surface, ctx, layoutContext, clipRect);
-            me.renderGridLines(surface, ctx, layoutContext, clipRect);
-            me.renderLimits(clipRect);
+            me.renderTicks(surface, ctx, layoutContext, rect);
+            me.renderAxisLine(surface, ctx, layoutContext, rect);
+            me.renderGridLines(surface, ctx, layoutContext, rect);
+            me.renderLimits(rect);
             ctx.stroke();
         }
     }

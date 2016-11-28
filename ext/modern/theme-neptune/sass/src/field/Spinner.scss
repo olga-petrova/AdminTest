@@ -2,58 +2,67 @@
  * @class Ext.field.Spinner
  */
 
-.x-spinner {
-    .x-field-input {
-        .x-input-el {
+.#{$prefix}spinnerfield {
+    .#{$prefix}input {
+        .#{$prefix}input-el {
             -webkit-text-fill-color: #000;
         }
     }
 
-    &.x-item-disabled {
-        .x-input-el {
+    &.#{$prefix}item-disabled {
+        .#{$prefix}input-el {
             -webkit-text-fill-color: #B3B3B3;
         }
 
-        .x-spinner-button {
-            color: #aaa !important;
+        .#{$prefix}spinnerfield-button {
+            color: $spinnerfield-button-disabled-color !important;
+            background-color: $spinnerfield-button-disabled-background-color;
         }
     }
 
-    .x-spinner-button {
+    .#{$prefix}spinnerfield-button {
         width: $spinnerfield-button-size;
         height: $spinnerfield-button-size;
-        line-height: $spinnerfield-button-size;
         color: $spinnerfield-button-color;
+        border-radius: $spinnerfield-button-border-radius;
+        margin: 0 ($spinnerfield-button-spacing / 2);
+
+        &.#{$prefix}button-pressed {
+            color: $spinnerfield-button-pressed-color;
+        }
 
         @if $enable-big {
-            .x-big & {
+            .#{$prefix}big & {
                 font-size: $spinnerfield-button-font-size-big;
             }
         }
     }
 
-    .x-spinner-button-down {
-        @include font-icon($spinnerfield-button-down-icon);
-        margin-left: .25em;
+    .#{$prefix}spinnerfield-button-down {
+        @include font-icon($spinnerfield-button-down-icon, $line-height: $spinnerfield-button-size);
+        background-color: $spinnerfield-button-down-background-color;
+
+        &.#{$prefix}button-pressed {
+            background-color: $spinnerfield-button-down-pressed-background-color;
+        }
     }
-    .x-spinner-button-up {
-        @include font-icon($spinnerfield-button-up-icon);
-        margin-right: .4em;
+    .#{$prefix}spinnerfield-button-up {
+        @include font-icon($spinnerfield-button-up-icon, $line-height: $spinnerfield-button-size);
+        background-color: $spinnerfield-button-up-background-color;
+
+        &.#{$prefix}button-pressed {
+            background-color: $spinnerfield-button-up-pressed-background-color;
+        }
     }
 
-    &.x-field-grouped-buttons {
-        .x-spinner-button-down {
-            margin-right: .5em;
+    &.#{$prefix}field-grouped-buttons {
+        .#{$prefix}spinnerfield-button-down {
+            // space between buttons
+            //margin-right: $spinnerfield-group-button-down-margin-right;
         }
     }
 }
 
-.x-android {
-    .x-spinner-button {
-        padding: .40em 0 .11em !important;
-    }
-}
-
-.x-ie .x-spinner .x-field-input .x-input-el:disabled {
+.#{$prefix}ie .#{$prefix}spinnerfield .#{$prefix}input .#{$prefix}input-el:disabled {
   color: #000;
 }

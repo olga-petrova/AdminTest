@@ -1,0 +1,64 @@
+$button-background-color: dynamic(transparent);
+$button-border-color: dynamic($button-background-color);
+$button-border-width: dynamic(1px);
+$button-border-radius: dynamic(.5em);
+$button-border-style: dynamic(solid);
+$button-color: dynamic($base-color);
+$button-pressed-color: dynamic($base-light-color);
+$button-disabled-color: dynamic($neutral-dark-color);
+
+$button-font-weight: dynamic($font-weight-normal);
+
+$button-line-height: dynamic(1.23em);
+$button-line-height-big: dynamic(1.25em);
+$button-padding: dynamic(0.171em 0.77em);
+$button-padding-big: dynamic(0.6875em 0.625em);
+$button-icon-color: dynamic($button-color);
+$button-pressed-icon-color: dynamic($button-pressed-color);
+
+@mixin button-confirm-ui {
+    @include button-ui(
+        $ui: 'confirm',
+        $color: $ios-green,
+        $pressed-color: mix(#fff, $ios-green, 70%)
+    );
+}
+
+@mixin button-decline-ui {
+    @include button-ui(
+        $ui: 'decline',
+        $color: $ios-red,
+        $pressed-color: mix(#fff, $ios-red, 70%)
+    );
+}
+
+@mixin button-action-ui {}
+@mixin button-round-ui {}
+
+@mixin button-icon-stroke($stroke-color) {
+    &:before {
+        color: transparent;
+        -webkit-text-stroke-width: 1px;
+        -webkit-text-stroke-color: $stroke-color;
+    }
+}
+
+.x-button-back:before {
+    content: '"';
+    font-family: 'iOS';
+    color: $button-color;
+    font-size: 1.3em;
+    line-height: 0;
+    padding-right: .13em;
+    position: relative;
+    top: .15em;
+}
+
+.x-button-back.x-button-pressing:before {
+    color: $button-pressed-color;
+}
+
+.x-button-back.x-button-disabled:before {
+    // TODO: add disabled color to button mixin
+    //color: $button-disabled-color;
+}

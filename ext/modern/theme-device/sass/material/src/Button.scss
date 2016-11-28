@@ -1,0 +1,149 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}button {
+      padding: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      background-color: transparent;
+      border: 0;
+      @include css-color-variable('primary-color-md');
+
+      &:not(.#{$prefix}haslabel) {
+        border-radius: 50%;
+      }
+
+      &.#{$prefix}haslabel .#{$prefix}button-icon:not(.#{$prefix}hidden) + .#{$prefix}button-label {
+        padding-left: 16px;
+        text-align: left;
+      }
+
+    }
+
+    .#{$prefix}button-icon.#{$prefix}shown {
+      display: flex;
+    }
+
+    .#{$prefix}button-pressing {
+      @include css-color-variable('background-color-md');
+      @include css-color-variable('primary-color-pressed-md', 'background-color');
+      transition: background-color .2s 0.28s cubic-bezier(0.4, 0, 0.2, 1), color .2s 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    // Raised Buttons
+    .#{$prefix}button-md-raised {
+      @include css-color-variable('background-color-md');
+      @include css-color-variable('primary-color-md', 'background-color');
+      @include material-shadow();
+
+      &.#{$prefix}button-pressing {
+        @include css-color-variable('primary-color-pressed-md', 'background-color');
+        @include material-shadow(2);
+      }
+
+      &.#{$prefix}button-decline {
+        @include css-color-variable('background-color-md');
+        @include css-color-variable('negative-color-md', 'background-color');
+      }
+
+      &.#{$prefix}button-confirm {
+        @include css-color-variable('background-color-md');
+        @include css-color-variable('positive-color-md', 'background-color');
+      }
+    }
+
+    // Floating Action Buttons
+    .#{$prefix}button-md-fab {
+      @include css-color-variable('background-color-md');
+      display: flex;
+      width: 56px;
+      height: 56px;
+      @include css-color-variable('accent-color-md', 'background-color');
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      @include material-shadow(2);
+
+      &.#{$prefix}button-pressing {
+        @include css-color-variable('accent-color-pressed-md', 'background-color');
+        @include material-shadow(3);
+      }
+    }
+
+    .#{$prefix}button-decline {
+      @include css-color-variable('negative-color-md');
+    }
+
+    .#{$prefix}button-confirm {
+      @include css-color-variable('positive-color-md');
+    }
+
+    .#{$prefix}docked-top {
+      .#{$prefix}hasbadge .#{$prefix}badge {
+        top: -11px;
+      }
+    }
+
+    .#{$prefix}hasbadge {
+      .#{$prefix}badge {
+        top: -1px;
+        left: -1px;
+
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        text-align: center;
+        display: block;
+        overflow: hidden;
+
+        max-width: 55%;
+        min-width: 23px;
+        padding: 4px;
+        @include material-font-style('caption');
+        line-height: inherit;
+        border-radius: 8px;
+        @include css-color-variable('accent-color-md', 'background-color');
+
+        @include material-shadow(1);
+      }
+    }
+
+    // Ripple Effects
+
+    .md-ripple-wrap {
+      overflow: hidden;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+
+    .md-ripple {
+      animation: none;
+    }
+
+    .md-ripple-effect {
+      position: absolute;
+      border-radius: 50%;
+      transform: scale(1);
+      opacity: .4;
+
+      animation: md-ripple-animation .5s ease-out forwards;
+    }
+  }
+
+  @keyframes md-ripple-animation {
+    0% {
+      transform: scale(0);
+      opacity: 0.4;
+    }
+    75% {
+      transform: scale(1.5);
+      opacity: .2;
+    }
+    100% {
+      transform: scale(1.5);
+      opacity: 0;
+    }
+  }
+}

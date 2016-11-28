@@ -1,0 +1,11 @@
+.#{$prefix}grid-summaryrow {
+  padding: 8px 0;
+
+  .#{$prefix}grid-expander-cell:before {
+    display: none;
+  }
+
+  .#{$prefix}grid-cell {
+    border: none;
+  }
+}

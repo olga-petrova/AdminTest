@@ -1,0 +1,17 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}carousel-indicator span {
+      display: block;
+      width: 10px;
+      height: 10px;
+      margin: 3px;
+      border-radius: 50%;
+      @include css-color-variable('text-color-lighter-md', 'background-color');
+      transition: background-color .25s ease-out;
+
+      &.#{$prefix}carousel-indicator-active {
+        @include css-color-variable('accent-color-md', 'background-color');
+      }
+    }
+  }
+}

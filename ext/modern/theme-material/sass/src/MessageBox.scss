@@ -1,0 +1,29 @@
+.#{$prefix}msgbox,
+.#{$prefix}panel.#{$prefix}floated,
+.#{$prefix}form.#{$prefix}floated {
+  background-color: $background-color;
+
+  width: 75vw;
+  max-height: 75vh;
+  min-width: initial;
+  max-width: initial;
+
+  .#{$prefix}panel-header {
+    background-color: $background-color;
+    color: $color;
+  }
+
+  .#{$prefix}toolbar {
+
+    .#{$prefix}button {
+      color: $base-color;
+    }
+  }
+}
+
+.#{$prefix}floating {
+  .#{$prefix}msgbox-inner, .#{$prefix}form-inner, .#{$prefix}panel-inner {
+    color: $highlight-color;
+    padding: 0 24px 24px 24px;
+  }
+}

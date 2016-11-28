@@ -65,20 +65,6 @@ Ext.define('Ext.field.Toggle', {
 
     config: {
         /**
-         * @cfg
-         * @inheritdoc
-         */
-        cls: 'x-toggle-field',
-
-        /**
-         * @cfg {String} labelAlign
-         * The position to render the label relative to the field input.
-         * Available options are: 'top', 'left', 'bottom' and 'right'
-         * @accessor
-         */
-        labelAlign: 'left',
-
-        /**
          * @cfg {String} activeLabel The label to add to the toggle field when it is toggled on.
          * Only available in the Blackberry theme.
          * @accessor
@@ -99,6 +85,8 @@ Ext.define('Ext.field.Toggle', {
          */
         value: false
     },
+
+    classCls: Ext.baseCSSPrefix + 'togglefield',
 
     /**
      * @event change

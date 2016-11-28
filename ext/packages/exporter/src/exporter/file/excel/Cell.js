@@ -1,8 +1,7 @@
-/**
+ /**
  * This class is used to create an xml Excel Cell.
  *
  * The data type of the cell value is automatically determined.
- *
  */
 Ext.define('Ext.exporter.file.excel.Cell', {
     extend: 'Ext.exporter.file.Base',
@@ -82,33 +81,34 @@ Ext.define('Ext.exporter.file.excel.Cell', {
         '<tpl if="this.exists(mergeDown)"> ss:MergeDown="{mergeDown}"</tpl>',
         '<tpl if="this.exists(formula)"> ss:Formula="{formula}"</tpl>',
         '>\n',
-        '                   <Data ss:Type="{dataType}">{[this.formatValue(values.value)]}</Data>\n',
+        '                   <Data ss:Type="{dataType}">{value}</Data>\n',
         '               </Cell>\n',
         {
             exists: function(value){
                 return !Ext.isEmpty(value);
-            },
-            formatValue: function(value){
-                var format = Ext.util.Format;
-                return (value instanceof Date ? Ext.Date.format(value, 'Y-m-d\\TH:i:s.u') : format.htmlEncode(format.htmlDecode(value)));
             }
         }
     ],
 
-    render: function(){
-        var me = this,
-            v = me.getValue();
+    applyValue: function(v){
+        var dt = 'String',
+            format = Ext.util.Format;
 
         // let's detect the data type
         if(v instanceof Date){
-            me.setDataType('DateTime');
+            dt = 'DateTime';
+            v = Ext.Date.format(v, 'Y-m-d\\TH:i:s.u');
         }else if(Ext.isNumeric(v)){
-            me.setDataType('Number');
+            dt = 'Number';
         }else{
-            me.setDataType('String');
+            // cannot use here stripTags
+            // this value goes into an xml tag and we need to force html encoding
+            // for chars like &><
+            v =  format.htmlEncode(format.htmlDecode(v))
         }
 
-        return me.callParent(arguments);
+        this.setDataType(dt);
+        return v;
     }
 
 });

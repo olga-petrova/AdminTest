@@ -1,0 +1,8 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}has-row-expander-column .#{$prefix}grid-rowbody {
+      padding-left: 52px;
+      position: relative;
+    }
+  }
+}

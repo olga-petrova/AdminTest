@@ -12,13 +12,13 @@ $list-item-color: dynamic($color);
  * @var {color}
  * List item background-color
  */
-$list-item-background-color: dynamic(#fff);
+$list-item-background-color: dynamic($background-color);
 
 /**
  * @var {color}
- * List item background-color
+ * List item border-color
  */
-$list-item-border-color: dynamic($neutral-highlight-color);
+$list-item-border-color: dynamic($neutral-highlight-color null null null);
 
 /**
  * @var {color}
@@ -96,7 +96,7 @@ $list-group-header-background-color: dynamic($neutral-light-color);
  * @var {color}
  * Border-color for list header rows (in grouped lists).
  */
-$list-group-header-border-color: dynamic($grid-column-border-color);
+$list-group-header-border-color: dynamic($grid-column-border-color null $grid-column-border-color null);
 
 /**
  * @var {string/number}
@@ -145,3 +145,48 @@ $list-group-header-padding: dynamic($list-item-padding);
  * List item padding in the {@link Global_CSS#$enable-big big} sizing scheme
  */
 $list-group-header-padding-big: dynamic($list-item-padding-big);
+
+// NEW
+$list-group-header-border-width: dynamic(1px null 1px null);
+$list-group-header-border-style: dynamic(solid null solid null);
+$list-group-header-pinned-color: dynamic(null);
+$list-group-header-pinned-background-color: dynamic(null);
+
+$list-item-display: dynamic(null);
+$list-item-align-items: dynamic(null);
+
+$list-item-border-width: dynamic(1px null null null);
+$list-item-border-style: dynamic(solid null null null);
+
+$list-footer-item-border-width: dynamic(null null $neutral-highlight-color null);
+$list-footer-item-border-style: dynamic(null null 1px null);
+$list-footer-item-border-color: dynamic(null null solid null);
+
+$list-item-selected-color: dynamic(null);
+$list-item-pressed-color: dynamic(null);
+
+$list-item-indexed-padding: dynamic(null);
+
+$list-item-disclosure-position: dynamic(absolute);
+$list-item-disclosure-right: dynamic(0);
+$list-item-disclosure-width: dynamic(1em);
+$list-item-disclosure-height: dynamic($list-item-disclosure-width);
+$list-item-disclosure-top: dynamic(50%);
+$list-item-disclosure-margin: dynamic(-.5em .6em 0 0);
+$list-item-disclosure-color: dynamic($neutral-dark-color);
+$list-item-disclosure-text-align: dynamic(center);
+$list-item-disclosure-icon: dynamic($fa-var-arrow-circle-right 1.24em);
+$list-item-disclosure-font-size-big: dynamic(1.2em);
+
+$list-item-disclosure-background-color: dynamic(null);
+$list-item-disclosure-border-radius: dynamic(null);
+$list-item-disclosure-padding: dynamic(null);
+$list-item-disclosure-display: dynamic(null);
+$list-item-disclosure-justify-content: dynamic(null);
+$list-item-disclosure-align-content: dynamic(null);
+$list-item-disclosure-align-items: dynamic(null);
+$list-item-disclosure-pressed-color: dynamic(null);
+$list-item-disclosure-pressed-background-color: dynamic(null);
+
+$list-item-indexed-disclosure-margin: dynamic(0 1.8em 0 0);
+

@@ -1,5 +1,20 @@
-.#{$prefix}ie .#{$prefix}field.#{$prefix}field-text {
-    .#{$prefix}field-mask {
+.#{$prefix}textfield {
+    .#{$prefix}input {
+        @include st-box();
+        @include st-box-orient(horizontal);
+        @include st-box-align(center);
+    }
+
+    .#{$prefix}input-el {
+        @include st-box-flex(1);
+    }
+}
+
+.#{$prefix}ie .#{$prefix}field.#{$prefix}textfield {
+    .#{$prefix}input-mask {
         z-index: -1;
     }
+}
+input::-ms-clear {
+    display: none;
 }

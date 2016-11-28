@@ -1,3 +1,5 @@
+/* global Ext, xit, expect, jasmine */
+
 describe("Ext.GlobalEvents", function() {
     describe('idle event', function() {
         var delay = Ext.isIE ? 50 : 10,
@@ -91,7 +93,7 @@ describe("Ext.GlobalEvents", function() {
         
         it("should fire after an Ajax request is processed", function() {
             Ext.Ajax.request({
-                url: 'resources/foo.json',
+                url: '../../../../packages/core/test/resources/foo.json',
                 callback: function() {
                     done = true;
                 }
@@ -130,8 +132,7 @@ describe("Ext.GlobalEvents", function() {
     describe('scroll event', function() {
         var stretcher,
             scrollingPanel,
-            scrolledElements = [],
-            runIt = Ext.supports.touchScroll ? xit : it;
+            scrolledElements = [];
 
         afterEach(function() {
             stretcher.destroy();
@@ -139,10 +140,15 @@ describe("Ext.GlobalEvents", function() {
         });
 
         function onGlobalScroll(scroller) {
-            scrolledElements.push(scroller.getElement());
+            // Check for duplicates because on iOS a single call to scrollBy can trigger multiple scroll events
+            var element = scroller.getElement();
+
+            if (!Ext.Array.contains(scrolledElements, element)) {
+                scrolledElements.push(element);
+            }
         }
 
-        runIt('should fire the global scroll event whenever anything scrolls', function() {
+        it('should fire the global scroll event whenever anything scrolls', function() {
             stretcher = Ext.getBody().createChild({
                 style: 'height:10000px'
             });
@@ -151,8 +157,8 @@ describe("Ext.GlobalEvents", function() {
             scrollingPanel = new Ext.Panel({
                 renderTo: document.body,
                 floating: true,
-                x: 0,
-                y: 0,
+                left: 0,
+                top: 0,
                 width: 300,
                 height: 300,
                 
@@ -169,13 +175,13 @@ describe("Ext.GlobalEvents", function() {
             Ext.on({
                 scroll: onGlobalScroll
             });
-            Ext.scroll.DomScroller.document.scrollBy(null, 100);
+            Ext.getViewportScroller().scrollBy(null, 100);
 
             // Wait for scroll events to fire (may be async)
             waitsFor(function() {
                 return scrolledElements.length === 1 &&
-                       scrolledElements[0] === Ext.scroll.DomScroller.document.getElement();
-            });
+                       scrolledElements[0] === Ext.scroll.Scroller.viewport.getElement();
+            }, 'Scroll of document to fire through the Ext.scroll.Scroller.viewport Scroller');
             
             runs(function() {
                 scrollingPanel.getScrollable().scrollBy(null, 100);
@@ -185,7 +191,7 @@ describe("Ext.GlobalEvents", function() {
             waitsFor(function() {
                 return scrolledElements.length === 2 &&
                        scrolledElements[1] === scrollingPanel.getScrollable().getElement();
-            });
+            }, 'Scroll of panel to fire through the Ext.scroll.Scroller.viewport Scroller');
         });
     });
 });

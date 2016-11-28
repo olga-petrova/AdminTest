@@ -1,0 +1,16 @@
+@if ($include-ios) {
+  #{$ios-selector} {
+    .#{$prefix}panel.#{$prefix}selectfield-overlay {
+      padding: 8px;
+      background-color: #fff;
+
+      > .#{$prefix}panel-inner {
+        overflow: hidden;
+      }
+
+      .#{$prefix}list {
+        background: transparent !important;
+      }
+    }
+  }
+}

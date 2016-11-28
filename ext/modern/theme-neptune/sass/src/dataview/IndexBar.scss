@@ -2,22 +2,41 @@
  * @class Ext.dataview.IndexBar
  */
 
-.x-indexbar {
-    padding: .3em 0;
+.#{$prefix}indexbar {
+    padding: $index-bar-padding;
     color: $index-bar-color;
-}
 
-.x-indexbar-vertical {
+    display: $index-bar-display;
+    align-items: $index-bar-align-items;
+    justify-content: $index-bar-justify-content;
+    opacity: $index-bar-opacity;
     width: $index-bar-width;
-    margin-right: 8px;
+    height: $index-bar-height;
+    margin: $index-bar-margin;
+
+    &.#{$prefix}indexbar-pressed {
+        background-color: $index-bar-pressed-background-color;
+        opacity: $index-bar-pressed-opacity;
+    }
+
+    & > div {
+        width: $index-bar-item-width;
+        height: $index-bar-item-height;
+        display: $index-bar-item-display;
+        justify-content: $index-bar-item-justify-content;
+        align-items: $index-bar-item-align-items;
+        @include font($index-bar-item-font-weight, $index-bar-item-font-size, $index-bar-item-font-line-height, $index-bar-item-font-family);
+    }
+
 }
 
-.x-indexbar-horizontal {
-    height: $index-bar-width;
-    margin-bottom: 8px;
+.#{$prefix}indexbar-horizontal {
+    width: $index-bar-horizontal-width;
+    height: $index-bar-horizontal-height;
+    margin: $index-bar-horizontal-margin;
 }
 
-.x-indexbar-pressed {
-    @include border-radius(($index-bar-width)/2);
+.#{$prefix}indexbar-pressed {
+    border-radius: $index-bar-pressed-border-radius;
     background-color: $index-bar-bg-color;
 }

@@ -1,0 +1,26 @@
+{
+    "namespace": "Ext",
+    "name": "theme-device",
+    "type": "theme",
+    "extend": "theme-base",
+    "framework": "ext",
+    "toolkit": "modern",
+    "creator": "Sencha",
+    "summary": "Ext JS Modern Device Theme",
+    "detailedDescription": "Modern Device theme provides a native looking theme for Android & iOS",
+    "version": "6.2.0.526",
+    "compatVersion": "1.0.0",
+    "format": "1",
+    "output": "${workspace.subpkg.prefix}/${package.name}",
+    "local": true,
+    "requires": [],
+    "sass" : {
+        "namespace": "Ext",
+        "etc": "${package.dir}/sass/etc/all.scss",
+        "var": ["${package.dir}/sass/var","${package.dir}/sass/material/var", "${package.dir}/sass/ios/var"],
+        "src": ["${package.dir}/sass/src","${package.dir}/sass/material/src", "${package.dir}/sass/ios/src"]
+    },
+
+    "classpath": "${package.dir}/src",
+    "overrides": "${package.dir}/overrides"
+}

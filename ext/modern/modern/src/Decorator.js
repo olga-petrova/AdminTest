@@ -92,6 +92,20 @@ Ext.define('Ext.Decorator', {
         }
     },
 
+    getRefItems: function(deep) {
+        var c = this.getComponent(),
+            ret;
+
+        if (c) {
+            ret = [c];
+            if (deep && c.getRefItems) {
+                ret = ret.concat(c.getRefItems(deep));
+            }
+        }
+        return ret || [];
+
+    },
+
     /**
      * @private
      */

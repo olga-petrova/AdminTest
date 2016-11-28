@@ -27,24 +27,24 @@
         .x-item-disabled .x-input-el:-ms-input-placeholder { color: $light-field-disabled-placeholder-color; }
 
         // Label
-        .x-form-label {
+        .x-field-label {
             color: $light-foreground-color;
         }
 
-        .x-field-text,
-        .x-field-textarea,
-        .x-field-search,
-        .x-spinner,
-        .x-field-select {
+        .x-textfield,
+        .x-textareafield,
+        .x-searchfield,
+        .x-spinnerfield,
+        .x-pickerfield
             .x-clear-icon,
-            .x-component-outer .x-input-el {
+            .x-field-body .x-input-el {
                 background-color: $light-field-background-color;
                 border-color: $light-field-border-color;
             }
 
             &.x-field-focused {
                 .x-clear-icon,
-                .x-component-outer .x-input-el {
+                .x-field-body .x-input-el {
                     background-color: $light-field-focus-background-color;
                     border-color: $light-field-focus-border-color;
                 }
@@ -52,7 +52,7 @@
 
             &.x-item-disabled {
                 .x-clear-icon,
-                .x-component-outer .x-input-el {
+                .x-field-body .x-input-el {
                     background-color: $light-field-disabled-background-color;
                     border-color: $light-field-disabled-border-color;
                 }
@@ -60,8 +60,8 @@
         }
 
         // checkboxfield + radiofield
-        .x-field-checkbox .x-field-mask,
-        .x-field-radio .x-field-mask {
+        .x-checkboxfield .x-input-mask,
+        .x-radiofield .x-input-mask {
             &:before {
                 background-color: $light-field-background-color;
                 border-color: $light-field-border-color;
@@ -69,35 +69,35 @@
         }
 
         .x-item-disabled {
-            &.x-field-checkbox .x-field-mask,
-            &.x-field-radio .x-field-mask {
+            &.x-checkboxfield .x-input-mask,
+            &.x-radiofield .x-input-mask {
                 &:before {
                     background-color: $light-field-disabled-background-color;
                     border-color: $light-field-disabled-border-color;
                 }
             }
 
-            .x-input-checkbox:checked ~ .x-field-mask:after {
+            .x-checkbox:checked ~ .x-input-mask:after {
                 color: $light-field-disabled-color;
             }
 
-            .x-input-radio:checked ~ .x-field-mask:after {
+            .x-radio:checked ~ .x-input-mask:after {
                 background-color: $light-field-disabled-color;
             }
         }
 
         // Ext.field.Spinner
-        .x-spinner {
+        .x-spinnerfield {
             &.x-item-disabled {
-                .x-field-input:before,
-                .x-spinner-button {
+                .x-input:before,
+                .x-spinnerfield-button {
                     color: $light-field-disabled-color !important;
                     border-color: $light-field-disabled-border-color !important;
                     background-color: $light-field-disabled-background-color !important;
                 }
             }
 
-            .x-spinner-button {
+            .x-spinnerfield-button {
                 border-color: $light-field-border-color !important;
 
                 &:before {

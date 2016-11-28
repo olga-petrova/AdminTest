@@ -113,12 +113,6 @@ Ext.define('Ext.field.Slider', {
 
     config: {
         /**
-         * @cfg
-         * @inheritdoc
-         */
-        cls: Ext.baseCSSPrefix + 'slider-field',
-
-        /**
          * @cfg {Boolean} liveUpdate
          * `true` to fire change events while the slider is dragging. `false` will
          * only fire a change once the drag is complete.
@@ -145,6 +139,8 @@ Ext.define('Ext.field.Slider', {
          */
         value: 0
     },
+
+    classCls: Ext.baseCSSPrefix + 'sliderfield',
 
     proxyConfig: {
 
@@ -225,14 +221,21 @@ Ext.define('Ext.field.Slider', {
         component.setMaxValue(this.getMaxValue());
     },
 
-    applyValue: function(value) {
-        var ret = value;
+    applyValue: function(value, oldValue) {
+        value = value || 0;
         // If we are currently dragging, don't allow the binding
         // to push a value over the top of what the user is doing.
         if (this.dragging && this.isSyncing('value')) {
-            ret = undefined;
+            value = undefined;
+        } else if (Ext.isArray(value)) {
+            value = value.slice(0);
+            if (oldValue && Ext.Array.equals(value, oldValue)) {
+                value = undefined;
+            }
+        } else {
+            value = [value];
         }
-        return ret;
+        return value;
     },
 
     updateValue: function(value, oldValue) {

@@ -1,0 +1,56 @@
+@if ($include-ios) {
+  #{$ios-selector} {
+    $picker-row-height: 2.5em;
+
+    .#{$prefix}picker {
+      background-color: #fff;
+
+      .#{$prefix}toolbar {
+        border-top: 1px solid #d9d9d9;
+        @include border-radius(0);
+      }
+    }
+
+    .#{$prefix}picker .#{$prefix}picker-inner {
+      background-color: #fff;
+      overflow: hidden;
+      margin: 0px;
+    }
+
+    .#{$prefix}picker-bar {
+      border-top: .12em solid #d9d9d9;
+      border-bottom: .12em solid #d9d9d9;
+      height: $picker-row-height;
+    }
+
+    .#{$prefix}use-titles {
+      .#{$prefix}picker-bar {
+        margin-top: 1.5em;
+      }
+    }
+
+    .#{$prefix}picker-slot-title {
+      height: 1.5em;
+      padding: 0.2em 1.02em;
+
+      > div {
+        font-size: 0.8em;
+      }
+    }
+
+    .#{$prefix}picker-slot {
+      .#{$prefix}dataview-item {
+        height: $picker-row-height;
+        line-height: $picker-row-height;
+        font-weight: bold;
+        padding: 0 10px;
+        //color: #aaaaaa;
+        color: #000;
+
+        &.#{$prefix}item-selected {
+          color: #000;
+        }
+      }
+    }
+  }
+}

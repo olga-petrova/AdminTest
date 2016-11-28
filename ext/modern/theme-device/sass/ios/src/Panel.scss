@@ -1,0 +1,75 @@
+@if ($include-ios) {
+  #{$ios-selector} {
+    .#{$prefix}panel.#{$prefix}floating,
+    .#{$prefix}form.#{$prefix}floating {
+      padding: 0;
+      @include border-radius(7px);
+      background-color: $background-color-ios;
+    }
+
+    .#{$prefix}panel.#{$prefix}floating > .#{$prefix}dock.#{$prefix}sized,
+    .#{$prefix}form.#{$prefix}floating > .#{$prefix}dock.#{$prefix}sized {
+      margin: 0;
+    }
+
+    .#{$prefix}toolbar.#{$prefix}docked-top {
+      @include border-top-radius(6px);
+    }
+
+    .#{$prefix}container.#{$prefix}floating > .#{$prefix}dock > .#{$prefix}toolbar.#{$prefix}docked-bottom,
+    .#{$prefix}panel.#{$prefix}floating > .#{$prefix}dock > .#{$prefix}toolbar.#{$prefix}docked-bottom {
+      @include border-bottom-radius(6px);
+    }
+
+    .#{$prefix}panel.#{$prefix}floating > .#{$prefix}dock.#{$prefix}sized,
+    .#{$prefix}msgbox > .#{$prefix}dock.#{$prefix}sized,
+    .#{$prefix}form.#{$prefix}floating > .#{$prefix}dock.#{$prefix}sized {
+      margin: 6px;
+    }
+
+    $anchor-height: .7em;
+    $anchor-width: $anchor-height*2.33;
+    .#{$prefix}webkit .#{$prefix}anchor {
+      position: absolute;
+      overflow: hidden;
+
+      &.#{$prefix}anchor-top {
+        margin-top: -$anchor-height + 0.02em;
+        margin-left: -$anchor-width / 2;
+        width: $anchor-width;
+        height: $anchor-height;
+        -webkit-mask: 0 0 get-image-url('tip_top') no-repeat;
+        -webkit-mask-size: $anchor-width $anchor-height;
+        background-color: white;
+      }
+
+      &.#{$prefix}anchor-bottom {
+        margin-left: -$anchor-width / 2;
+        width: $anchor-width;
+        height: $anchor-height;
+        -webkit-mask: 0 0 get-image-url('tip_bottom') no-repeat;
+        -webkit-mask-size: $anchor-width $anchor-height;
+        background-color: white;
+      }
+
+      &.#{$prefix}anchor-left {
+        margin-left: -$anchor-width / 2 + 0.15em;
+        margin-top: -$anchor-height / 2;
+        height: $anchor-width;
+        width: $anchor-height;
+        -webkit-mask: 0 0 get-image-url('tip_left') no-repeat;
+        -webkit-mask-size: $anchor-height $anchor-width;
+        background-color: white;
+      }
+
+      &.#{$prefix}anchor-right {
+        margin-top: -$anchor-height / 2;
+        height: $anchor-width;
+        width: $anchor-height;
+        -webkit-mask: 0 0 get-image-url('tip_right') no-repeat;
+        -webkit-mask-size: $anchor-height $anchor-width;
+        background-color: white;
+      }
+    }
+  }
+}

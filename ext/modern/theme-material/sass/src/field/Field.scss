@@ -1,0 +1,51 @@
+// Rising Placeholders
+// only apply to text & text-area inputs
+.#{$prefix}textfield, .#{$prefix}textareafield {
+
+  &.#{$prefix}field-placeholder-label.#{$prefix}field-clearable {
+    .#{$prefix}field-label {
+      @include transform(none);
+      transition: none;
+    }
+  }
+
+  &.#{$prefix}field-placeholder-label:not(.#{$prefix}field-clearable) {
+    .#{$prefix}field-label {
+      @include transform(matrix(1.15, 0, 0, 1.1, 0, 35));
+      @include transform-origin(left);
+      opacity: 0;
+      color: $disabled-color;
+      // Transition label down (from label to placeholder position)
+      transition: transform .25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0s .25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .#{$prefix}input-el::-webkit-input-placeholder {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0s .25s ease-out;
+    }
+
+    &.#{$prefix}field-focused {
+      .#{$prefix}field-label {
+        color: $base-color;
+        opacity: 1;
+        @include transform(none);
+        // Transition label up (from placeholder to label position)
+        transition: transform .25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .#{$prefix}input-el::-webkit-input-placeholder {
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0s;
+      }
+
+      // Workaround for odd issue where placeholder styles are being overridden by the browser
+      // This happens when you enter text into a field, then erase it but keep focus.
+      // The bug will show the placeholder text, this fix will force the placeholder to be invisible
+      &.#{$prefix}empty .#{$prefix}input-el {
+        -webkit-text-fill-color: transparent;
+      }
+    }
+  }
+}

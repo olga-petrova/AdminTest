@@ -2,7 +2,13 @@ describe('Ext.grid.plugin.RowEditing', function () {
     var store, plugin, grid, view, column,
         synchronousLoad = true,
         proxyStoreLoad = Ext.data.ProxyStore.prototype.load,
-        loadStore;
+        loadStore = function() {
+            proxyStoreLoad.apply(this, arguments);
+            if (synchronousLoad) {
+                this.flushLoad.apply(this, arguments);
+            }
+            return this;
+        };
 
     function makeGrid(pluginCfg, gridCfg, storeCfg) {
         var gridPlugins = gridCfg && gridCfg.plugins,
@@ -49,13 +55,7 @@ describe('Ext.grid.plugin.RowEditing', function () {
 
     beforeEach(function() {
         // Override so that we can control asynchronous loading
-        loadStore = Ext.data.ProxyStore.prototype.load = function() {
-            proxyStoreLoad.apply(this, arguments);
-            if (synchronousLoad) {
-                this.flushLoad.apply(this, arguments);
-            }
-            return this;
-        };
+        Ext.data.ProxyStore.prototype.load = loadStore;
     });
 
     afterEach(function () {

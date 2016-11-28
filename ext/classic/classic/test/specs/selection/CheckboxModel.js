@@ -1,15 +1,20 @@
+/* global Ext, expect, jasmine, xit, spyOn */
+
 describe('Ext.selection.CheckboxModel', function() {
     var grid, view, store, checkboxModel, data,
         donRec, evanRec, nigeRec,
         synchronousLoad = true,
         proxyStoreLoad = Ext.data.ProxyStore.prototype.load,
-        loadStore;
+        loadStore = function() {
+            proxyStoreLoad.apply(this, arguments);
+            if (synchronousLoad) {
+                this.flushLoad.apply(this, arguments);
+            }
+            return this;
+        };
 
     function makeGrid(selectionCfg, cfg) {
         checkboxModel = new Ext.selection.CheckboxModel(selectionCfg);
-        checkboxModel.getHeaderCheckbox = function() {
-            return this.views[0].headerCt.child('gridcolumn[isCheckerHd]');
-        };
 
         grid = new Ext.grid.Panel(Ext.apply({
             store: store,
@@ -27,13 +32,7 @@ describe('Ext.selection.CheckboxModel', function() {
 
     beforeEach(function() {
         // Override so that we can control asynchronous loading
-        loadStore = Ext.data.ProxyStore.prototype.load = function() {
-            proxyStoreLoad.apply(this, arguments);
-            if (synchronousLoad) {
-                this.flushLoad.apply(this, arguments);
-            }
-            return this;
-        };
+        Ext.data.ProxyStore.prototype.load = loadStore;
 
         Ext.define('spec.CheckboxModel', {
             extend: 'Ext.data.Model',
@@ -74,13 +73,13 @@ describe('Ext.selection.CheckboxModel', function() {
         Ext.data.Model.schema.clear();
     });
 
-    function expectHeaderChecked(checkboxModel, checked) {
-        var headerCheckbox = checkboxModel.getHeaderCheckbox();
+    function expectHeaderChecked(checked) {
+        var headerCheckbox = checkboxModel.column;
         expect(headerCheckbox.hasCls(checkboxModel.checkerOnCls)).toBe(checked);
     }
 
     function clickOnHeaderCheckbox() {
-        jasmine.fireMouseEvent(checkboxModel.getHeaderCheckbox().el.dom, 'click', 10, 10);
+        jasmine.fireMouseEvent(checkboxModel.column, 'click', 10, 10);
     }
 
     function clickCheckbox(rowIdx) {
@@ -109,6 +108,22 @@ describe('Ext.selection.CheckboxModel', function() {
         jasmine.fireKeyEvent(cell.down(checkboxModel.checkSelector), 'keydown', keyCode, shiftKey, ctrlKey, altKey);
     }
 
+    describe("grid reconfigure", function() {
+        it("should be able to change the columns without hiding the checkcolumn", function() {
+            var store2 = new Ext.data.Store({
+                fields: ['foo'],
+                data: [{
+                    foo: 'bar'
+                }]
+            });
+            makeGrid();
+
+            grid.reconfigure(store2, [{dataIndex: 'foo'}]);
+
+            expect(grid.view.body.el.down('.x-grid-checkcolumn')).not.toBeNull();
+        });
+    });
+
     describe("column insertion", function() {
         var cols;
 
@@ -116,7 +131,7 @@ describe('Ext.selection.CheckboxModel', function() {
             cols = null;
         });
 
-        it("should ignore any xtype defaults and insert a gridcolumn", function() {
+        it("should ignore any xtype defaults and insert a checkcolumn", function() {
             makeGrid(null, {
                 columns: {
                     defaults: {
@@ -131,92 +146,12 @@ describe('Ext.selection.CheckboxModel', function() {
                 }
             });
             var allCols = grid.getColumnManager().getColumns();
-            expect(allCols[0].$className).toBe('Ext.grid.column.Column');
-            expect(allCols[0].isCheckerHd).toBe(true);
+            expect(allCols[0].$className).toBe('Ext.grid.column.Check');
         });
 
         describe("without locking", function() {
             beforeEach(function() {
                 cols = [{
-                    dataIndex: 'name'
-                }, {
-                    dataIndex: 'name'
-                }, {
-                    dataIndex: 'name'
-                }]
-            });
-
-            it("should insert the column at the start by default", function() {
-                makeGrid(null, {
-                    columns: cols
-                });
-
-                var allCols = grid.getColumnManager().getColumns(),
-                    col = allCols[0];
-
-                expect(col.isCheckerHd).toBe(true);
-                expect(grid.query('[isCheckerHd]').length).toBe(1);
-                expect(allCols.length).toBe(4);
-            });
-
-            it("should insert the column at the start with injectCheckbox: 'first'", function() {
-                makeGrid({
-                    injectCheckbox: 'first'
-                }, {
-                    columns: cols
-                });
-
-                var allCols = grid.getColumnManager().getColumns(),
-                    col = allCols[0];
-
-                expect(col.isCheckerHd).toBe(true);
-                expect(grid.query('[isCheckerHd]').length).toBe(1);
-                expect(allCols.length).toBe(4);
-            });
-
-            it("should insert the column at the end with injectCheckbox: 'last'", function() {
-                makeGrid({
-                    injectCheckbox: 'last'
-                }, {
-                    columns: cols
-                });
-
-                var allCols = grid.getColumnManager().getColumns(),
-                    col = allCols[3];
-
-                expect(col.isCheckerHd).toBe(true);
-                expect(grid.query('[isCheckerHd]').length).toBe(1);
-                expect(allCols.length).toBe(4);
-            });
-
-            it("should insert the column at the specified index", function() {
-                makeGrid({
-                    injectCheckbox: 1
-                }, {
-                    columns: cols
-                });
-
-                var allCols = grid.getColumnManager().getColumns(),
-                    col = allCols[1];
-
-                expect(col.isCheckerHd).toBe(true);
-                expect(grid.query('[isCheckerHd]').length).toBe(1);
-                expect(allCols.length).toBe(4);
-            });
-        });
-
-        describe("with locking", function() {
-            beforeEach(function() {
-                cols = [{
-                    dataIndex: 'name',
-                    locked: true
-                }, {
-                    dataIndex: 'name',
-                    locked: true
-                }, {
-                    dataIndex: 'name',
-                    locked: true
-                }, {
                     dataIndex: 'name'
                 }, {
                     dataIndex: 'name'
@@ -233,10 +168,153 @@ describe('Ext.selection.CheckboxModel', function() {
                 var allCols = grid.getColumnManager().getColumns(),
                     col = allCols[0];
 
-                expect(col.isCheckerHd).toBe(true);
-                expect(grid.query('[isCheckerHd]').length).toBe(1);
-                expect(grid.normalGrid.query('[isCheckerHd]').length).toBe(0);
+                expect(col.isCheckColumn).toBe(true);
+                expect(grid.query('checkcolumn').length).toBe(1);
+                expect(allCols.length).toBe(4);
+            });
+
+            it("should insert the column at the start with injectCheckbox: 'first'", function() {
+                makeGrid({
+                    injectCheckbox: 'first'
+                }, {
+                    columns: cols
+                });
+
+                var allCols = grid.getColumnManager().getColumns(),
+                    col = allCols[0];
+
+                expect(col.isCheckColumn).toBe(true);
+                expect(grid.query('checkcolumn').length).toBe(1);
+                expect(allCols.length).toBe(4);
+            });
+
+            it("should insert the column at the end with injectCheckbox: 'last'", function() {
+                makeGrid({
+                    injectCheckbox: 'last'
+                }, {
+                    columns: cols
+                });
+
+                var allCols = grid.getColumnManager().getColumns(),
+                    col = allCols[3];
+
+                expect(col.isCheckColumn).toBe(true);
+                expect(grid.query('checkcolumn').length).toBe(1);
+                expect(allCols.length).toBe(4);
+            });
+
+            it("should insert the column at the specified index", function() {
+                makeGrid({
+                    injectCheckbox: 1
+                }, {
+                    columns: cols
+                });
+
+                var allCols = grid.getColumnManager().getColumns(),
+                    col = allCols[1];
+
+                expect(col.isCheckColumn).toBe(true);
+                expect(grid.query('checkcolumn').length).toBe(1);
+                expect(allCols.length).toBe(4);
+            });
+        });
+
+        describe('Lockable, but starting with no locked columns', function() {
+            beforeEach(function() {
+                cols = [{
+                    text: 'Name1',
+                    dataIndex: 'name'
+                }, {
+                    text: 'Name2',
+                    dataIndex: 'name'
+                }, {
+                    text: 'Name3',
+                    dataIndex: 'name'
+                }];
+            });
+
+            it('should migrate the check column to locked when the first column is locked', function() {
+                makeGrid(null, {
+                    enableLocking: true,
+                    columns: cols
+                });
+                var checkColumn = grid.down('[isCheckerHd]'),
+                    name1Column = grid.down('[text=Name1]');
+
+                // There's a locked grid but it's not visible.
+                expect(grid.lockedGrid.isVisible()).toBe(false);
+
+                grid.lock(name1Column);
+
+                // The locked grid should now be visible
+                expect(grid.lockedGrid.isVisible()).toBe(true);
+
+                // TWO columns should now be owned by the locked grid.
+                // checkColumn must have migrated.
+                expect(checkColumn.up('grid') === grid.lockedGrid).toBe(true);
+                expect(name1Column.up('grid') === grid.lockedGrid).toBe(true);
+            });
+        });
+
+        describe("with locking", function() {
+            beforeEach(function() {
+                cols = [{
+                    text: 'Name 1',
+                    dataIndex: 'name',
+                    locked: true
+                }, {
+                    text: 'Name 2',
+                    dataIndex: 'name',
+                    locked: true
+                }, {
+                    text: 'Name 3',
+                    dataIndex: 'name',
+                    locked: true
+                }, {
+                    text: 'Name 4',
+                    dataIndex: 'name'
+                }, {
+                    text: 'Name 5',
+                    dataIndex: 'name'
+                }, {
+                    text: 'Name 6',
+                    dataIndex: 'name'
+                }];
+            });
+
+            it("should insert the column at the start by default", function() {
+                makeGrid(null, {
+                    columns: cols
+                });
+
+                var allCols = grid.getColumnManager().getColumns(),
+                    col = allCols[0];
+
+                expect(col.isCheckColumn).toBe(true);
+                expect(grid.query('checkcolumn').length).toBe(1);
+                expect(grid.normalGrid.query('checkcolumn').length).toBe(0);
                 expect(allCols.length).toBe(7);
+            });
+
+            it("should unlock the column when all other columns are unlocked", function() {
+                makeGrid(null, {
+                    width: 800,
+                    columns: cols
+                });
+
+                var allCols = grid.getColumnManager().getColumns(),
+                    col = allCols[0];
+
+                grid.unlock(allCols[1]);
+                grid.unlock(allCols[2]);
+                grid.unlock(allCols[3]);
+
+                // Locked grid should have been hidden because unlocking the three lockeddata columns
+                // should have caysed migration of the checkbox column
+                expect(grid.lockedGrid.isVisible()).toBe(false);
+
+                // Normal grid should contain hte checkbox column
+                expect(grid.normalGrid.headerCt.contains(col)).toBe(true);
             });
 
             it("should insert the column at the start with injectCheckbox: 'first'", function() {
@@ -249,9 +327,9 @@ describe('Ext.selection.CheckboxModel', function() {
                 var allCols = grid.getColumnManager().getColumns(),
                     col = allCols[0];
 
-                expect(col.isCheckerHd).toBe(true);
-                expect(grid.query('[isCheckerHd]').length).toBe(1);
-                expect(grid.normalGrid.query('[isCheckerHd]').length).toBe(0);
+                expect(col.isCheckColumn).toBe(true);
+                expect(grid.query('checkcolumn').length).toBe(1);
+                expect(grid.normalGrid.query('checkcolumn').length).toBe(0);
                 expect(allCols.length).toBe(7);
             });
 
@@ -265,9 +343,9 @@ describe('Ext.selection.CheckboxModel', function() {
                 var allCols = grid.getColumnManager().getColumns(),
                     col = allCols[3];
 
-                expect(col.isCheckerHd).toBe(true);
-                expect(grid.query('[isCheckerHd]').length).toBe(1);
-                expect(grid.normalGrid.query('[isCheckerHd]').length).toBe(0);
+                expect(col.isCheckColumn).toBe(true);
+                expect(grid.query('checkcolumn').length).toBe(1);
+                expect(grid.normalGrid.query('checkcolumn').length).toBe(0);
                 expect(allCols.length).toBe(7);
             });
 
@@ -281,9 +359,9 @@ describe('Ext.selection.CheckboxModel', function() {
                 var allCols = grid.getColumnManager().getColumns(),
                     col = allCols[1];
 
-                expect(col.isCheckerHd).toBe(true);
-                expect(grid.query('[isCheckerHd]').length).toBe(1);
-                expect(grid.normalGrid.query('[isCheckerHd]').length).toBe(0);
+                expect(col.isCheckColumn).toBe(true);
+                expect(grid.query('checkcolumn').length).toBe(1);
+                expect(grid.normalGrid.query('checkcolumn').length).toBe(0);
                 expect(allCols.length).toBe(7);
             });
         });
@@ -345,112 +423,189 @@ describe('Ext.selection.CheckboxModel', function() {
         });
 
         it("should be initially unchecked", function() {
-            expectHeaderChecked(checkboxModel, false);
+            expectHeaderChecked(false);
         });
         
         it("should be unchecked if there are no records", function(){
             store.removeAll();
-            expectHeaderChecked(checkboxModel, false);
+            expectHeaderChecked(false);
         });
 
         it("should check header when all rows are selected", function() {
-            expectHeaderChecked(checkboxModel, false);
+            expectHeaderChecked(false);
 
             checkboxModel.select(donRec, true);
-            expectHeaderChecked(checkboxModel, false);
+            expectHeaderChecked(false);
 
             checkboxModel.select(evanRec, true);
-            expectHeaderChecked(checkboxModel, false);
+            expectHeaderChecked(false);
 
             checkboxModel.select(nigeRec, true);
-            expectHeaderChecked(checkboxModel, true);
+            expectHeaderChecked(true);
         });
 
         it("should uncheck header when any row is deselected", function() {
             checkboxModel.selectAll();
-            expectHeaderChecked(checkboxModel, true);
+            expectHeaderChecked(true);
 
             checkboxModel.selectAll();
             checkboxModel.deselect(donRec);
-            expectHeaderChecked(checkboxModel, false);
+            expectHeaderChecked(false);
 
             checkboxModel.selectAll();
             checkboxModel.deselect(evanRec);
-            expectHeaderChecked(checkboxModel, false);
+            expectHeaderChecked(false);
 
             checkboxModel.selectAll();
             checkboxModel.deselect(nigeRec);
-            expectHeaderChecked(checkboxModel, false);
+            expectHeaderChecked(false);
         });
 
         describe("loading", function() {
             it("should keep the header checked when reloaded and all items were checked", function() {
                 checkboxModel.selectAll();
-                expectHeaderChecked(checkboxModel, true);
+                expectHeaderChecked(true);
                 store.load();
-                expectHeaderChecked(checkboxModel, true);
+                expectHeaderChecked(true);
             });
             
             it("should keep the header checked when reloaded and loading a subset of items", function() {
                 checkboxModel.selectAll();
-                expectHeaderChecked(checkboxModel, true);
+                expectHeaderChecked(true);
 
                 store.getProxy().setData([{
                     id: 1,
                     name: 'Don'
                 }]);
                 store.load();
-                expectHeaderChecked(checkboxModel, true);
+                expectHeaderChecked(true);
             });
             
             it("should be unchecked when the loaded items do not match", function() {
                 checkboxModel.selectAll();
-                expectHeaderChecked(checkboxModel, true);
+                expectHeaderChecked(true);
 
                 store.getProxy().setData([{
                     id: 4,
                     name: 'Foo'
                 }]);
                 store.load();
-                expectHeaderChecked(checkboxModel, false);
+                expectHeaderChecked(false);
             });            
         });
 
         it("should uncheck header when an unchecked record is added", function() {
             checkboxModel.selectAll();
-            expectHeaderChecked(checkboxModel, true);
+            expectHeaderChecked(true);
 
             store.add({name: 'Marcelo'});
-            expectHeaderChecked(checkboxModel, false);
+            expectHeaderChecked(false);
         });
 
         it("should check header when last unchecked record is removed before rows are rendered", function() {
             checkboxModel.select(donRec, true);
             checkboxModel.select(evanRec, true);
-            expectHeaderChecked(checkboxModel, false);
+            expectHeaderChecked(false);
 
-            store.removeAt(store.find('name', 'Nige'));
-
-            waitsFor(function() {
-                return grid.view.viewReady;
-            });
-            runs(function() {
-                expectHeaderChecked(checkboxModel, true);
-            });
+            store.remove(nigeRec);
+            expectHeaderChecked(true);
         });
 
         it("should check header when last unchecked record is removed after rows are rendered", function() {
             checkboxModel.select(donRec, true);
             checkboxModel.select(evanRec, true);
-            expectHeaderChecked(checkboxModel, false);
+            expectHeaderChecked(false);
 
-            waitsFor(function() {
-                return grid.view.viewReady;
+            store.remove(nigeRec);
+            expectHeaderChecked(true);
+        });
+
+        describe("when filtered", function() {
+            describe("adding records", function() {
+                it("should remain checked when a record is added that does not match the filter", function() {
+                    checkboxModel.select(donRec);
+                    store.filter('name', 'Don');
+                    expectHeaderChecked(true);
+
+                    store.add({
+                        name: 'Foo'
+                    });
+                    expectHeaderChecked(true);
+                });
+
+                it("should uncheck when adding a record that does match the filter", function() {
+                    checkboxModel.select(donRec);
+                    store.filter('name', 'Don');
+                    expectHeaderChecked(true);
+
+                    store.add({
+                        name: 'Don'
+                    });
+                    expectHeaderChecked(false);
+                });
             });
 
-            runs(function() {
-                store.remove(nigeRec);
-                expectHeaderChecked(checkboxModel, true);
+            describe("removing records", function() {
+                it("should remain checked when removing an item that does not match the filter", function() {
+                    checkboxModel.select(donRec, evanRec);
+                    store.filter('name', 'Don');
+                    expectHeaderChecked(true);
+
+                    store.remove(evanRec);
+                    expectHeaderChecked(true);
+                });
+
+                it("should remain checked when removing an item that does match the filter", function() {
+                    checkboxModel.select([donRec, evanRec]);
+                    store.getFilters().add({
+                        filterFn: function(rec) {
+                            return rec === donRec || rec === evanRec;
+                        }
+                    });
+                    expectHeaderChecked(true);
+
+                    store.remove(evanRec);
+                    expectHeaderChecked(true);
+                });
+
+                it("should uncheck if the record being removed is the last matching the filter", function() {
+                    checkboxModel.select(donRec);
+                    store.filter('name', 'Don');
+                    expectHeaderChecked(true);
+
+                    store.remove(donRec);
+                    expectHeaderChecked(false);
+                });
+            });
+
+            describe("updating records", function() {
+                it("should uncheck if an unselected record is changed to match the filter", function() {
+                    checkboxModel.select(donRec);
+                    store.filter('name', 'Don');
+                    expectHeaderChecked(true);
+
+                    evanRec.set('name', 'Don');
+                    expectHeaderChecked(false);
+                });
+
+                it("should uncheck if the last selected item is changed to not match the filter", function() {
+                    checkboxModel.select(donRec);
+                    store.filter('name', 'Don');
+                    expectHeaderChecked(true);
+
+                    donRec.set('name', 'Evan');
+                    expectHeaderChecked(false);
+                });
+
+                it("should check if an unselected record is changed to not match the filter", function() {
+                    checkboxModel.select(donRec);
+                    evanRec.set('name', 'Don');
+                    store.filter('name', 'Don');
+                    expectHeaderChecked(false);
+
+                    evanRec.set('name', 'Evan');
+                    expectHeaderChecked(true);
+                });
             });
         });
 
@@ -463,7 +618,7 @@ describe('Ext.selection.CheckboxModel', function() {
                     mode: 'SINGLE'
                 });
 
-                expect(checkboxModel.getHeaderCheckbox()).toBe(null);
+                expect(checkboxModel.column.el.down(checkboxModel.checkSelector)).toBe(null);
             });
 
             it('should not render the header checkbox by config', function () {
@@ -472,20 +627,17 @@ describe('Ext.selection.CheckboxModel', function() {
                         mode: 'SINGLE',
                         showHeaderCheckbox: true
                     });
-                }).toThrow('The header checkbox is not supported for SINGLE mode selection models.')
+                }).toThrow('The header checkbox is not supported for SINGLE mode selection models.');
             });
         });
 
         describe('mode="MULTI"', function () {
-            beforeEach(function() {
-                makeGrid();
-            });
-
             it("should check all when no record is checked", function() {
-                expectHeaderChecked(checkboxModel, false);
+                makeGrid();
+                expectHeaderChecked(false);
 
                 clickOnHeaderCheckbox();
-                expectHeaderChecked(checkboxModel, true);
+                expectHeaderChecked(true);
 
                 expect(checkboxModel.isSelected(donRec)).toBe(true);
                 expect(checkboxModel.isSelected(evanRec)).toBe(true);
@@ -493,17 +645,43 @@ describe('Ext.selection.CheckboxModel', function() {
             });
 
             it("should check all when some records are checked", function() {
-                expectHeaderChecked(checkboxModel, false);
+                makeGrid();
+                expectHeaderChecked(false);
 
                 checkboxModel.select(donRec, true);
                 checkboxModel.select(nigeRec, true);
 
                 clickOnHeaderCheckbox();
-                expectHeaderChecked(checkboxModel, true);
+                expectHeaderChecked(true);
 
                 expect(checkboxModel.isSelected(donRec)).toBe(true);
                 expect(checkboxModel.isSelected(evanRec)).toBe(true);
                 expect(checkboxModel.isSelected(nigeRec)).toBe(true);
+            });
+
+            it("should not do anything with showHeaderCheckbox: false", function() {
+                makeGrid({
+                    showHeaderCheckbox: false
+                });
+
+                clickOnHeaderCheckbox();
+                expect(checkboxModel.getCount()).toBe(0);
+            });
+
+            describe("with filtering", function() {
+                it("should only check items in the current view", function() {
+                    makeGrid();
+                    store.filter('name', 'Don');
+                    clickOnHeaderCheckbox();
+                    expectHeaderChecked(true);
+
+                    store.getFilters().removeAll();
+
+                    expectHeaderChecked(false);
+                    expect(checkboxModel.isSelected(donRec)).toBe(true);
+                    expect(checkboxModel.isSelected(evanRec)).toBe(false);
+                    expect(checkboxModel.isSelected(nigeRec)).toBe(false);
+                });
             });
         });
     });
@@ -517,13 +695,34 @@ describe('Ext.selection.CheckboxModel', function() {
             checkboxModel.select(donRec, true);
             checkboxModel.select(evanRec, true);
             checkboxModel.select(nigeRec, true);
-            expectHeaderChecked(checkboxModel, true);
+            expectHeaderChecked(true);
 
             clickOnHeaderCheckbox();
-            expectHeaderChecked(checkboxModel, false);
+            expectHeaderChecked(false);
             expect(checkboxModel.isSelected(donRec)).toBe(false);
             expect(checkboxModel.isSelected(evanRec)).toBe(false);
             expect(checkboxModel.isSelected(nigeRec)).toBe(false);
+        });
+
+        describe("with filtering", function() {
+            it("should only uncheck items in the current view", function() {
+                checkboxModel.selectAll();
+                store.filter('name', 'Nige');
+                clickOnHeaderCheckbox();
+
+                expectHeaderChecked(false);
+                expect(checkboxModel.isSelected(donRec)).toBe(true);
+                expect(checkboxModel.isSelected(evanRec)).toBe(true);
+                expect(checkboxModel.isSelected(nigeRec)).toBe(false);
+
+                store.getFilters().removeAll();
+
+                expectHeaderChecked(false);
+                expect(checkboxModel.isSelected(donRec)).toBe(true);
+                expect(checkboxModel.isSelected(evanRec)).toBe(true);
+                expect(checkboxModel.isSelected(nigeRec)).toBe(false);
+            });
+
         });
 
     });
@@ -738,7 +937,7 @@ describe('Ext.selection.CheckboxModel', function() {
                         makeSpies();
                         clickCheckbox(0);
                         expect(checkboxModel.isSelected(donRec)).toBe(false);
-                        expectChangeSpy([evanRec, nigeRec]);
+                        expectChangeSpy([nigeRec, evanRec]);
                         expectDeselectSpy(donRec);
                         expect(selectSpy).not.toHaveBeenCalled();
                     });
@@ -778,8 +977,7 @@ describe('Ext.selection.CheckboxModel', function() {
 
                 it("should deselect everything past & including the clicked item", function() {
                     checkboxModel.selectAll();
-                    var view = grid.getView(),
-                        cell;
+                    var view = grid.getView();
 
                     clickCell(0, 1);
                     spyOn(view, 'processUIEvent').andCallFake(function(e) {

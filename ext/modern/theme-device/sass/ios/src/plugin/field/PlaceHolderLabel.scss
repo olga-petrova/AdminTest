@@ -1,0 +1,11 @@
+@if ($include-ios) {
+  #{$ios-selector} {
+    .#{$prefix}placeholderlabel {
+      &.#{$prefix}field-focused {
+        .#{$prefix}field-label {
+          color: $primary-color-ios;
+        }
+      }
+    }
+  }
+}

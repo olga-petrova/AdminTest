@@ -1,0 +1,71 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}slider {
+      height: 32px;
+      overflow: hidden;
+
+      &:before {
+        top: 16px;
+        height: 2px;
+      }
+
+      .#{$prefix}thumb {
+        margin-top: 11px;
+      }
+
+      &.#{$prefix}item-disabled {
+        .#{$prefix}thumb {
+          &:before {
+            @include css-color-variable('text-color-lightest-md', 'background-color');
+          }
+        }
+      }
+
+      .#{$prefix}thumb-pressing:after {
+        transform: scale(2.5);
+      }
+    }
+
+    .#{$prefix}toggle,
+    .#{$prefix}slider-multiple {
+      .#{$prefix}thumb:before {
+        border: 0;
+        background: transparent;
+        background-image: none;
+        width: 0;
+      }
+    }
+
+    .#{$prefix}thumb {
+      width: 12px;
+      height: 12px;
+      background: transparent none;
+      border: 0;
+
+      &:after {
+        @include insertion(12px, 12px, 0, 0);
+        @include css-color-variable('primary-color-md', 'background-color');
+        border-radius: 50%;
+        transition: transform .15s ease-out;
+      }
+
+      &:before {
+        transform: none;
+        content: '';
+        position: absolute;
+        top: 5px;
+        width: 5000px;
+        right: 8px;
+        height: 2px;
+        @include css-color-variable('primary-color-md', 'background-color');
+      }
+    }
+
+    .#{$prefix}thumb.#{$prefix}item-disabled {
+      &:after {
+        @include css-color-variable('text-color-lighter-md', 'background-color');
+        border: 2px solid $background-color-md;
+      }
+    }
+  }
+}

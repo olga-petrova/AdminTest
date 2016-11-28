@@ -1,0 +1,11 @@
+$toolbar-background-color: dynamic($base-color);
+$toolbar-color: dynamic($reverse-color);
+$toolbar-border-color: dynamic(null);
+$toolbar-border-width: dynamic(null);
+$toolbar-border-style: dynamic(null);
+$toolbar-padding: dynamic(0 $content-padding 0 $content-padding);
+$toolbar-padding-big: dynamic($toolbar-padding);
+$toolbar-title-color: dynamic($reverse-color);
+$toolbar-title-font-weight: dynamic($font-weight-bold);
+$toolbar-title-font-size: dynamic(20px);
+$toolbar-title-font-size-big: dynamic($toolbar-title-font-size);

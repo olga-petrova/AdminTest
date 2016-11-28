@@ -1,0 +1,38 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}tabpanel.#{$prefix}floating {
+      @include css-color-variable('background-color-light-md', 'background-color');
+    }
+
+    .#{$prefix}tabbar {
+      height: 56px;
+    }
+
+    .#{$prefix}tab {
+      @include st-box-orient(vertical);
+      @include st-box-flex(1);
+      padding: 8px;
+      @include css-color-variable('primary-color-md', 'background-color');
+      @include css-color-variable('text-color-reverse-md');
+      border-right: 1px solid;
+      @include css-color-variable('text-color-reverse-lightest-md', 'border-right-color');
+
+      &:last-child {
+        border-right: none;
+      }
+
+      .#{$prefix}button-label {
+        @include material-font-style('body');
+      }
+
+      .#{$prefix}badge {
+        top: -10px;
+        left: 0;
+      }
+    }
+
+    .#{$prefix}tab-active {
+      @include css-color-variable('primary-color-pressed-md', 'background-color');
+    }
+  }
+}

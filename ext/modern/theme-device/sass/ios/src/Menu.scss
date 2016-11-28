@@ -1,0 +1,63 @@
+@if ($include-ios) {
+  #{$ios-selector} {
+    &.#{$prefix}ios-7.#{$prefix}standalone .#{$prefix}menu {
+      padding-top: 35px;
+    }
+
+    .#{$prefix}menu {
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-width: 0;
+      @include box-shadow(inset 0 1px 0 rgba(255, 255, 255, .3));
+      background-color: #fff;
+
+      .#{$prefix}button {
+        margin-bottom: 7px;
+
+        &:before {
+          content: '';
+          display: block;
+          position: absolute;
+          bottom: -1px;
+          left: 1em;
+          right: 0px;
+          border-type: solid;
+          border-color: $list-item-border-color-ios;
+        }
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+
+      &.#{$prefix}left,
+      &.#{$prefix}right {
+        width: 220px;
+      }
+
+      &.#{$prefix}left {
+        &:before {
+          border-right-width: 1px;
+        }
+      }
+
+      &.#{$prefix}right {
+        &:before {
+          border-left-width: 1px;
+        }
+      }
+
+      &.#{$prefix}top {
+        &:before {
+          border-bottom-width: 1px;
+        }
+      }
+
+      &.#{$prefix}bottom {
+        &:before {
+          border-top-width: 1px;
+        }
+      }
+    }
+  }
+}

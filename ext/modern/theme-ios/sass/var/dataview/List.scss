@@ -1,0 +1,16 @@
+$list-item-disclosure-icon: dynamic("!" 0.875em iOS);
+$list-item-disclosure-font-size-big: dynamic(0.875em);
+$list-item-selected-background-color: dynamic($neutral-dark-color);
+$list-group-header-background-color: dynamic($neutral-highlight-color);
+$list-group-header-border-width: dynamic(null);
+$list-group-header-border-style: dynamic(null);
+$list-group-header-color: dynamic($color);
+
+$list-item-line-height: dynamic(1.23em);
+$list-item-line-height-big: dynamic(1.25);
+
+$list-item-padding: dynamic(.5em .77em);
+$list-item-padding-big: dynamic(.6875em .9375em);
+
+$list-group-header-padding: dynamic(.125em .77em);
+$list-group-header-padding-big: dynamic(.25em .9375em);

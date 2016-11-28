@@ -1,0 +1,143 @@
+/**
+ * @class Ext.field.Slider
+ */
+
+$slider-height: dynamic($slider-thumb-size);
+$slider-disabled-opacity: dynamic(.6);
+
+$slider-thumb-size: dynamic(1.85em);
+$slider-thumb-border: dynamic(1px solid darken(#ddd, 30%));
+$slider-thumb-border-radius: dynamic(50%);
+$slider-thumb-background-color: dynamic(#ddd);
+$slider-thumb-background-gradient: dynamic('matte');
+$slider-thumb-dragging-background-color: dynamic(darken(#ddd, 5%));
+$slider-thumb-dragging-background-gradient: dynamic($slider-thumb-background-gradient);
+$slider-thumb-disabled-background-color: dynamic($slider-thumb-background-color);
+$slider-thumb-disabled-border: dynamic($slider-thumb-border);
+$slider-thumb-top: dynamic(0);
+$slider-thumb-left: dynamic(0);
+$slider-thumb-background-clip: dyamic(padding-box);
+
+$slider-track-height: dynamic(.8em);
+$slider-track-width: dynamic(auto);
+$slider-track-top: dynamic(.6em);
+$slider-track-left: dynamic(0);
+$slider-track-border: dynamic(.1em solid rgba(#000, .1));
+$slider-track-border-radius: dynamic($slider-track-height/2);
+$slider-track-background-color: dynamic(#ddd);
+$slider-track-background-gradient: dynamic('recessed');
+$slider-track-fill-background-color: dynamic(transparent);
+$slider-track-fill-background-gradient: dynamic(null);
+$slider-track-fill-disabled-background-color: dynamic(transparent);
+
+$slider-track-margin: dynamic(0 $slider-thumb-size/2);
+$slider-track-box-shadow: dynamic(rgba(#fff, .7) 0 .1em 0);
+
+/**
+ * @class Ext.slider.Slider
+ */
+
+@mixin slider-ui(
+  $ui: null,
+  $height: null,
+  $disabled-opacity: null,
+  $thumb-size: null,
+  $thumb-border: null,
+  $thumb-border-radius: null,
+  $thumb-background-color: null,
+  $thumb-background-gradient: null,
+  $thumb-disabled-background-color: null,
+  $thumb-disabled-border: null,
+  $thumb-dragging-background-color: null,
+  $thumb-dragging-background-gradient: null,
+  $thumb-use-pseudo: null,
+  $thumb-top: null,
+  $thumb-left: null,
+  $thumb-background-clip: null,
+  $track-margin: null,
+  $track-border: null,
+  $track-border-radius: null,
+  $track-background-color: null,
+  $track-background-gradient: null,
+  $track-fill-background-color: null,
+  $track-fill-background-gradient: null,
+  $track-fill-disabled-background-color: null,
+  $track-width: null,
+  $track-height: null,
+  $track-top: null,
+  $track-left: null,
+  $track-box-shadow: null
+) {
+
+  $ui-suffix: ui-suffix($ui);
+
+  .#{$prefix}slider#{$ui-suffix} {
+    height: $height;
+
+    .#{$prefix}item-disabled {
+      opacity: $disabled-opacity;
+
+      &.#{$prefix}thumb:after {
+        background-color: $thumb-disabled-background-color;
+        border: $thumb-disabled-border;
+      }
+    }
+
+    .#{$prefix}thumb {
+      height: $thumb-size;
+      width: $thumb-size;
+      background-color: transparent;
+      border: 0;
+
+      // Thumb Handle
+      &:after {
+        border: $thumb-border;
+        @include insertion($thumb-size, $thumb-size, $thumb-top, $thumb-left);
+        @include background-gradient($thumb-background-color, $thumb-background-gradient);
+        @include background-clip($thumb-background-clip);
+        @if $enable-border-radius {
+          @include border-radius($thumb-size/2);
+        }
+      }
+
+      &.#{$prefix}dragging:after {
+        @include background-gradient($thumb-dragging-background-color, $thumb-dragging-background-gradient);
+      }
+
+      // Track Fill Color
+      &:before {
+        transform: none;
+        @include insertion(5000px, $track-height, $track-top, null);
+        right: $thumb-size/2;
+        @include background-gradient($track-fill-background-color, $track-fill-background-gradient);
+      }
+
+      &.#{$prefix}item-disabled:before {
+        background-color: $track-fill-disabled-background-color;
+        width: 0;
+      }
+    }
+
+    // Track
+    &:before {
+      margin: $track-margin;
+      border: $track-border;
+      border-bottom: 0;
+      @include background-gradient($track-background-color, $track-background-gradient);
+      @include insertion($track-width, $track-height, $track-top, $track-left);
+      @include box-shadow($track-box-shadow);
+
+      @if $enable-border-radius {
+        @include border-radius($track-border-radius);
+      }
+    }
+
+    // Sliders inside of multiple sliders should not use fill colors
+    .#{$prefix}slider-multiple & {
+      .#{$prefix}thumb:before {
+        background-color: $track-fill-disabled-background-color;
+        width: 0;
+      }
+    }
+  }
+}

@@ -2,15 +2,14 @@
   "name": "pivot",
   "namespace": "Ext",
   "format": "1",
-  "version": "6.0.2.275",
+  "version": "6.2.0.526",
   "compatVersion": "6.0.0",
   "creator": "Sencha",
   "summary": "Sencha Pivot",
-  "detailedDescription": "Pivot Grid component",
+  "detailedDescription": "Pivot components",
   "type": "code",
   "requires": [
-    "exporter",
-    "ux"
+    "exporter"
   ],
   "resources": [
     {
@@ -29,32 +28,62 @@
     ]
   },
   "builds": {
+    "triton": {
+      "toolkit": "classic",
+      "theme": "theme-triton"
+    },
     "neptune": {
-      "framework": "ext",
-      "theme": "ext-theme-neptune"
+      "toolkit": "classic",
+      "theme": "theme-neptune"
     },
     "crisp": {
-      "framework": "ext",
-      "theme": "ext-theme-crisp"
+      "toolkit": "classic",
+      "theme": "theme-crisp"
     },
     "classic": {
-      "framework": "ext",
-      "theme": "ext-theme-classic"
+      "toolkit": "classic",
+      "theme": "theme-classic"
+    },
+    "modern-triton": {
+      "toolkit": "modern",
+      "theme": "theme-triton"
+    },
+    "modern-neptune": {
+      "toolkit": "modern",
+      "theme": "theme-neptune"
+    },
+    "material": {
+      "toolkit": "modern",
+      "theme": "theme-material"
     }
   },
   "framework": "ext",
-  "toolkit": "classic",
   "output": {
-    "base": "${package.dir}/build/${build.id}",
+    "base": "${package.dir}/build/${toolkit.name}/${build.id}",
     "js": "..",
     "sass": ""
   },
   "sass": {
     "namespace": "Ext",
-    "etc": "${package.dir}/sass/etc/all.scss",
-    "var": "${package.dir}/sass/var",
-    "src": "${package.dir}/sass/src"
+    "etc": [
+      "${package.dir}/sass/etc/all.scss",
+      "${package.dir}/${toolkit.name}/sass/etc/all.scss"
+    ],
+    "var": [
+      "${package.dir}/sass/var",
+      "${package.dir}/${toolkit.name}/sass/var"
+    ],
+    "src": [
+      "${package.dir}/sass/src",
+      "${package.dir}/${toolkit.name}/sass/src"
+    ]
   },
-  "classpath": "${package.dir}/src",
-  "overrides": "${package.dir}/overrides"
+  "classpath": [
+    "${package.dir}/src",
+    "${package.dir}/${toolkit.name}/src"
+  ],
+  "overrides": [
+    "${package.dir}/overrides",
+    "${package.dir}/${toolkit.name}/overrides"
+  ]
 }

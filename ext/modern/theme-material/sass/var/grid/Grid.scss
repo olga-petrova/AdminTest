@@ -1,0 +1,19 @@
+$grid-group-header-padding: dynamic($content-padding/2 $content-padding);
+$grid-group-header-background-color: dynamic($base-dark-color);
+$grid-group-header-color: dynamic($reverse-color);
+
+$grid-group-header-border-width: dynamic(null);
+$grid-group-header-border-style: dynamic(null);
+$grid-group-header-border-color: dynamic(null);
+
+$grid-pagingtoolbar-color: dynamic($reverse-color);
+
+$grid-cell-border-color: dynamic($divider-color);
+
+$grid-cell-background-color: dynamic(transparent);
+$grid-cell-selected-background-color: dynamic($base-light-color);
+$grid-cell-selected-color: dynamic($color);
+
+$grid-cell-padding: dynamic($content-padding * .75);
+
+$grid-summary-row-cell-padding:dynamic(8px 0);

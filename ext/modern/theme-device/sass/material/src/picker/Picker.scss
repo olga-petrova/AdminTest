@@ -1,0 +1,40 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}picker {
+      @include css-color-variable('background-color-md', 'background-color');
+    }
+
+    .#{$prefix}picker-bar {
+      border-top: 1px solid;
+      @include css-color-variable('text-color-lightest-md', 'border-top-color');
+      border-bottom: 1px solid;
+      @include css-color-variable('text-color-lightest-md', 'border-bottom-color');
+      @include css-color-variable('overlay-color-md', 'background-color');
+      height: 50px;
+    }
+
+    .#{$prefix}use-titles {
+      .#{$prefix}picker-bar {
+        margin-top: 55px;
+      }
+    }
+
+    .#{$prefix}picker-slot-title {
+      border-bottom: 2px solid;
+      @include css-color-variable('text-color-lightest-md', 'border-bottom-color');
+      @include material-font-style('title');
+      @include css-color-variable('text-color-base-md');
+    }
+
+    .#{$prefix}picker-slot {
+      .#{$prefix}dataview-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        @include css-color-variable('text-color-base-md');
+        @include material-font-style('subhead');
+        height: 50px;
+      }
+    }
+  }
+}

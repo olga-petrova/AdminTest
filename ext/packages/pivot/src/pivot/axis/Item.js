@@ -67,10 +67,12 @@ Ext.define('Ext.pivot.axis.Item', {
      * @readonly
      *
      * When the {@link Ext.pivot.matrix.Local Local} matrix is used this is the pivot store record generated for this axis item.
-     * Only items belonging to the leftAxis have this property.
+     * Only bottom level items belonging to the leftAxis have this property.
      *
      */
     record:         null,
+
+    records:        null,
     
     /**
      * @property {Ext.pivot.axis.Base} axis Parent axis instance
@@ -109,7 +111,7 @@ Ext.define('Ext.pivot.axis.Item', {
 
         Ext.destroy(me.children);
 
-        me.axis = me.data = me.dimension = me.record = me.children = null;
+        me.axis = me.data = me.dimension = me.record = me.children = me.records = null;
         
         me.callParent(arguments);
     },
@@ -141,7 +143,7 @@ Ext.define('Ext.pivot.axis.Item', {
         me.expanded = true;
         
         if(includeChildren === true){
-            me.expandCollapseChildrenTree(me, true);
+            me.expandCollapseChildrenTree(true);
         }
         
         me.axis.matrix.fireEvent('groupexpand', me.axis.matrix, (me.axis.isLeftAxis ? 'row' : 'col'), me);
@@ -158,7 +160,7 @@ Ext.define('Ext.pivot.axis.Item', {
         me.expanded = false;
         
         if(includeChildren === true){
-            me.expandCollapseChildrenTree(me, false);
+            me.expandCollapseChildrenTree(false);
         }
 
         me.axis.matrix.fireEvent('groupcollapse', me.axis.matrix, (me.axis.isLeftAxis ? 'row' : 'col'), me);
@@ -169,14 +171,14 @@ Ext.define('Ext.pivot.axis.Item', {
      *
      * @private
      */
-    expandCollapseChildrenTree: function(item, state){
+    expandCollapseChildrenTree: function(state){
         var me = this,
             i;
         
-        item.expanded = state;
+        me.expanded = state;
         if(Ext.isArray(me.children)){
             for(i = 0; i < me.children.length; i++){
-                me.expandCollapseChildrenTree(me.children[i], state);
+                me.children[i].expandCollapseChildrenTree(state);
             }
         }
     }

@@ -44,6 +44,7 @@
 
     &.x-dock-vertical {
         @include st-box-orient(vertical);
+        @include st-box-flex(1);
     }
 
     &.x-dock-horizontal {

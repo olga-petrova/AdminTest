@@ -262,14 +262,14 @@ Ext.define('Ext.util.Format', function () {
          * @param {String} [format] Any valid date format string. Defaults to {@link Ext.Date#defaultFormat}.
          * @return {String} The formatted date string.
          */
-        date: function(v, format) {
-            if (!v) {
+        date: function(value, format) {
+            if (!value) {
                 return "";
             }
-            if (!Ext.isDate(v)) {
-                v = new Date(Date.parse(v));
+            if (!Ext.isDate(value)) {
+                value = new Date(Date.parse(value));
             }
-            return Ext.Date.dateFormat(v, format || Ext.Date.defaultFormat);
+            return Ext.Date.dateFormat(value, format || Ext.Date.defaultFormat);
         },
 
         /**
@@ -365,12 +365,61 @@ Ext.define('Ext.util.Format', function () {
         },
 
         /**
+         * Compares `value` against `threshold` and returns:
+         *
+         * - if `value` < `threshold` then it returns `below`
+         * - if `value` > `threshold` then it returns `above`
+         * - if `value` = `threshold` then it returns `equal` or `above` when `equal` is missing
+         *
+         * The usefulness of this formatter method is in templates. For example:
+         *
+         *      {foo:lessThanElse(0, 'negative', 'positive')}
+         *
+         *      {bar:lessThanElse(200, 'lessThan200', 'greaterThan200', 'equalTo200')}
+         *
+         * @param {Number} value Value that will be checked
+         * @param {Number} threshold Value to compare against
+         * @param {Mixed} below Value to return when `value` < `threshold`
+         * @param {Mixed} above Value to return when `value` > `threshold`. If `value` = `threshold` and
+         * `equal` is missing then `above` is returned.
+         * @param {Mixed} equal Value to return when `value` = `threshold`
+         * @return {Mixed}
+         */
+        lessThanElse: function (value, threshold, below, above, equal) {
+            var v = Ext.Number.from(value, 0),
+                t = Ext.Number.from(threshold, 0),
+                missing = !Ext.isDefined(equal);
+
+            return v < t ? below : (v > t ? above : (missing ? above : equal));
+        },
+
+        /**
+         * Checks if `value` is a positive or negative number and returns the proper param.
+         *
+         * The usefulness of this formatter method is in templates. For example:
+         *
+         *      {foo:sign("clsNegative","clsPositive")}
+         *
+         * @param {Number} value
+         * @param {Mixed} negative
+         * @param {Mixed} positive
+         * @param {Mixed} zero
+         * @return {Mixed}
+         */
+        sign: function (value, negative, positive, zero) {
+            if (zero === undefined) {
+                zero = positive;
+            }
+            return me.lessThanElse(value, 0, negative, positive, zero);
+        },
+
+        /**
          * Strips all HTML tags.
          * @param {Object} value The text from which to strip tags
          * @return {String} The stripped text
          */
-        stripTags: function(v) {
-            return !v ? v : String(v).replace(me.stripTagsRe, "");
+        stripTags: function(value) {
+            return !value ? value : String(value).replace(me.stripTagsRe, "");
         },
 
         /**
@@ -378,8 +427,8 @@ Ext.define('Ext.util.Format', function () {
          * @param {Object} value The text from which to strip script tags
          * @return {String} The stripped text
          */
-        stripScripts : function(v) {
-            return !v ? v : String(v).replace(me.stripScriptsRe, "");
+        stripScripts : function(value) {
+            return !value ? value : String(value).replace(me.stripScriptsRe, "");
         },
 
         /**
@@ -702,8 +751,8 @@ Ext.define('Ext.util.Format', function () {
          * singular form with an "s" appended)
          * @return {String} output The pluralized output of the passed singular form
          */
-        plural : function(v, s, p) {
-            return v +' ' + (v === 1 ? s : (p ? p : s+'s'));
+        plural : function(value, singular, plural) {
+            return value +' ' + (value === 1 ? singular : (plural ? plural : singular+'s'));
         },
 
         /**

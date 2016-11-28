@@ -1,0 +1,15 @@
+@mixin css-color-variable($variable, $style: 'color') {
+  // In legacy support mode we add two styles, one will fail in legacy browsers
+  // and use the fallback
+  @if ($enable-css-color-variables-legacy-fallback) {
+    // Legacy first
+    #{$style}: get-color($variable, true);
+    // Variable will override
+    #{$style}: get-color($variable);
+
+
+  // When not built with legacy support we only use CSS variables
+  } @else {
+    #{$style}: get-color($variable);
+  }
+}

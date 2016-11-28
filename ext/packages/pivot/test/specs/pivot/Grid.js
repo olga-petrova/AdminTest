@@ -1,3 +1,8 @@
+/**
+ * We only define here tests that apply to the Matrix classes which should be
+ * common to both toolkits.
+ */
+
 describe('Ext.pivot.Grid', function() {
     var data = [],
         items = 500,
@@ -38,7 +43,7 @@ describe('Ext.pivot.Grid', function() {
         });
     }
 
-    var store, grid, view, selModel, navModel, pivotDone, matrix,
+    var store, grid, pivotDone, matrix,
         Sale = Ext.define(null, {
             extend: 'Ext.data.Model',
 
@@ -152,71 +157,19 @@ describe('Ext.pivot.Grid', function() {
             }],
             renderTo: document.body
         });
-        view = grid.getView();
-        selModel = view.getSelectionModel();
-        navModel = view.getNavigationModel();
         matrix = grid.getMatrix();
     }
 
     function destroyGrid(){
         Ext.destroy(grid, store);
-        store = grid = view = navModel = selModel = matrix = null;
+        store = grid = matrix = null;
         pivotDone = false;
     }
 
-    describe('Outline view', function() {
-        beforeEach(makeGrid);
-        afterEach(destroyGrid);
-
-        // https://sencha.jira.com/browse/EXTJS-17921
-        it('should allow cell to cell navigation when there are colSpans', function() {
-            waitsFor(function() {
-                return pivotDone;
-            });
-
-            runs(function() {
-                var c0_0 = view.getCellByPosition({row:0,column:0}, true),
-                    c0_2 = view.getCellByPosition({row:0,column:2}, true),
-                    c1_0 = view.getCellByPosition({row:1,column:0}, true),
-                    c1_1 = view.getCellByPosition({row:1,column:1}, true);
-
-                view.focus();
-
-                // Focus must be on cell 0,0
-                expect(navModel.getPosition().getCell(true)).toBe(c0_0);
-
-                jasmine.fireKeyEvent(c0_0, 'keydown', Ext.event.Event.DOWN);
-
-                // Focus must be on cell 1,0
-                expect(navModel.getPosition().getCell(true)).toBe(c1_0);
-
-                jasmine.fireKeyEvent(c1_0, 'keydown', Ext.event.Event.RIGHT);
-
-                // Focus must be on cell 1,1
-                expect(navModel.getPosition().getCell(true)).toBe(c1_1);
-
-                jasmine.fireKeyEvent(c1_1, 'keydown', Ext.event.Event.UP);
-
-                // Focus must be on cell 0,0
-                expect(navModel.getPosition().getCell(true)).toBe(c0_0);
-
-                jasmine.fireKeyEvent(c0_0, 'keydown', Ext.event.Event.RIGHT);
-
-                // Focus must be on cell 0,2 (0,1 is spanned out)
-                expect(navModel.getPosition().getCell(true)).toBe(c0_2);
-
-                jasmine.fireKeyEvent(c0_2, 'keydown', Ext.event.Event.LEFT);
-
-                // Focus must be on cell 0,0
-                expect(navModel.getPosition().getCell(true)).toBe(c0_0);
-            });
-        });
-
-    });
+    beforeEach(makeGrid);
+    afterEach(destroyGrid);
 
     describe('Matrix calculations', function(){
-        beforeEach(makeGrid);
-        afterEach(destroyGrid);
 
         function checkAxisResults(item, index, len, additionalFilters){
             var keys = Ext.Object.getKeys(item.data),
@@ -494,6 +447,133 @@ describe('Ext.pivot.Grid', function() {
             });
         });
 
+        it('should return correct results when adding a Value filter with ">" operator', function(){
+            waitsFor(function(){
+                return pivotDone;
+            });
+
+            runs(function(){
+                // let's find one pivot result and extract its value
+                var value = '50000';
+
+                pivotDone = false;
+
+                grid.reconfigurePivot({
+                    leftAxis: [{
+                        id:         'person',
+                        dataIndex:  'person',
+                        header:     'Person',
+                        width:      80,
+                        filter: {
+                            type: 'value',
+                            operator: '>',
+                            dimensionId: 'agg',
+                            value: value
+                        }
+                    },{
+                        id:         'company',
+                        dataIndex:  'company',
+                        header:     'Company',
+                        sortable:   false,
+                        width:      80
+                    }]
+                });
+
+                waitsFor(function(){
+                    return pivotDone;
+                });
+
+                runs(function(){
+                    matrix.leftAxis.items.each(function(item){
+                        if(item.level === 0) {
+                            expect(matrix.results.get(item.key, matrix.grandTotalKey).getValue('agg')).toBeGreaterThan(value);
+                        }
+                    });
+                });
+            });
+        });
+
+
+        describe('Matrix events', function() {
+            //beforeEach(makeGrid);
+            //afterEach(destroyGrid);
+
+            it('should fire pivotbeforereconfigure', function(){
+                var fired = false;
+
+                grid.on({
+                    pivotbeforereconfigure: function(){
+                        fired = true;
+                    }
+                });
+
+                grid.reconfigurePivot({
+                    leftAxis: [{
+                        dataIndex:  'person'
+                    }]
+                });
+
+                waitsFor(function(){
+                    return pivotDone;
+                });
+
+                runs(function(){
+                    expect(fired).toBe(true);
+                });
+            });
+
+            it('should fire pivotreconfigure', function(){
+                var fired = false;
+
+                grid.on({
+                    pivotreconfigure: function(){
+                        fired = true;
+                    }
+                });
+
+                grid.reconfigurePivot({
+                    leftAxis: [{
+                        dataIndex:  'person'
+                    }]
+                });
+
+                waitsFor(function(){
+                    return pivotDone;
+                });
+
+                runs(function(){
+                    expect(fired).toBe(true);
+                });
+            });
+
+            it('should cancel reconfiguration', function(){
+                var fired = false;
+
+                grid.on({
+                    pivotbeforereconfigure: function(){
+                        return false;
+                    },
+                    pivotreconfigure: function(){
+                        fired = true;
+                    }
+                });
+
+                grid.reconfigurePivot({
+                    leftAxis: [{
+                        dataIndex:  'person'
+                    }]
+                });
+
+                waitsFor(function(){
+                    return pivotDone;
+                });
+
+                runs(function(){
+                    expect(fired).toBe(false);
+                });
+            });
+
+        });
 
 
     });

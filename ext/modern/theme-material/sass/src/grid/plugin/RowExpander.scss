@@ -1,0 +1,15 @@
+.#{$prefix}grid-row-expander-column {
+  border: none;
+}
+
+.#{$prefix}grid-expander-cell {
+  @include material-icon-style('before');
+  &:before {
+    content: 'expand_more';
+    font-size: 18px;
+  }
+}
+
+.#{$prefix}row-expanded .#{$prefix}grid-expander-cell:before {
+  content: 'expand_less';
+}

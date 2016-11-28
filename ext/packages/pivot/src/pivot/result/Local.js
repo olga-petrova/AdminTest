@@ -36,9 +36,7 @@ Ext.define('Ext.pivot.result.Local', {
     },
 
     /**
-     * Calculate all pivot aggregate dimensions for the internal records. Useful when using a
-     * {@link Ext.pivot.matrix.Local Local} matrix.
-     *
+     * @inheritdoc
      */
     calculate: function(){
         var me = this,
@@ -48,22 +46,28 @@ Ext.define('Ext.pivot.result.Local', {
         // for each pivot aggregate dimension calculate the value and call addValue
         for(i = 0; i < length; i++){
             dimension = me.matrix.aggregate.getAt(i);
-            me.addValue(dimension.getId(), dimension.aggregatorFn(me.records, dimension.dataIndex, me.matrix, me.leftKey, me.topKey));
+            me.addValue(dimension.getId(), Ext.callback(dimension.aggregatorFn, dimension.getScope() || 'self.controller', [me.records, dimension.dataIndex, me.matrix, me.leftKey, me.topKey], 0, me.matrix.cmp));
         }
     },
 
     /**
-     * Besides the calculation functions defined on your aggregate dimension you could
-     * calculate values based on other store fields and custom functions.
-     *
-     * @param key The generated value will be stored in the result under this key for later extraction
-     * @param dataIndex The dataIndex that should be used on the records for doing calculations
-     * @param aggFn Your custom function
+     * @inheritdoc
      */
     calculateByFn: function(key, dataIndex, aggFn){
         var me = this,
-            v = aggFn(me.records, dataIndex, me.matrix, me.leftKey, me.topKey);
+            v;
 
+        if(Ext.isString(aggFn)){
+            aggFn = Ext.pivot.Aggregators[aggFn];
+        }
+
+        //<debug>
+        if(!Ext.isFunction(aggFn)){
+            Ext.raise('Invalid function provided!');
+        }
+        //</debug>
+
+        v = aggFn(me.records, dataIndex, me.matrix, me.leftKey, me.topKey);
         me.addValue(key, v);
 
         return v;

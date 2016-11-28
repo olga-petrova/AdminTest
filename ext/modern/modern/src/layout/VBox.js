@@ -57,6 +57,10 @@ Ext.define('Ext.layout.VBox', {
 
     alias: 'layout.vbox',
 
+    cls: [ Ext.baseCSSPrefix + 'layout-box', Ext.baseCSSPrefix + 'layout-vbox' ],
+
+    itemCls: [ Ext.baseCSSPrefix + 'layout-box-item', Ext.baseCSSPrefix + 'layout-vbox-item' ],
+
     config: {
         orient: 'vertical'
     }

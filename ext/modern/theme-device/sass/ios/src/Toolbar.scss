@@ -1,0 +1,46 @@
+@if ($include-ios) {
+  #{$ios-selector} {
+    .#{$prefix}toolbar {
+      background-color: #f8f9f9;
+      min-height: 2.85em;
+
+      &.#{$prefix}docked-bottom {
+        border-top: 1px solid #ccc;
+      }
+
+      &.#{$prefix}docked-top {
+        border-radius: 6px 6px 0 0;
+        border-bottom: 1px solid #ccc;
+        .#{$prefix}button {
+          padding-top: .15em;
+        }
+      }
+
+      &.#{$prefix}docked-left {
+        border-right: 1px solid #ccc;
+      }
+
+      &.#{$prefix}docked-right {
+        border-left: 1px solid #ccc;
+      }
+
+      .#{$prefix}title {
+        color: $text-color-ios;
+        font-weight: 500;
+        font-size: 1em;
+        padding-top: .3em;
+      }
+
+      .#{$prefix}button {
+        border: 0;
+        background-color: transparent;
+        margin: 0 5px;
+        height: 2.0em;
+      }
+
+      .#{$prefix}button-label {
+        font-size: 1.1em;
+      }
+    }
+  }
+}

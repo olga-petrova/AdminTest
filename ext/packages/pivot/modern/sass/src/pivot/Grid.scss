@@ -1,0 +1,21 @@
+.#{$prefix}pivot-grid-group-header-collapsible {
+  .#{$prefix}pivot-grid-group {
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-image: theme-background-image('group-collapse');
+    padding: $pivot-grid-group-icon-padding;
+  }
+}
+
+.#{$prefix}pivot-grid-group-title {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.#{$prefix}pivot-grid-group-header-collapsed {
+  .#{$prefix}pivot-grid-group {
+    background-image: theme-background-image('group-expand');
+  }
+}

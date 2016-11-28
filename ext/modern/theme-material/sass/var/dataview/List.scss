@@ -1,0 +1,55 @@
+$list-item-display: dynamic(flex);
+$list-item-align-items: dynamic(center);
+
+$list-item-background-color: dynamic($background-color);
+
+$list-item-border-width: dynamic(null);
+$list-item-border-style: dynamic(null);
+$list-item-border-color: dynamic(null);
+
+$list-item-selected-color: dynamic($reverse-color);
+$list-item-pressed-color: dynamic($reverse-color);
+
+$list-item-indexed-padding: dynamic(0 0 0 72px);
+
+$list-footer-item-border-width: dynamic(null);
+$list-footer-item-border-style: dynamic(null);
+$list-footer-item-border-color: dynamic(null);
+
+$list-item-pressed-background-color: dynamic($base-pressed-color);
+$list-item-selected-background-color: dynamic($base-pressed-color);
+$list-item-font-weight: dynamic($material-subhead-font-weight);
+$list-item-font-size: dynamic($material-subhead-font-size);
+$list-item-line-height: dynamic(normal);
+$list-item-line-height-big: dynamic($list-item-line-height);
+$list-item-padding: dynamic($content-padding/2 $content-padding $content-padding/2 $content-padding);
+$list-item-padding-big: dynamic($list-item-padding);
+
+
+$list-group-header-color: dynamic($highlight-color);
+$list-group-header-background-color: dynamic($background-color);
+$list-group-header-pinned-color: dynamic($color);
+$list-group-header-pinned-background-color: dynamic($background-color);
+$list-group-header-font-weight: dynamic($font-weight-normal);
+$list-group-header-padding: dynamic($content-padding/2 0 0 $content-padding);
+$list-group-header-padding-big: dynamic($list-group-header-padding);
+$list-group-header-border-width: dynamic(null);
+$list-group-header-border-style: dynamic(null);
+$list-group-header-border-color: dynamic(null);
+
+
+$list-item-disclosure-width: dynamic(28px);
+$list-item-disclosure-margin: dynamic(-14px 12px 0 0);
+$list-item-disclosure-color: dynamic($highlight-color);
+$list-item-disclosure-icon: dynamic('arrow_forward', 20px);
+$list-item-disclosure-font-size-big: dynamic(null);
+
+$list-item-disclosure-background-color: dynamic($background-color);
+$list-item-disclosure-border-radius: dynamic(50%);
+$list-item-disclosure-padding: dynamic(14px);
+$list-item-disclosure-display: dynamic(flex);
+$list-item-disclosure-justify-content: dynamic(center);
+$list-item-disclosure-align-content: dynamic(center);
+$list-item-disclosure-align-items: dynamic(center);
+$list-item-disclosure-pressed-background-color: dynamic($base-pressed-color);
+$list-item-disclosure-pressed-color: dynamic($reverse-color);

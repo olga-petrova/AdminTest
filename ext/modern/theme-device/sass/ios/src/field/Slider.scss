@@ -1,0 +1,10 @@
+@if ($include-ios) {
+  #{$ios-selector} {
+    .#{$prefix}sliderfield,
+    .#{$prefix}togglefield {
+      .#{$prefix}field-body {
+        padding: .6em;
+      }
+    }
+  }
+}

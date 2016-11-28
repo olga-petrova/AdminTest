@@ -122,6 +122,14 @@ Ext.define('Ext.pivot.matrix.Base', {
      * This is the 'dataIndex' field name on the pivot store model.
      */
     compactViewKey:     '_compactview_',
+
+    /**
+     * @cfg {Number} compactViewColumnWidth
+     *
+     * In compact view layout mode the matrix generates only one column for all left axis dimensions.
+     * This is the width of that column.
+     */
+    compactViewColumnWidth:   200,
     
     /**
      * @cfg {String} viewLayoutType Type of layout used to display the pivot data.
@@ -137,7 +145,7 @@ Ext.define('Ext.pivot.matrix.Base', {
     /**
      * @cfg {String} rowGrandTotalsPosition Possible values: `first`, `none`, `last`
      */
-    rowGrandTotalsPosition:     'first',
+    rowGrandTotalsPosition:     'last',
 
     /**
      * @cfg {String} colSubTotalsPosition Possible values: `first`, `none`, `last`
@@ -147,7 +155,7 @@ Ext.define('Ext.pivot.matrix.Base', {
     /**
      * @cfg {String} colGrandTotalsPosition Possible values: `first`, `none`, `last`
      */
-    colGrandTotalsPosition:     'first',
+    colGrandTotalsPosition:     'last',
 
     /**
      * @cfg {Boolean} showZeroAsBlank Should 0 values be displayed as blank?
@@ -202,6 +210,14 @@ Ext.define('Ext.pivot.matrix.Base', {
      * This is useful to check when functions are deferred.
      */
     isDestroyed:    false,
+
+    /**
+     * Reference to the pivot component that monitors this matrix
+     * @private
+     */
+    cmp:            null,
+
+    isPivotMatrix:  true,
     
     constructor: function(config){
         var ret = this.callParent(arguments);
@@ -213,6 +229,24 @@ Ext.define('Ext.pivot.matrix.Base', {
          *
          * @event cleardata
          * @param {Ext.pivot.matrix.Base} matrix Reference to the Matrix object
+         */
+
+        /**
+         * Fires before the matrix is reconfigured.
+         *
+         * Return false to stop reconfiguring the matrix.
+         *
+         * @event beforereconfigure
+         * @param {Ext.pivot.matrix.Base} matrix Reference to the Matrix object
+         * @param {Object} config Object used to reconfigure the matrix
+         */
+
+        /**
+         * Fires when the matrix is reconfigured.
+         *
+         * @event reconfigure
+         * @param {Ext.pivot.matrix.Base} matrix Reference to the Matrix object
+         * @param {Object} config Object used to reconfigure the matrix
          */
 
         /**
@@ -308,7 +342,7 @@ Ext.define('Ext.pivot.matrix.Base', {
         if(Ext.isArray(me.totals)){
             me.totals.length = 0;
         }
-        me.columns = me.model = me.totals = me.keysMap = null;
+        me.columns = me.model = me.totals = me.keysMap = me.cmp = me.modelInfo = null;
         
         me.isDestroyed = true;
 
@@ -428,6 +462,7 @@ Ext.define('Ext.pivot.matrix.Base', {
             }
         }
         me.totals = [];
+        me.modelInfo = {};
         me.keysMap = null;
 
         if(firstTime){
@@ -445,11 +480,13 @@ Ext.define('Ext.pivot.matrix.Base', {
     },
     
     /**
+     * @method
      * Template method called to do your internal initialization when you extend this class.
      */
     onInitialize: Ext.emptyFn,
     
     /**
+     * @method
      * Template method called before destroying the instance.
      */
     onDestroy: Ext.emptyFn,
@@ -462,16 +499,22 @@ Ext.define('Ext.pivot.matrix.Base', {
     reconfigure: function(config){
         var me = this,
             config = Ext.clone(config || {});
-        
-        me.initialize(false, config);
-        
-        me.clearData();
-        
-        if(Ext.isFunction(me.onReconfigure)){
-            me.onReconfigure(config);
+
+        if(me.fireEvent('beforereconfigure', me, config) !== false) {
+            if (Ext.isFunction(me.onReconfigure)) {
+                me.onReconfigure(config);
+            }
+
+            // the user can change values on the config before reinitializing the matrix
+            me.fireEvent('reconfigure', me, config);
+            me.initialize(false, config);
+
+            me.clearData();
+
+            me.delayedTask.delay(5);
+        }else{
+            me.delayedTask.cancel();
         }
-        
-        me.delayedTask.delay(5);
     },
     
     /**
@@ -517,12 +560,18 @@ Ext.define('Ext.pivot.matrix.Base', {
         
         for(i = 0; i < aggregates.length; i++){
             item = aggregates[i];
-            Ext.applyIf(item, {
-                isAggregate:        true,
-                align:              'right',
-                showZeroAsBlank:    me.showZeroAsBlank
-            });
-            me.aggregate.add(Ext.create('Ext.pivot.dimension.Item', item));
+
+            if(!(item instanceof Ext.pivot.dimension.Item)){
+                Ext.applyIf(item, {
+                    isAggregate:        true,
+                    align:              'right',
+                    showZeroAsBlank:    me.showZeroAsBlank
+                });
+                item.matrix = this;
+                item = Ext.create('Ext.pivot.dimension.Item', item);
+            }
+
+            me.aggregate.add(item);
         }
     },
     
@@ -574,6 +623,7 @@ Ext.define('Ext.pivot.matrix.Base', {
         }
         
         me.totals = [];
+        me.modelInfo = {};
         me.keysMap = null;
         
         if(me.pivotStore){
@@ -608,7 +658,7 @@ Ext.define('Ext.pivot.matrix.Base', {
         }
         me.fireEvent('storebuilt', me, me.pivotStore);
         
-        me.fireEvent('done');
+        me.fireEvent('done', me);
     },
     
     /**
@@ -670,111 +720,118 @@ Ext.define('Ext.pivot.matrix.Base', {
      */
     buildModelAndColumns: function(){
         var me = this;
-            
+
         me.model = [
-            {name: 'id', type: 'string'}
-            //{name: 'info', type: 'object'}
+            {name: 'id', type: 'string'},
+            {name: 'isRowGroupHeader', type: 'boolean', defaultValue: false},
+            {name: 'isRowGroupTotal', type: 'boolean', defaultValue: false},
+            {name: 'isRowGrandTotal', type: 'boolean', defaultValue: false},
+            {name: 'leftAxisKey', type: 'boolean', defaultValue: null}
         ];
-        
-        me.buildColumnHeaders(false);
-    },
-    
-    /**
-     * @private
-     */
-    buildColumnHeaders: function(disableChangeModel){
-        var me = this;
-        
+
         me.internalCounter = 0;
         me.columns = [];
 
         if(me.viewLayoutType == 'compact'){
-            me.generateCompactLeftAxis(disableChangeModel);
+            me.generateCompactLeftAxis();
         }else{
             me.leftAxis.dimensions.each(function(item){
-                this.parseLeftAxisDimension(item, disableChangeModel);
+                this.parseLeftAxisDimension(item);
             }, me);
         }
-        
+
         if(me.colGrandTotalsPosition == 'first'){
             me.columns.push(me.parseAggregateForColumn(null, {
                 text:       me.textGrandTotalTpl,
                 grandTotal: true
-            }, disableChangeModel));
+            }));
         }
         Ext.Array.each(me.topAxis.getTree(), function(item){
-            this.parseTopAxisItem(item, disableChangeModel);
+            this.parseTopAxisItem(item);
         }, me);
-        
+
         if(me.colGrandTotalsPosition == 'last'){
             me.columns.push(me.parseAggregateForColumn(null, {
                 text:       me.textGrandTotalTpl,
                 grandTotal: true
-            }, disableChangeModel));
+            }));
         }
 
         // call the hook functions
-        if(!disableChangeModel){
-            if(Ext.isFunction(me.onBuildModel)){
-                me.onBuildModel(me.model);
-            }
-            me.fireEvent('modelbuilt', me, me.model);
+        if(Ext.isFunction(me.onBuildModel)){
+            me.onBuildModel(me.model);
         }
+        me.fireEvent('modelbuilt', me, me.model);
         if(Ext.isFunction(me.onBuildColumns)){
             me.onBuildColumns(me.columns);
         }
         me.fireEvent('columnsbuilt', me, me.columns);
     },
-    
+
+    getDefaultFieldInfo: function(config){
+        return Ext.apply({
+            isColGroupTotal:    false,
+            isColGrandTotal:    false,
+            leftAxisColumn:     false,
+            topAxisColumn:      false,
+            topAxisKey:         null
+        }, config);
+    },
+
     /**
      * @private
      */
-    parseLeftAxisDimension: function(dimension, disableChangeModel){
-        if(!disableChangeModel){
-            this.model.push({
-                name:   dimension.getId(), 
-                type:   'string'
-            });
-        }
-        this.columns.push({
-            dataIndex:  dimension.getId(),
+    parseLeftAxisDimension: function(dimension){
+        var me = this,
+            id = dimension.getId();
+
+        me.model.push({
+            name:   id,
+            type:   'string'
+        });
+        me.columns.push({
+            dataIndex:  id,
             text:       dimension.header,
             dimension:  dimension,
             leftAxis:   true
         });
-    },
-    
-    /**
-     * @private
-     */
-    generateCompactLeftAxis: function(disableChangeModel){
-        var me = this;
-        
-        if(!disableChangeModel){
-            me.model.push({
-                name:   me.compactViewKey,
-                type:   'string'
-            });
-        }
-        me.columns.push({
-            dataIndex:  me.compactViewKey,
-            text:       me.textRowLabels,
-            leftAxis:   true,
-            width:      200
+        me.modelInfo[id] = me.getDefaultFieldInfo({
+            leftAxisColumn:     true
         });
     },
     
     /**
      * @private
      */
-    parseTopAxisItem: function(item, disableChangeModel){
+    generateCompactLeftAxis: function(){
+        var me = this;
+
+        me.model.push({
+            name:   me.compactViewKey,
+            type:   'string'
+        });
+        me.columns.push({
+            dataIndex:  me.compactViewKey,
+            text:       me.textRowLabels,
+            leftAxis:   true,
+            width:      me.compactViewColumnWidth
+        });
+        me.modelInfo[me.compactViewKey] = me.getDefaultFieldInfo({
+            leftAxisColumn:     true
+        });
+    },
+    
+    /**
+     * @private
+     */
+    parseTopAxisItem: function(item){
         var me = this,
             columns = [],
             retColumns = [],
             o1, o2, doAdd = false;
         
         if(!item.children){
-            columns = me.parseAggregateForColumn(item, null, disableChangeModel);
+            columns = me.parseAggregateForColumn(item, null);
             if(item.level === 0){
                 me.columns.push(columns);
             }else{
@@ -783,7 +840,7 @@ Ext.define('Ext.pivot.matrix.Base', {
             }
         }else{
             if(me.colSubTotalsPosition == 'first'){
-                o2 = me.addColSummary(item, disableChangeModel, true);
+                o2 = me.addColSummary(item);
                 if(o2){
                     retColumns.push(o2);
                 }
@@ -792,7 +849,7 @@ Ext.define('Ext.pivot.matrix.Base', {
             // this part has to be done no matter if the column is added to the grid or not
             // the dataIndex is generated incrementally
             Ext.Array.each(item.children, function(child){
-                var ret = me.parseTopAxisItem(child, disableChangeModel);
+                var ret = me.parseTopAxisItem(child);
                 
                 if(Ext.isArray(ret)){
                     columns = Ext.Array.merge(columns, ret);
@@ -801,30 +858,28 @@ Ext.define('Ext.pivot.matrix.Base', {
                 }
             });
 
-            if(item.expanded || !disableChangeModel){
-                o1 = {
-                    text:           item.name,
-                    columns:        columns,
-                    key:            item.key,
-                    xcollapsible:   item.expanded,
-                    xexpanded:      item.expanded,
-                    xexpandable:    true
-                };
-                if(item.level === 0){
-                    me.columns.push(o1);
-                }
-                retColumns.push(o1);
+            o1 = {
+                text:           item.name,
+                group:          item,
+                columns:        columns,
+                key:            item.key,
+                xexpandable:    true,
+                xgrouped:       true
+            };
+            if(item.level === 0){
+                me.columns.push(o1);
             }
-            
+            retColumns.push(o1);
+
             if(me.colSubTotalsPosition == 'last'){
-                o2 = me.addColSummary(item, disableChangeModel, true);
+                o2 = me.addColSummary(item);
                 if(o2){
                     retColumns.push(o2);
                 }
             }
 
             if(me.colSubTotalsPosition == 'none'){
-                o2 = me.addColSummary(item, disableChangeModel, false);
+                o2 = me.addColSummary(item);
                 if(o2){
                     retColumns.push(o2);
                 }
@@ -837,64 +892,52 @@ Ext.define('Ext.pivot.matrix.Base', {
     /**
      * @private
      */
-    addColSummary: function(item, disableChangeModel, addColumns){
+    addColSummary: function(item){
         var me = this,
             o2, doAdd = false;
             
         // add subtotal columns if required
         o2 = me.parseAggregateForColumn(item, {
             text:           item.expanded ? item.getTextTotal() : item.name,
+            group:          item,
             subTotal:       true
-        }, disableChangeModel);
+        });
 
-        if(addColumns){
-            doAdd = true;
-        }else{
-            // this has to change since we want to show the totals
-            // when the column is collapsed but hide them when is expanded
-            /*o2 = {
-                text:           item.expanded ? item.getTextTotal() : item.name,
-                dimension:      item.dimension,
-                subTotal:       true
-            };*/
-            doAdd = !item.expanded;
+        if(item.level === 0){
+            me.columns.push(o2);
         }
-        
-        if(doAdd){
-            if(item.level === 0){
-                me.columns.push(o2);
-            }
-            
-            Ext.apply(o2, {
-                key:            item.key,
-                xcollapsible:   !item.expanded,
-                xexpanded:      item.expanded,
-                xexpandable:    !item.expanded
-            });
-            return o2;
-        }
+
+        Ext.apply(o2, {
+            key:            item.key,
+            xexpandable:    true,
+            xgrouped:       true
+        });
+        return o2;
     },
     
     /**
      * @private
      */
-    parseAggregateForColumn: function(item, config, disableChangeModel){
+    parseAggregateForColumn: function(item, config){
         var me = this,
             columns = [],
-            column = {};
-        
-        me.aggregate.each(function(agg){
+            column = {},
+            dimensions = me.aggregate.getRange(),
+            length = dimensions.length,
+            i, agg;
+
+        for(i = 0; i < length; i++){
+            agg = dimensions[i];
+
             me.internalCounter++;
-            if(!disableChangeModel){
-                me.model.push({
-                    name:           'c' + me.internalCounter, 
-                    type:           'auto',
-                    defaultValue:   undefined,
-                    useNull:        true,
-                    col:            item ? item.key : me.grandTotalKey,
-                    agg:            agg.getId()
-                });
-            }
+            me.model.push({
+                name:           'c' + me.internalCounter,
+                type:           'auto',
+                defaultValue:   undefined,
+                useNull:        true,
+                col:            item ? item.key : me.grandTotalKey,
+                agg:            agg.getId()
+            });
 
             columns.push({
                 dataIndex:  'c' + me.internalCounter,
@@ -904,7 +947,14 @@ Ext.define('Ext.pivot.matrix.Base', {
                 grandTotal: (config ? config.grandTotal === true : false),
                 dimension:  agg
             });
-        });
+
+            me.modelInfo['c' + me.internalCounter] = me.getDefaultFieldInfo({
+                isColGroupTotal:    (config ? config.subTotal === true : false),
+                isColGrandTotal:    (config ? config.grandTotal === true : false),
+                topAxisColumn:      true,
+                topAxisKey:         item ? item.key : me.grandTotalKey
+            });
+        }
 
         if(columns.length == 0 && me.aggregate.getCount() == 0){
             me.internalCounter++;
@@ -959,7 +1009,11 @@ Ext.define('Ext.pivot.matrix.Base', {
         // first of all add the grand total
         totals.push({
             title:      me.textGrandTotalTpl,
-            values:     me.preparePivotStoreRecordData({key: me.grandTotalKey})
+            values:     me.preparePivotStoreRecordData({
+                key: me.grandTotalKey
+            }, {
+                isRowGrandTotal:    true
+            })
         });
         
         // additional grand totals can be added. collect these using events or 
@@ -971,7 +1025,9 @@ Ext.define('Ext.pivot.matrix.Base', {
         // add records to the pivot store for each grand total
         Ext.Array.forEach(totals, function(t){
             if(Ext.isObject(t) && Ext.isObject(t.values)){
-                //t.values.id = '';
+                Ext.applyIf(t.values, {
+                    isRowGrandTotal:    true
+                });
                 me.totals.push({
                     title:      t.title || '',
                     record:     me.pivotStore.add(t.values)[0]
@@ -985,18 +1041,53 @@ Ext.define('Ext.pivot.matrix.Base', {
      */
     addRecordToPivotStore: function(item){
         var me = this,
-            record;
-        
+            record, dataIndex;
+
         if(!item.children){
             // we are on the deepest level so it's time to build the record and add it to the store
-            record = me.pivotStore.add(me.preparePivotStoreRecordData(item));
-            item.record = record[0];
+            record = me.pivotStore.add(me.preparePivotStoreRecordData(item))[0];
+            item.record = record;
             // this should be moved into the function "preparePivotStoreRecordData"
             if(Ext.isFunction(me.onBuildRecord)){
-                me.onBuildRecord(record[0]);
+                me.onBuildRecord(record);
             }
-            me.fireEvent('recordbuilt', me, record[0]);
+            me.fireEvent('recordbuilt', me, record);
         }else{
+
+            // This group is expandable so let's generate records for the following use cases
+            // - expanded group
+            // - collapsed group
+            // - footer for an expanded group that has rowSubTotalsPosition = last.
+            // We define all these records on the group item so that we can update them as well
+            // when we have an editable pivot. Without doing this we can't mark dirty records
+            // in the pivot grid cells
+            item.records = {};
+            dataIndex = (me.viewLayoutType == 'outline' ? item.dimensionId : me.compactViewKey);
+
+            // a collapsed group will always be the same
+            item.records.collapsed = me.pivotStore.add(me.preparePivotStoreRecordData(item, {
+                isRowGroupHeader:   true,
+                isRowGroupTotal:    true
+            }))[0];
+            if(me.rowSubTotalsPosition == 'first'){
+                item.records.expanded = me.pivotStore.add(me.preparePivotStoreRecordData(item, {
+                    isRowGroupHeader:   true
+                }))[0];
+            }else {
+                record = {};
+                record[dataIndex] = item.name;
+                record.isRowGroupHeader = true;
+
+                item.records.expanded = me.pivotStore.add(record)[0];
+                if(me.rowSubTotalsPosition == 'last') {
+                    record = me.preparePivotStoreRecordData(item, {
+                        isRowGroupTotal:    true
+                    });
+                    record[dataIndex] = item.getTextTotal();
+                    item.records.footer = me.pivotStore.add(record)[0];
+                }
+            }
+
             Ext.Array.each(item.children, function(child){
                 me.addRecordToPivotStore(child);
             });
@@ -1009,34 +1100,33 @@ Ext.define('Ext.pivot.matrix.Base', {
      *
      * @private
      */
-    preparePivotStoreRecordData: function(group){
+    preparePivotStoreRecordData: function(group, values){
         var me = this,
             data = {};
-        
-        data['id'] = group.key;
-        Ext.apply(data, group.data || {}); // merge the left axis data
-        
-        Ext.Array.each(me.model, function(field){
-            var result;
-            
-            if(field.col && field.agg){
-                result = me.results.get(group.key, field.col);
-                if(result){
-                    data[field.name] = result.getValue(field.agg);
-                }
+
+        if(group) {
+            if (group.dimensionId) {
+                data[group.dimensionId] = group.name;
             }
-        });
-        
-        if(me.viewLayoutType == 'compact'){
-            data[me.compactViewKey] = group.name;
+            data.leftAxisKey = group.key;
+
+            Ext.Array.each(me.model, function (field) {
+                var result;
+
+                if (field.col && field.agg) {
+                    result = me.results.get(group.key, field.col);
+                    if (result) {
+                        data[field.name] = result.getValue(field.agg);
+                    }
+                }
+            });
+
+            if (me.viewLayoutType == 'compact') {
+                data[me.compactViewKey] = group.name;
+            }
         }
         
-        // @TODO this function is used intensively in the pivot grid when the pivot grid store is generated
-        // there is a need for a "recordbuild" event so that the developer can add
-        // additional data to the record that will be added to the pivot store.
-        // the matrix should fire "recordbuild" and the pivot grid should relay that event
-        
-        return data;
+        return Ext.applyIf(data, values);
     },
     
     /**
@@ -1058,8 +1148,6 @@ Ext.define('Ext.pivot.matrix.Base', {
         
         if(!me.model){
             me.buildModelAndColumns();
-        }else{
-            me.buildColumnHeaders(true);
         }
         return me.columns;
     },
@@ -1080,7 +1168,7 @@ Ext.define('Ext.pivot.matrix.Base', {
         var obj = this.leftAxis.findTreeElement('key', key);
 
         if(!obj) return false;
-        return (obj.node.children && obj.nodel.children.length == 0) ? 0 : obj.level;
+        return (obj.node.children && obj.node.children.length == 0) ? 0 : obj.level;
     },
     
     /**

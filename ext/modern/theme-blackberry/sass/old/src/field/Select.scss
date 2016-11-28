@@ -2,15 +2,15 @@
  * @class Ext.field.Select
  */
 
-.x-form .x-field-select {
+.x-form .x-pickerfield {
 	padding-bottom: 18px;
 }
 
-.x-field-select {
+.x-pickerfield {
 	padding-left: 5px;
 	padding-right: 5px;
 
-	.x-component-outer {
+	.x-field-body {
 		@include st-box;
 		@include st-box-align(center);
 		@include st-box-direction(horizontal);
@@ -39,12 +39,12 @@
 			@include background(linear-gradient(color-stops(#FFFFFF, #DEDFDE)));
 		}
 
-		.x-form-label {
+		.x-field-label {
 			font-size: 15px;
 			line-height: inherit;
 		}
 
-		.x-field-input {
+		.x-input {
 			@include st-box-flex(1);
 		}
 
@@ -59,7 +59,7 @@
 	}
 }
 
-.x-panel.x-select-overlay {
+.x-panel.x-selectfield-overlay {
 	> .x-panel-inner {
 		overflow: hidden;
 		border: 1px solid #cfcdcf;

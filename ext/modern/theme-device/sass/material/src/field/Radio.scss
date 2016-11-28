@@ -1,0 +1,40 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}radiofield {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+
+      .#{$prefix}input {
+        height: 27px;
+      }
+    }
+
+    .#{$prefix}radio {
+      visibility: hidden;
+    }
+
+    .#{$prefix}radiofield {
+      .#{$prefix}input-mask {
+        @include material-icon('radio_button_unchecked');
+        top: -4px;
+        left: inherit;
+        @include css-color-variable('text-color-light-md');
+      }
+
+      .#{$prefix}input-el:checked + .#{$prefix}input-mask {
+        @include css-color-variable('primary-color-md');
+        &::after {
+          content: 'radio_button_checked';
+        }
+      }
+
+      &.#{$prefix}item-disabled {
+        .#{$prefix}input-el:checked + .#{$prefix}input-mask, .#{$prefix}input-mask {
+          @include css-color-variable('text-color-lighter-md');
+        }
+      }
+    }
+  }
+}

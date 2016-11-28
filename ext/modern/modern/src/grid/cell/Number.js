@@ -20,6 +20,8 @@ Ext.define('Ext.grid.cell.Number', {
         format: '0,000.00'
     },
 
+    zeroValue: null,
+
     updateColumn: function (column, oldColumn) {
         this.callParent([column, oldColumn]);
         if (column) {
@@ -38,8 +40,14 @@ Ext.define('Ext.grid.cell.Number', {
 
     writeValue: function () {
         var value = this.getValue(),
-            hasValue = value || value === 0;
+            hasValue = value || value === 0,
+            zeroValue;
 
-        this.setRawValue(hasValue ? Ext.util.Format.number(value, this.getFormat()) : null);
+        if(value === 0 && (zeroValue = this.geZeroValue()) != null) {
+            value = zeroValue;
+        }else{
+            value = hasValue ? Ext.util.Format.number(value, this.getFormat()) : null;
+        }
+        this.setRawValue(value);
     }
 });

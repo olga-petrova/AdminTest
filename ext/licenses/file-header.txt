@@ -1,15 +1,15 @@
-This file is part of Ext JS 6.0.1.250
+This file is part of Ext JS 6.2.0.526
 
-Copyright (c) 2011-2015 Sencha Inc
+Copyright (c) 2011-2016 Sencha Inc
 
 Contact:  http://www.sencha.com/contact
 
-Commercial Usage
-Licensees holding valid commercial licenses may use this file in accordance with the Commercial
-Software License Agreement provided with the Software or, alternatively, in accordance with the
-terms contained in a written agreement between you and Sencha.
+Pre-release code in the Ext repository is intended for development purposes only and will
+not always be stable. 
 
-If you are unsure which license is appropriate for your use, please contact the sales department
-at http://www.sencha.com/contact.
+Use of pre-release code is permitted with your application at your own risk under standard
+Ext license terms. Public redistribution is prohibited.
 
-Version: 6.0.1.250 Build date: 2015-09-02 16:59:34 (22ef9ff0ebf584ff525541be37e753a703cc044b)
+For early licensing, please contact us at licensing@sencha.com
+
+Version: 6.2.0.526 Build date: 2016-06-01 03:17:49 (d12686a51edf60b3ab9bb90a394d0c9e0c0d9448)

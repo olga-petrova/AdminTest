@@ -214,9 +214,37 @@ Ext.define('Ext.layout.container.Container', {
             Ext.DomHelper.generateMarkup(tree, out);
         }
     },
+    
+    doRenderTabGuard: function(out, renderData, position) {
+        // Careful! This method is bolted on to the renderTpl so all we get for context is
+        // the renderData! The "this" pointer is the renderTpl instance!
+
+        var cmp = renderData.$comp,
+            tabGuardTpl;
+        
+        // Due to framing, we will be called in two different ways: in the frameTpl or in
+        // the renderTpl. The frameTpl version enters via doRenderFramingTabGuard which
+        // sets "$skipTabGuards" on the renderTpl's renderData.
+        //
+        if (cmp.tabGuard && !renderData.$skipTabGuards) {
+            tabGuardTpl = cmp.getTpl('tabGuardTpl');
+            
+            if (tabGuardTpl) {
+                renderData.tabGuard = position;
+                renderData.tabGuardEl = cmp.tabGuardElements[position];
+                
+                cmp.addChildEl(renderData.tabGuardEl);
+                tabGuardTpl.applyOut(renderData, out);
+                
+                delete renderData.tabGuard;
+                delete renderData.tabGuardEl;
+            }
+        }
+    },
 
     finishRender: function () {
         var me = this,
+            owner = me.owner,
             target, items;
 
         me.callParent();
@@ -531,6 +559,7 @@ Ext.define('Ext.layout.container.Container', {
         renderTpl.renderBody = this.doRenderBody;
         renderTpl.renderContainer = this.doRenderContainer;
         renderTpl.renderItems = this.doRenderItems;
+        renderTpl.renderTabGuard = this.doRenderTabGuard;
     },
 
     getContentTarget: function(){

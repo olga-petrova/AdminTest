@@ -1,0 +1,103 @@
+//------------------------------------------
+//-----PRIMARY CONFIG VARIABLES
+//------------------------------------------
+// Primary user customizable variables.
+
+// Color names can be found here
+// https://www.google.com/design/spec/style/color.html#color-color-palette
+$primary-color-name-md: dynamic('blue');
+$accent-color-name-md: dynamic('orange');
+
+// Toggles all calculations to dark backgrounds and light text
+$dark-mode-md: dynamic(false);
+
+// When true will reference CSS variables for all colors used in the theme.
+// otherwise normal sass color embedding will apply
+// currently only used in the material design theme
+$enable-css-color-variables: dynamic(true);
+
+// When true will create a second style entry anytime a CSS variable is used.
+// This style will be above the CSS variable which allows CSS variables to win
+// in browsers that support them and the actual value in browsers that do not.
+// If you are only supporting modern browsers with CSS variable support you will
+// want to disable this as it will cut down on the size of the final CSS
+$enable-css-color-variables-legacy-fallback: dynamic(true);
+
+// When true will enable a fallback on the original SASS value for any
+// CSS variable. This adds to the CSS size but provides a safety if a variable is broken
+$enable-css-color-variables-fallback: dynamic(false);
+
+// Determines if all Material icons should be added to the CSS
+// if not user must add each icon they wish to use
+// material-icon-class('arrow-back'); // and so on
+$include-all-icon-classes-md: dynamic(true);
+
+// Determines if all colors should be added as a class selectors for color and background-color
+$include-color-classes-md: dynamic(false);
+
+
+//------------------------------------------
+//-----CALCULATED CONFIG VARIABLES
+//------------------------------------------
+// Calculated variables, can be overridden
+
+$primary-color-md: dynamic(material-color($primary-color-name-md, '500'));
+$primary-color-light-md: dynamic(material-color($primary-color-name-md, '100'));
+$primary-color-dark-md: dynamic(material-color($primary-color-name-md, '700'));
+// Primary color to show interaction with an element
+$primary-color-pressed-md: dynamic(rgba($primary-color-md, .8));
+// This is used for fading out background colors
+$primary-color-invisible-md: dynamic(rgba($primary-color-md, 0));
+
+$accent-color-md: dynamic(material-color($accent-color-name-md, '500'));
+$accent-color-light-md: dynamic(material-color($accent-color-name-md, '100'));
+$accent-color-dark-md: dynamic(material-color($accent-color-name-md, '700'));
+// Accent color to show interaction with an element
+$accent-color-pressed-md: dynamic(rgba($accent-color-md, .8));
+// This is used for fading out background colors
+$accent-color-invisible-md: dynamic(rgba($accent-color-md, 0));
+
+// Used to indicate positive user interactions or results
+$positive-color-md: dynamic(material-color('light-green', '600'));
+$positive-color-pressed-md: dynamic(rgba($positive-color-md, .8));
+// Used to indicate negative user interactions or results (errors, etc)
+$negative-color-md: dynamic(material-color('red', '800'));
+$negative-color-pressed-md: dynamic(rgba($negative-color-md, .8));
+
+// Text color on full color backgrounds
+$text-color-base-md: dynamic(if($dark-mode-md, #fff, #000));
+$color: $text-color-base-md;
+
+// Backgrounds should be opposite of the text color
+$text-color-reverse-md: dynamic(if($dark-mode-md, #222, #fff));
+
+// Primary background color
+$background-color-md: dynamic(if($dark-mode-md, #303030, #fafafa));
+
+// Background color for modals
+$background-color-light-md: dynamic(if($dark-mode-md, #424242, #ffffff));
+
+// Text color on dark/light background
+$text-color-md: dynamic(rgba($text-color-base-md, .87));
+
+// Secondary Text Color & Icons
+$text-color-light-md: dynamic(rgba($text-color-base-md, .54));
+
+// Disabled Text Color
+$text-color-lighter-md: dynamic(rgba($text-color-base-md, .38));
+
+// Divider Color
+$text-color-lightest-md: dynamic(rgba($text-color-base-md, .12));
+
+// Faded versions of reversed text colors
+$text-color-reverse-light-md: dynamic(rgba($text-color-reverse-md, .54));
+$text-color-reverse-lighter-md: dynamic(rgba($text-color-reverse-md, .38));
+$text-color-reverse-lightest-md: dynamic(rgba($text-color-reverse-md, .12));
+
+// Used for subtle overlays on top of items (picker bar, etc)
+$overlay-color-md: dynamic(if($dark-mode-md, rgba(#fff, .03), rgba(#000, .03)));
+
+// Material Design Spec Variables
+// These are here for ease of re-use throughout the theme, not for customization
+$content-padding-md: 16px;
+// </editor-fold>

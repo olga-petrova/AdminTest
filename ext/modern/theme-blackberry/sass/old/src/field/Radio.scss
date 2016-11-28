@@ -1,5 +1,5 @@
 @charset "utf-8";
-.x-field-radio .x-field-mask {
+.x-radiofield .x-input-mask {
     height: 47px;
 
     &::before {
@@ -19,7 +19,7 @@
     }
 }
 
-.x-input-radio:checked ~ .x-field-mask::after {
+.x-radio:checked ~ .x-input-mask::after {
     @include background(linear-gradient(color-stops(#3498CB, #0974A8)));
     @include box-shadow(inset 0 1px 0 0 #55AAD5);
     font-family: Helvetica;
@@ -28,8 +28,8 @@
     content: '•';
 }
 
-.x-item-disabled.x-field-radio {
-    .x-input-radio:checked ~ .x-field-mask:after {
+.x-item-disabled.x-radiofield {
+    .x-radio:checked ~ .x-input-mask:after {
         @include background(linear-gradient(color-stops(#bfd7e3, #85b3c9)));
         @include box-shadow(inset 0 1px 0 0 #aac5d3);
     }

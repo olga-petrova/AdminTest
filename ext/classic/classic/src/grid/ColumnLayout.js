@@ -82,15 +82,28 @@ Ext.define('Ext.grid.ColumnLayout', {
     },
 
     moveItemBefore: function (item, before) {
-        var prevOwner = item.ownerCt;
+        var prevOwner = item.ownerCt,
+            nextSibling = before && before.nextSibling();
 
         // Due to the nature of grid headers, index calculation for
         // moving items is complicated, especially since removals can trigger
         // groups to be removed (and thus alter indexes). As such, the logic
         // is simplified by removing the item first, then calculating the index
-        // and inserting it
+        // and inserting it.
+        // When removing from previous container ensure the header is not destroyed
+        // or removed from the DOM (which would destroy focus).
+        // The layout's moveItem method will preserve focus when it does the move.
         if (item !== before && prevOwner) {
-            prevOwner.remove(item, false);
+            prevOwner.remove(item, {
+                destroy: false,
+                detach: false
+            });
+
+            // If the removal caused destruction of the before, this was
+            // the last subheader, so move to beore its next sibling
+            if (before && before.destroyed) {
+                before = nextSibling;
+            }
         }
         return this.callParent([item, before]);
     },
@@ -107,8 +120,9 @@ Ext.define('Ext.grid.ColumnLayout', {
             // locking grid will not have this set. The ownerGrid in that case would have
             // it set but will pass along true only to the normal side.
             reserveScrollbar = grid.reserveScrollbar && !vetoReserveScrollbar,
+            scrollable = grid.view.getScrollable(),
             manageScrollbar = !reserveScrollbar && !vetoReserveScrollbar &&
-                    grid.view.scrollFlags.y;
+                    scrollable && scrollable.getY();
 
         // If we have reserveScrollbar then we will always have a vertical scrollbar so
         // manageScrollbar should be false. Otherwise it is based on overflow-y:

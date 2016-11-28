@@ -38,3 +38,17 @@ $spinnerfield-button-down-icon: dynamic($fa-var-minus $spinnerfield-button-font-
  * Spinner button icon color
  */
 $spinnerfield-button-color: dynamic($neutral-dark-color);
+
+$spinnerfield-button-border-radius: dynamic(null);
+$spinnerfield-button-pressed-color: dynamic($spinnerfield-button-color);
+
+$spinnerfield-button-disabled-color: dynamic(#aaa);
+$spinnerfield-button-disabled-background-color: dynamic(null);
+
+$spinnerfield-button-up-background-color: dynamic(null);
+$spinnerfield-button-up-pressed-background-color: dynamic(null);
+
+$spinnerfield-button-down-background-color: dynamic(null);
+$spinnerfield-button-down-pressed-background-color: dynamic(null);
+
+$spinnerfield-button-spacing: dynamic(0.4em);

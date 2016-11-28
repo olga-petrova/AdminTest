@@ -1,0 +1,57 @@
+@if ($include-material) {
+  #{$material-selector} {
+
+    .#{$prefix}indexbar {
+      height: 100% !important;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      width: 32px;
+      opacity: 0;
+      z-index: 1;
+      transition: .4s opacity;
+
+      &.#{$prefix}indexbar-vertical {
+        margin-right: 0;
+      }
+
+      &.#{$prefix}indexbar-pressed {
+        background-color: transparent;
+        opacity: 1;
+      }
+    }
+
+    .#{$prefix}indexbar > div {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      @include material-font-style('caption');
+      line-height: inherit;
+    }
+
+    .#{$prefix}indexbar-indicator {
+      width: 92px;
+      height: 92px;
+      background-color: #2196f3;
+      position: absolute;
+      top: 0;
+      right: 42px;
+      border-top-left-radius: 92px;
+      border-bottom-left-radius: 92px;
+      border-top-right-radius: 92px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transform: rotate(-45deg);
+      @include material-shadow(2);
+
+      .#{$prefix}indexbar-indicator-inner {
+        @include css-color-variable('text-color-reverse-md');
+        transform: rotate(45deg);
+        @include material-font-style('subhead');
+      }
+    }
+  }
+}

@@ -24,16 +24,19 @@ Ext.define('Ext.layout.container.CheckboxGroup', {
         'innerCt'
     ],
 
-    renderTpl: [
-        '<table id="{ownerId}-innerCt" data-ref="innerCt" class="' + Ext.baseCSSPrefix + 'table-plain" cellpadding="0"',
-            'role="presentation" style="{tableStyle}"><tr role="presentation">',
-            '<tpl for="columns">',
-                '<td class="{parent.colCls}" valign="top" style="{style}" role="presentation">',
-                    '{% this.renderColumn(out,parent,xindex-1) %}',
-                '</td>',
-            '</tpl>',
-        '</tr></table>'
-    ],
+    renderTpl:
+        '<table id="{ownerId}-innerCt" data-ref="innerCt" class="' + Ext.baseCSSPrefix + 'table-plain" cellpadding="0"' +
+            'role="presentation" style="{tableStyle}">' +
+            '<tbody role="presentation">' +
+                '<tr role="presentation">' +
+                    '<tpl for="columns">' +
+                        '<td class="{parent.colCls}" valign="top" style="{style}" role="presentation">' +
+                            '{% this.renderColumn(out,parent,xindex-1) %}' +
+                        '</td>' +
+                    '</tpl>' +
+                '</tr>' +
+            '</tbody>' +
+        '</table>',
 
     lastOwnerItemsGeneration : null,
 

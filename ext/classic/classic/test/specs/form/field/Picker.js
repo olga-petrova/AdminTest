@@ -1,3 +1,5 @@
+/* global Ext, jasmine, expect, describe, spyOn, xdescribe */
+
 describe("Ext.form.field.Picker", function() {
     var component, makeComponent;
 
@@ -35,10 +37,6 @@ describe("Ext.form.field.Picker", function() {
             xy = trigger.getXY();
         jasmine.fireMouseEvent(trigger.dom, 'click', xy[0], xy[1]);
     }
-    
-    function expectAria(attr, value) {
-        jasmine.expectAriaAttr(component, attr, value);
-    }
 
     describe("defaults", function() {
         beforeEach(function() {
@@ -63,11 +61,11 @@ describe("Ext.form.field.Picker", function() {
             });
             
             it("should have aria-haspopup attribute", function() {
-                expectAria('aria-haspopup', 'true');
+                expect(component).toHaveAttr('aria-haspopup', 'true');
             });
             
             it("should have aria-expanded attribute", function() {
-                expectAria('aria-expanded', 'false');
+                expect(component).toHaveAttr('aria-expanded', 'false');
             });
         });
     });
@@ -133,13 +131,20 @@ describe("Ext.form.field.Picker", function() {
         it("should set aria-expanded to true", function() {
             component.expand();
             
-            expectAria('aria-expanded', 'true');
+            expect(component).toHaveAttr('aria-expanded', 'true');
         });
         
-        it("should set aria-owns attribute", function() {
+        it("should set aria-owns attribute if missing", function() {
             component.expand();
             
-            expectAria('aria-owns', component.picker.el.id);
+            expect(component).toHaveAttr('aria-owns', component.picker.el.id);
+        });
+        
+        it("should not override existing aria-owns attribute", function() {
+            component.ariaEl.dom.setAttribute('aria-owns', 'blerg zurg throbbe');
+            component.expand();
+            
+            expect(component).toHaveAttr('aria-owns', 'blerg zurg throbbe');
         });
 
         // TODO
@@ -177,13 +182,13 @@ describe("Ext.form.field.Picker", function() {
         it("should set aria-expanded to false", function() {
             component.collapse();
             
-            expectAria('aria-expanded', 'false');
+            expect(component).toHaveAttr('aria-expanded', 'false');
         });
         
         it("should not remove aria-owns", function() {
             component.collapse();
             
-            expectAria('aria-owns', component.picker.el.id);
+            expect(component).toHaveAttr('aria-owns', component.picker.el.id);
         });
 
         // TODO
@@ -261,9 +266,9 @@ describe("Ext.form.field.Picker", function() {
         });
 
         it("should collapse the picker when the escape key is pressed", function() {
-            spyOn(component.keyNav.map.bindings[1], "handler").andCallThrough();
+            spyOn(component, component.keyMap.ESC.handler).andCallThrough();
             fireKey(27);
-            expect(component.keyNav.map.bindings[1].handler).toHaveBeenCalled();
+            expect(component[component.keyMap.ESC.handler]).toHaveBeenCalled();
         });
     });
 

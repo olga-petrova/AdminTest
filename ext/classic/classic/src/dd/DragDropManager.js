@@ -71,20 +71,23 @@ Ext.define('Ext.dd.DragDropManager', {
 
     /**
      * @property {Boolean} preventDefault
-     * Flag to determine if we should prevent the default behavior of the
-     * events we define. By default this is true, but this can be set to
-     * false if you need the default behavior (not recommended)
+     * `true` to invoke `preventDefault()` on all events during a drag (may be
+     * mouse, touch, or pointer events depending on the platform).
+     *
+     * @deprecated 6.1.0 Use {@link Ext.Component#touchAction touchAction} or
+     * {@link Ext.dom.Element#setTouchAction setTouchAction} to prevent specific
+     * default actions during drag
      */
     preventDefault: true,
 
     /**
      * @property {Boolean} stopPropagation
-     * Flag to determine if we should stop the propagation of the events
-     * we generate. This is true by default but you may want to set it to
-     * false if the html element contains other features that require the
-     * mouse click.
+     * `true` to invoke `stopPropagation()` on all events during a drag (may be
+     * mouse, touch, or pointer events depending on the platform).
+     *
+     * @deprecated 6.1.0
      */
-    stopPropagation: true,
+    stopPropagation: false,
 
     /**
      * Internal flag that is set to true when drag and drop has been
@@ -148,6 +151,8 @@ Ext.define('Ext.dd.DragDropManager', {
      * Class to add to the {@link Ext.dd.DragDrop#getDragEl dragged element} of a DragDrop instance.
      */
     dragCls: Ext.baseCSSPrefix + 'dd-drag-current',
+    
+    currentPoint: new Ext.util.Point(),
 
     /**
      * Runs method on all drag and drop objects
@@ -182,36 +187,11 @@ Ext.define('Ext.dd.DragDropManager', {
 
         me.init();
 
-        Ext.getDoc().on({
-            //TODO delay: 1, // delay to let other mouseup events occur before us
-            mouseup: me.handleMouseUp,
-
-            // Mousemove events do not need to be captured because they do not contend
-            // with scroll events - they're only processed when a drag has begun.
-            // Capturing was causing https://sencha.jira.com/browse/EXTJS-13952
-            mousemove: {
-                fn: me.handleMouseMove,
-                capture: false
-            },
-            dragstart: me.preventDrag,
-            drag: me.preventDrag,
-            dragend: me.preventDrag,
-            capture: true,
-            scope: me
-        });
         Ext.getWin().on({
             unload: me._onUnload,
             resize: me._onResize,
             scope: me
         });
-    },
-
-    // if a drag/drop operation is currently underway, this method stops the dragstart,
-    // drag, and dragend events from propagating down to any other listeners, e.g. scrollers
-    preventDrag: function(e) {
-        if (this.isMouseDown) {
-            e.stopPropagation();
-        }
     },
 
     /**
@@ -479,16 +459,59 @@ Ext.define('Ext.dd.DragDropManager', {
      */
     handleMouseDown: function(e, oDD) {
         var me = this,
-            xy, el;
+            xy = e.getXY(),
+            el = oDD.getEl(),
+            // let other mouseup events occur before us
+            pointerup = {
+                translate: false,
+                fn: me.handleMouseUp,
+                capture: false,
+                priority: -1000
+            },
+            // Mousemove events do not need to be captured because they do not contend
+            // with scroll events - they're only processed when a drag has begun.
+            // Capturing was causing https://sencha.jira.com/browse/EXTJS-13952
+            pointermove = {
+                translate: false,
+                fn: me.handleMouseMove,
+                capture: false
+            },
+            listeners = {
+                capture: true,
+                destroyable: true,
+                scope: me
+            },
+            supports = Ext.supports;
+
+        // On devices that support multi-touch the second touch terminates drag
+        listeners.touchstart = me.handleMouseUp;
+
+        // Listen for the right kind of events depending on how
+        // the drag was initiated.
+        if (supports.PointerEvents) {
+            listeners.pointerup = pointerup;
+            listeners.pointermove = pointermove;
+        } else if (supports.MSPointerEvents) {
+            listeners.MSPointerUp = pointerup;
+            listeners.MSPointerMove = pointermove;
+        } else if (e.pointerType === 'mouse') {      
+            listeners.mouseup = pointerup;
+            listeners.mousemove = pointermove;
+        } else {
+            listeners.touchend = pointerup;
+            listeners.touchmove = pointermove;
+        }
+
+        me.pointerMoveListeners = Ext.getDoc().on(listeners);
 
         me.isMouseDown = true;
 
         if (Ext.quickTipsActive){
             Ext.tip.QuickTipManager.ddDisable();
         }
-        
-        me.currentPoint = e.getPoint();
-        
+
+        me.currentPoint.setPosition(xy);
+
         if (me.dragCurrent){
             // the original browser mouseup wasn't handled (e.g. outside FF browser window)
             // so clean up first to avoid breaking the next drag
@@ -499,8 +522,6 @@ Ext.define('Ext.dd.DragDropManager', {
         me.currentTarget = e.getTarget();
         me.dragCurrent = oDD;
 
-        el = oDD.getEl();
-
         //<feature legacyBrowser>
         // We use this to handle an issue where a mouseup will not be detected
         // if the mouseup event happens outside of the browser window. When the
@@ -510,7 +531,6 @@ Ext.define('Ext.dd.DragDropManager', {
         //</feature>
 
         // track start position
-        xy = e.getXY();
         me.startX = xy[0];
         me.startY = xy[1];
 
@@ -538,11 +558,18 @@ Ext.define('Ext.dd.DragDropManager', {
         if (current) {
             current.b4StartDrag(x, y);
             current.startDrag(x, y);
-            dragEl = current.getDragEl();
+            
+            dragEl = Ext.fly(current.getDragEl());
 
             // Add current drag class to dragged element
             if (dragEl) {
-                Ext.fly(dragEl).addCls(me.dragCls);
+                dragEl.addCls(me.dragCls);
+                
+                // This will allow pointer events to bubble through the shim iframe
+                // to the parent document
+                if (dragEl.shim) {
+                    dragEl.shim.el.addCls(me.dragCls);
+                }
             }
         }
         me.dragThreshMet = true;
@@ -557,6 +584,8 @@ Ext.define('Ext.dd.DragDropManager', {
     handleMouseUp: function(e) {
         var me = this;
 
+        // We only listen for pointermove after a trigger even
+        me.pointerMoveListeners.destroy();
         me.isMouseDown = false;
 
         if (Ext.quickTipsActive){
@@ -579,8 +608,10 @@ Ext.define('Ext.dd.DragDropManager', {
 
         me.stopDrag(e);
 
-        me.stopEvent(e);
-        
+        if (me.dragThreshMet) {
+            me.stopEvent(e);
+        }
+
         me.mousedownEvent = me.currentTarget = null;
     },
 
@@ -613,11 +644,15 @@ Ext.define('Ext.dd.DragDropManager', {
         // Fire the drag end event for the item that was dragged
         if (current) {
             if (me.dragThreshMet) {
-
                 // Remove current drag class from dragged element
-                dragEl = current.getDragEl();
+                dragEl = Ext.fly(current.getDragEl());
+                
                 if (dragEl) {
-                    Ext.fly(dragEl).removeCls(me.dragCls);
+                    dragEl.removeCls(me.dragCls);
+                    
+                    if (dragEl.shim) {
+                        dragEl.shim.el.removeCls(me.dragCls);
+                    }
                 }
 
                 current.b4EndDrag(e);
@@ -647,20 +682,23 @@ Ext.define('Ext.dd.DragDropManager', {
     handleMouseMove: function(e) {
         var me = this,
             current = me.dragCurrent,
-            point = me.currentPoint = e.getPoint(),
-            currentX = point.x,
-            currentY = point.y,
+            point = e.getXY(),
+            currentX = point[0],
+            currentY = point[1],
             diffX,
             diffY;
 
         me.offsetX = currentX - me.startX;
         me.offsetY = currentY - me.startY;
+        me.currentPoint.setPosition(point);
 
         if (!current) {
             return true;
         }
 
         if (!me.dragThreshMet) {
+            e.claimGesture();
+
             diffX = Math.abs(me.offsetX);
             diffY = Math.abs(me.offsetY);
             if (diffX > me.clickPixelThresh || diffY > me.clickPixelThresh) {
@@ -693,15 +731,12 @@ Ext.define('Ext.dd.DragDropManager', {
             isTouch = Ext.supports.Touch,
             dragCurrent = me.dragCurrent,
             mousePoint = me.currentPoint,
-            currentX = mousePoint.x,
-            currentY = mousePoint.y,
             allTargets = [],
             oldOvers  = [],  // cache the previous dragOver array
             outEvts   = [],
             overEvts  = [],
             dropEvts  = [],
             enterEvts = [],
-            zoom = isTouch ? document.documentElement.clientWidth / window.innerWidth : 1,
             dragEl, overTarget, overTargetEl, needsSort, i, len, sGroup, overDragEl;
 
         // If the user did the mouse up outside of the window, we could
@@ -727,7 +762,14 @@ Ext.define('Ext.dd.DragDropManager', {
             if (overDragEl) {
                 dragEl.style.visibility = 'hidden';
             }
-            e.target = document.elementFromPoint(currentX / zoom, currentY/ zoom);
+            // In Win10, dragging outside the browser window will cause elementFromPoint to
+            // return null. In these cases, default to the document.
+            // We are about to change the event target so that it behaves like a mouse
+            // event, not a touch event.  We first need to prototype chain a new object
+            // to the original event, to avoid modifying the original.
+            e = e.chain({
+                target: me.elementFromPoint(e.clientX, e.clientY) || document.documentElement
+            });
             if (overDragEl) {
                 dragEl.style.visibility = 'visible';
             }
@@ -761,7 +803,7 @@ Ext.define('Ext.dd.DragDropManager', {
             oldOvers[i] = true;
         }
 
-        // Collect all targets which are members of the same ddGoups that the dragCurrent is a member of, and which may recieve mouseover and drop notifications.
+        // Collect all targets which are members of the same ddGoups that the dragCurrent is a member of, and which may receive mouseover and drop notifications.
         // This is preparatory to seeing which one(s) we are currently over
         // Begin by iterating through the ddGroups of which the dragCurrent is a member
         for (sGroup in dragCurrent.groups) {
@@ -893,6 +935,21 @@ Ext.define('Ext.dd.DragDropManager', {
             dragCurrent.onInvalidDrop(e);
         }
 
+    },
+
+    /**
+     * @private
+     * Wrap Ext.Element.fromPagePoint.
+     *
+     * This is because in RTL mode we need to reverse any RTLification of the X coordinate
+     * because document.elementFromPoint uses LTR.
+     */
+    elementFromPoint: function(x, y) {
+        if (Ext.rootInheritedState.rtl) {
+            x = Ext.Element.getViewportWidth() - x;
+        }
+
+        return Ext.Element.fromPoint(x, y, true);
     },
 
     /**

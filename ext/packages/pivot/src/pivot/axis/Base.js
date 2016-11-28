@@ -116,9 +116,18 @@ Ext.define('Ext.pivot.axis.Base', {
      * @param {Object} config Config object for the {@link Ext.pivot.dimension.Item} that is created.
      */
     addDimension: function(config){
-        if(config){
-            this.dimensions.add(Ext.create('Ext.pivot.dimension.Item', Ext.apply({matrix: this.matrix}, config)));
+        var cfg;
+
+        if(!config){
+            return;
         }
+        if(config instanceof Ext.pivot.dimension.Item){
+            cfg = config;
+            cfg.matrix = this.matrix;
+        }else{
+            cfg = Ext.create('Ext.pivot.dimension.Item', Ext.apply({matrix: this.matrix}, config));
+        }
+        this.dimensions.add(cfg);
     },
     
     /**
@@ -135,7 +144,7 @@ Ext.define('Ext.pivot.axis.Base', {
         
         item.key = String(item.key);
         item.dimension = me.dimensions.getByKey(item.dimensionId);
-        item.name = item.name || item.dimension.renderer(item.value);
+        item.name = item.name || Ext.callback(item.dimension.getLabelRenderer(), item.dimension.getScope() || 'self.controller', [item.value], 0, me.matrix.cmp) || item.value;
 
         item.dimension.addValue(item.value, item.name);
         item.axis = me;
@@ -166,6 +175,28 @@ Ext.define('Ext.pivot.axis.Base', {
             this.buildTree();
         }
         return this.tree;
+    },
+
+    /**
+     * Expand all groups
+     */
+    expandAll: function(){
+        Ext.Array.each(this.getTree(), function(item){
+            item.expandCollapseChildrenTree(true);
+        });
+        // we fire a single groupexpand event without any item
+        this.matrix.fireEvent('groupexpand', this.matrix, (this.isLeftAxis ? 'row' : 'col'), null);
+    },
+
+    /**
+     * Collapse all groups
+     */
+    collapseAll: function(){
+        Ext.Array.each(this.getTree(), function(item){
+            item.expandCollapseChildrenTree(false);
+        });
+        // we fire a single groupcollapse event without any item
+        this.matrix.fireEvent('groupcollapse', this.matrix, (this.isLeftAxis ? 'row' : 'col'), null);
     },
     
     /**

@@ -15,22 +15,12 @@ describe("Ext.scroll.Scroller", function() {
             Ext.supports.Touch = originalSupportsTouch;
         });
 
-        it("should create an instance of Ext.scroll.DomScroller if Ext.supports.Touch is false", function() {
-            Ext.supports.Touch = false;
+        it("should create an instance of Ext.scroll.DomScroller", function() {
             scroller = Ext.scroll.Scroller.create({
                 element: el
             });
 
             expect(scroller instanceof Ext.scroll.DomScroller).toBe(true);
-        });
-
-        (Ext.isIE9m ? xit : it)("should create an instance of Ext.scroll.TouchScroller if Ext.supports.Touch is true", function() {
-            Ext.supports.Touch = true;
-            scroller = Ext.scroll.Scroller.create({
-                element: el
-            });
-
-            expect(scroller instanceof Ext.scroll.TouchScroller).toBe(true);
         });
     });
 

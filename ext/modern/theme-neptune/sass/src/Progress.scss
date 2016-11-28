@@ -1,4 +1,4 @@
-@if $include-progress-default-ui {
+@if $enable-progress-default-ui {
     @include progress-ui(
         $border-color: $progress-border-color,
         $background-color: $progress-background-color,

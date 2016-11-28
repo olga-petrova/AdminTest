@@ -39,6 +39,7 @@ Ext.define('Ext.sparkline.Pie', {
     applyValues: function(newValues) {
         newValues = Ext.Array.map(Ext.Array.from(newValues), Number);
         this.disabled = !(newValues && newValues.length);
+        this.applyConfigChange();
         return newValues;
     },
 

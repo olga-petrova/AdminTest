@@ -27,7 +27,7 @@ Ext.define('Ext.grid.plugin.SummaryRow', {
 
     updateGrid: function(grid, oldGrid) {
         var me  = this,
-            columns, len, headerContainer, i;
+            columns, len, headerContainer, i, store;
 
         me.storeListeners = Ext.destroy(me.storeListeners);
 
@@ -35,8 +35,9 @@ Ext.define('Ext.grid.plugin.SummaryRow', {
             columns = grid.getColumns();
             len = columns.length;
             headerContainer = grid.getHeaderContainer();
+            store = grid.getStore();
 
-            me.storeListeners = grid.getStore().onAfter({
+            me.storeListeners = store.onAfter({
                 destroyable: true,
                 scope: me,
                 add: 'doUpdateSummary',
@@ -71,6 +72,11 @@ Ext.define('Ext.grid.plugin.SummaryRow', {
             }
 
             me.bindHook(grid, 'onScrollBinder', 'onGridScroll');
+
+            if(store.isLoaded()){
+                // if the store is already loaded then we update summaries
+                me.doUpdateSummary();
+            }
         }
     },
 
@@ -122,7 +128,7 @@ Ext.define('Ext.grid.plugin.SummaryRow', {
             ln = columns.length,
             emptyText = me.getEmptyText(),
             emptyCls = me.getEmptyCls(),
-            i, column, type, renderer, cell, value, field;
+            i, column, type, renderer, formatter, cell, value, field, scope;
 
         for (i = 0; i < ln; i++) {
             column = columns[i];
@@ -132,6 +138,8 @@ Ext.define('Ext.grid.plugin.SummaryRow', {
             if (!column.getIgnore() && type !== null) {
                 field = column.getDataIndex();
                 renderer = column.getSummaryRenderer();
+                formatter = column.getSummaryFormatter();
+                scope = column.getScope();
 
                 if (Ext.isFunction(type)) {
                     value = type.call(store, store.data.items.slice(), field);
@@ -156,12 +164,14 @@ Ext.define('Ext.grid.plugin.SummaryRow', {
                     }
                 }
 
-                if (renderer !== null) {
+                if (formatter !== null) {
+                    value = formatter(value);
+                }else if (renderer !== null) {
                     type = typeof renderer;
                     if (type === 'function') {
-                        value = renderer.call(store, value, store, field, cell);
+                        value = renderer.call(scope, value, store, field, cell);
                     } else if (type === 'string') {
-                        value = Ext.callback(renderer, null, [value, store, field, cell], 0, me);
+                        value = Ext.callback(renderer, scope, [value, store, field, cell], 0, me);
                     }
                 }
 

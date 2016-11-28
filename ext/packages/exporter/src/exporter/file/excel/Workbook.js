@@ -1,5 +1,5 @@
 /**
- * This class generates an Excel XML workbook.
+ * This class generates an Excel 2003 XML workbook.
  *
  * The workbook is the top level object of an xml Excel file.
  * It should have at least one Worksheet before rendering.
@@ -175,23 +175,16 @@ Ext.define('Ext.exporter.file.excel.Workbook', {
         '       <ProtectWindows>{protectWindows}</ProtectWindows>\n',
         '   </ExcelWorkbook>\n',
         '   <Styles>\n',
-        '<tpl for="styles">{[values.render()]}</tpl>',
+        '<tpl if="styles"><tpl for="styles.getRange()">{[values.render()]}</tpl></tpl>',
         '   </Styles>\n',
-        '<tpl for="worksheets">{[values.render()]}</tpl>',
+        '<tpl if="worksheets"><tpl for="worksheets.getRange()">{[values.render()]}</tpl></tpl>',
         '</Workbook>'
     ],
 
     destroy: function(){
-        this.getStyles().destroy();
-        this.getWorksheets().destroy();
-        return this.callParent(arguments);
-    },
-
-    getRenderData: function(){
-        return Ext.apply(this.callParent(arguments), {
-            worksheets: this.getWorksheets().getRange(),
-            styles: this.getStyles().getRange()
-        });
+        this.callParent();
+        this.setStyles(null);
+        this.setWorksheets(null);
     },
 
     applyStyles: function(data, dataCollection){

@@ -1,0 +1,23 @@
+@if ($include-ios) {
+  #{$ios-selector} {
+    .#{$prefix}mask .#{$prefix}mask-inner {
+      position: relative;
+      background: #fff;
+      color: $primary-color-ios;
+      text-align: center;
+      padding: .4em;
+      font-size: .95em;
+      font-weight: 400;
+      @include border-radius(7px);
+
+      .#{$prefix}mask-message {
+        color: $primary-color-ios;
+        bottom: 15px;
+      }
+
+      .#{$prefix}loading-spinner > span {
+        margin-left: -.065em;
+      }
+    }
+  }
+}

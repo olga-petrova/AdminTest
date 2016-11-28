@@ -1,0 +1,118 @@
+@if ($include-ios) {
+  #{$ios-selector} {
+    .#{$prefix}tabbar {
+      min-height: 3em;
+      background-color: #f9f9f9;
+
+      &.#{$prefix}docked-bottom {
+        min-height: 3.1em;
+      }
+    }
+
+    .#{$prefix}tab {
+      height: 2.9em;
+      margin: 0 .2em;
+      border: 0;
+      background: transparent;
+      @include st-box-orient(vertical);
+    }
+
+    .#{$prefix}tab-active {
+      background: rgba(255, 255, 255, .15);
+    }
+
+    .#{$prefix}tab {
+      &.#{$prefix}tab-active {
+        .#{$prefix}button-label {
+          color: $primary-color-ios;
+        }
+
+        .#{$prefix}button-icon:before, .#{$prefix}button-label {
+          color: $primary-color-ios;
+        }
+      }
+
+      .#{$prefix}button-label {
+        font-size: .65em;
+        font-weight: 400;
+        color: #929292;
+        line-height: 3em;
+      }
+
+      .#{$prefix}button-icon {
+        display: block;
+        width: 1.5em;
+        height: 1.5em;
+        margin: 0 auto;
+        -webkit-text-stroke-width: .35px;
+        -webkit-text-stroke-color: $primary-color-ios;
+
+        .#{$prefix}button-icon.#{$prefix}hidden {
+          display: none;
+        }
+
+        &:before {
+          color: transparent;
+          font-size: 1.8em;
+          line-height: 1.35em;
+        }
+      }
+
+      .#{$prefix}badge {
+        top: 0;
+        left: 55%;
+        right: auto;
+        max-width: 55%;
+        font-size: .65em;
+        line-height: 1.5em;
+      }
+    }
+
+    $tabbar-tab-radius: 4px;
+    .#{$prefix}tabbar.#{$prefix}docked-top {
+      padding: 10px;
+      .#{$prefix}tab {
+        @include border-radius(0);
+        @include st-box-flex(1);
+        min-width: 3.3em;
+        height: inherit;
+        background-color: transparent;
+        margin: 0;
+        border: 1px solid darken($primary-color-ios, 1);
+        color: #fff;
+        padding: 7px;
+
+        .#{$prefix}button-label {
+          color: $primary-color-ios;
+          font-size: .8em;
+          line-height: 1;
+        }
+
+        &.#{$prefix}tab-active {
+          background-color: $primary-color-ios;
+          .#{$prefix}button-label {
+            color: #fff;
+          }
+        }
+
+        .#{$prefix}button-icon::before {
+          display: none;
+        }
+
+        &:first-child {
+          border-radius: $tabbar-tab-radius 0 0 $tabbar-tab-radius;
+          border-right: 0;
+        }
+
+        &:last-child {
+          border-radius: 0 $tabbar-tab-radius $tabbar-tab-radius 0;
+          border-left: 0;
+        }
+
+        .#{$prefix}button-icon.#{$prefix}hidden {
+          display: none;
+        }
+      }
+    }
+  }
+}

@@ -60,7 +60,7 @@
  *
  *     @example
  *     // A simple subclass of Base that creates a HTML5 search field. Redirects to the
- *     // searchUrl when the Enter key is pressed.222
+ *     // searchUrl when the Enter key is pressed.
  *     Ext.define('Ext.form.SearchField', {
  *         extend: 'Ext.form.field.Text',
  *         alias: 'widget.searchfield',
@@ -455,7 +455,11 @@ Ext.define('Ext.form.field.Text', {
     // Observable rejects Ext.emptyFn as a no-op and the listener does not get added so the default does not get prevented.
     // We do not want touchend events translated into mouseup, we only want to prevent default on real mouseup events.
     squashMouseUp: {
-        mouseup: function(){},
+        mouseup: function(e) {
+            if (this.selectOnFocus) {
+                this.inputEl.dom.select();
+            }            
+        },
         translate: false,
         single: true,
         preventDefault: true
@@ -479,7 +483,12 @@ Ext.define('Ext.form.field.Text', {
 
     preSubTpl: [
         '<div id="{cmpId}-triggerWrap" data-ref="triggerWrap"',
-                ' role="presentation" class="{triggerWrapCls} {triggerWrapCls}-{ui}">',
+                '<tpl if="ariaEl == \'triggerWrap\'">',
+                    '<tpl foreach="ariaElAttributes"> {$}="{.}"</tpl>',
+                '<tpl else>',
+                    ' role="presentation"',
+                '</tpl>',
+                ' class="{triggerWrapCls} {triggerWrapCls}-{ui}">',
             '<div id={cmpId}-inputWrap data-ref="inputWrap"',
                 ' role="presentation" class="{inputWrapCls} {inputWrapCls}-{ui}">'
     ],
@@ -698,6 +707,7 @@ Ext.define('Ext.form.field.Text', {
             // 99% of the time, it will be the mouseup of the click into the field, and 
             // We will be preventing deselection of selected text: https://code.google.com/p/chromium/issues/detail?id=4505
             // Listener is on the doc in case the pointer moves out before user lets go.
+            this.squashMouseUp.scope = this;
             Ext.getDoc().on(this.squashMouseUp);
         }
     },
@@ -860,8 +870,8 @@ Ext.define('Ext.form.field.Text', {
             inputEl.removeAttribute(readOnlyName);
         }
         
-        if (me.ariaRole) {
-            me.ariaEl.dom.setAttribute('aria-readonly', !!readOnly);
+        if (!me.ariaStaticRoles[me.ariaRole]) {
+            me.inputEl.dom.setAttribute('aria-readonly', !!readOnly);
         }
     },
 
@@ -890,6 +900,11 @@ Ext.define('Ext.form.field.Text', {
             newValue = value.replace(stripRe, '');
             if (newValue !== value) {
                 me.setRawValue(newValue);
+                // Some components change lastValue as you type, so we need to verify
+                // if this is the case here and replace the value of lastValue
+                if (me.lastValue === value) {
+                    me.lastValue = newValue;
+                }
                 value = newValue;
             }
         }
@@ -1015,7 +1030,7 @@ Ext.define('Ext.form.field.Text', {
     toggleInvalidCls: function(hasError) {
         var method = hasError ? 'addCls' : 'removeCls';
 
-        this.callParent();
+        this.callParent([hasError]);
 
         this.triggerWrap[method](this.triggerWrapInvalidCls);
         this.inputWrap[method](this.inputWrapInvalidCls);
@@ -1258,9 +1273,9 @@ Ext.define('Ext.form.field.Text', {
      */
     selectText: function (start, end) {
         var me = this,
-            v = me.getRawValue(),
-            len = v.length,
             el = me.inputEl.dom,
+            v = el.value,
+            len = v.length,
             range;
 
         if (len > 0) {

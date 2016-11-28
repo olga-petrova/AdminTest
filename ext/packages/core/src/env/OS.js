@@ -1,4 +1,6 @@
 /**
+ * @class Ext.env.OS
+ *
  * Provides information about operating system environment.
  *
  * Should not be manually instantiated unless for unit-testing.

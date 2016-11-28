@@ -1,0 +1,20 @@
+/**
+ * @var {number}
+ * The border-width of the container's body that holds dimension fields.
+ */
+$pivot-grid-config-container-body-border-width: dynamic(0 0 0 1px);
+/**
+ * @var {string}
+ * The border-style of the container's body that holds dimension fields.
+ */
+$pivot-grid-config-container-body-border-style: dynamic(solid);
+/**
+ * @var {color}
+ * The border color of the container's body that holds dimension fields.
+ */
+$pivot-grid-config-container-body-border-color: dynamic(top($panel-body-border-color));
+
+$pivot-grid-left-indicator-icon: $fa-var-long-arrow-left FontAwesome;
+$pivot-grid-right-indicator-icon: $fa-var-long-arrow-right FontAwesome;
+$pivot-drag-proxy-placeholder-valid-icon: $fa-var-check FontAwesome;
+$pivot-drag-proxy-placeholder-invalid-icon: $fa-var-close FontAwesome;

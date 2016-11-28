@@ -69,6 +69,7 @@ Ext.define('Ext.pivot.result.Base', {
     },
 
     /**
+     * @method
      * Calculate all pivot aggregate dimensions for the internal records. Useful when using a
      * {@link Ext.pivot.matrix.Local Local} matrix.
      *

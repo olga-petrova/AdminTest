@@ -1,0 +1,37 @@
+
+// Checkbox el in CheckColumn header hidden by default
+.#{$prefix}checkcolumn-checkbox {
+    display: none;
+}
+
+// Checkbox el in CheckColumn header shown when headerCheckbox set to true
+.#{$prefix}check-column {
+    .#{$prefix}checkcolumn-checkbox {
+        display: initial;
+    }
+}
+
+.#{$prefix}column-title {
+    width: 100%;
+}
+
+.#{$prefix}grid-checkcell {
+
+    .#{$prefix}grid-cell-inner {
+        display: -webkit-flex;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-justify-content: center;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+// No checkbox in summary row
+.#{$prefix}grid-summaryrow {
+    .#{$prefix}grid-checkcell {
+        .#{$prefix}grid-cell-inner {
+            display: none;
+        }
+    }
+}

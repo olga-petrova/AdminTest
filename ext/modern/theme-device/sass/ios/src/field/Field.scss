@@ -1,0 +1,101 @@
+@if ($include-ios) {
+  #{$ios-selector} {
+    $form-clear-size: 2.2em;
+
+    .#{$prefix}field {
+      min-height: 2.5em;
+      background: #fff;
+
+      &:last-child {
+        border-bottom: 0;
+      }
+    }
+
+    .#{$prefix}input {
+      .#{$prefix}clear-icon {
+        background: get-image-url('clear_icon') no-repeat;
+        background-position: center center;
+        background-size: 55% 55%;
+        width: $form-clear-size;
+        height: $form-clear-size;
+        margin: .5em;
+        margin-top: -($form-clear-size/2);
+        right: -.5em;
+      }
+
+      border: 1px solid #cccccc;
+      border-radius: 5px;
+      background-color: #fff;
+    }
+
+    .#{$prefix}field-clearable {
+      .#{$prefix}input {
+        padding-right: $form-clear-size;
+      }
+    }
+
+    .#{$prefix}input-el {
+      background: transparent;
+      padding: .7em .4em .4em .4em;
+      min-height: 2.5em;
+      border-width: 0;
+      -webkit-appearance: none;
+    }
+
+    .#{$prefix}ie .#{$prefix}input-el {
+      background: transparent;
+    }
+
+    .#{$prefix}item-disabled {
+      .#{$prefix}field-label,
+      input,
+      .#{$prefix}input-el,
+      .#{$prefix}spinner-body,
+      select,
+      textarea,
+      .#{$prefix}field-clear-container {
+        color: #b3b3b3;
+        pointer-events: none;
+      }
+    }
+
+    .#{$prefix}item-disabled .#{$prefix}field-label {
+      color: #aaa;
+    }
+
+    .#{$prefix}item-disabled .#{$prefix}field-label:after {
+      color: #666 !important;
+    }
+
+    .#{$prefix}toolbar {
+      .#{$prefix}field {
+        background: transparent;
+
+        .#{$prefix}field-body {
+          padding: .4em .6em 0;
+        }
+
+        .#{$prefix}input-el {
+          padding: .3em .6em;
+          min-height: 1.4em;
+          background: transparent;
+        }
+      }
+
+      .#{$prefix}input {
+        position: relative;
+        background: #fff;
+      }
+
+      .#{$prefix}field-clearable .#{$prefix}input {
+        padding-right: 0;
+      }
+
+      .#{$prefix}clear-icon {
+        position: absolute;
+        top: .9em;
+        right: -.7em;
+      }
+    }
+  }
+}

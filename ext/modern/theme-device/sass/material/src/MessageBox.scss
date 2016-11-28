@@ -1,0 +1,21 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}msgbox,
+    .#{$prefix}panel.#{$prefix}floating,
+    .#{$prefix}form.#{$prefix}floating {
+      @include css-color-variable('background-color-md', 'background-color');
+
+      width: 75vw;
+      max-height: 75vh;
+      min-width: initial;
+      max-width: initial;
+    }
+
+    .#{$prefix}floating {
+      .#{$prefix}msgbox-inner, .#{$prefix}form-inner, .#{$prefix}panel-inner {
+        @include css-color-variable('text-color-light-md');
+        padding: 0 24px 24px 24px;
+      }
+    }
+  }
+}

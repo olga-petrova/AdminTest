@@ -135,12 +135,6 @@ Ext.define('Ext.field.Text', {
          * @cfg
          * @inheritdoc
          */
-        ui: 'text',
-
-        /**
-         * @cfg
-         * @inheritdoc
-         */
         clearIcon: true,
 
         /**
@@ -193,7 +187,9 @@ Ext.define('Ext.field.Text', {
             fastFocus: false
         },
 
-        bubbleEvents: ['action']
+        bubbleEvents: ['action'],
+
+        bodyAlign: 'stretch'
     },
 
     defaultBindProperty: 'value',
@@ -205,6 +201,7 @@ Ext.define('Ext.field.Text', {
         value: 1
     },
 
+    classCls: Ext.baseCSSPrefix + 'textfield',
     focusedCls: Ext.baseCSSPrefix + 'field-focused',
     clearableCls: Ext.baseCSSPrefix + 'field-clearable',
     emptyCls: Ext.baseCSSPrefix + 'empty',

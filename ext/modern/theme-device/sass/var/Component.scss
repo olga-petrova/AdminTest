@@ -1,0 +1,15 @@
+// Include all iOS Styles in the final CSS
+$include-ios: dynamic(true);
+
+// Include all Material Styles in the final CSS
+$include-material: dynamic(true);
+
+$material-selector: if($include-ios, '.x-md', '');
+$ios-selector: if($include-material, '.x-iost', '');
+
+
+$panel_body_border_color: blue;
+$neutral_dark_color: red;
+$gridviewoptions_icon_font_size: 12px;
+$gridviewoptions_icon_font_size_big: 16px;
+$list_item_padding: 8px;

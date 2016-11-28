@@ -1,0 +1,33 @@
+$panel-border-color: dynamic(transparent);
+$panel-border-width: dynamic(null);
+$panel-border-style: dynamic(null);
+$panel-body-background-color: dynamic($background-color);
+$panel-body-border-color: dynamic(transparent);
+$panel-body-border-width: dynamic(null);
+$panel-body-border-style: dynamic(null);
+
+$panel-body-font-weight: dynamic($material-body-font-weight);
+
+$panel-body-font-size: dynamic($material-body-font-size);
+$panel-body-font-size-big: dynamic($panel-body-font-size);
+$panel-body-line-height: dynamic(25px);
+$panel-body-line-height-big: dynamic($material-body-line-height);
+$panel-header-color: dynamic($reverse-color);
+$panel-header-border-style: dynamic(null);
+
+$panel-header-font-weight: dynamic($material-title-font-weight);
+$panel-header-font-size: dynamic($material-title-font-size);
+$panel-header-line-height: dynamic($material-title-line-height);
+$panel-header-line-height-big: dynamic($panel-header-line-height);
+
+$panel-header-padding: dynamic($content-padding);
+$panel-header-padding-big: dynamic($panel-header-padding);
+
+// Calendar uses light-ui, material theme is always dark or light
+@mixin panel-light-ui {
+    @include panel-ui(
+    $ui: 'light',
+    $header-color: $reverse-color,
+    $header-background-color: $base-dark-color
+    );
+}

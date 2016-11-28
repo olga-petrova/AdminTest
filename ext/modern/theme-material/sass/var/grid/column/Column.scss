@@ -1,0 +1,19 @@
+$grid-column-color: dynamic($color);
+$grid-column-background-color: dynamic(transparent);
+$grid-column-sorted-background-color: dynamic($grid-column-background-color);
+$grid-column-border-color: dynamic($divider-color);
+$grid-column-font-weight: dynamic($font-weight-normal);
+$grid-column-font-size: dynamic($material-subhead-font-size);
+$grid-column-font-size-big: dynamic(null);
+$grid-column-line-height: dynamic(null);
+$grid-column-line-height-big: dynamic($grid-column-line-height);
+$grid-column-padding: dynamic($content-padding/2 $content-padding);
+$grid-column-padding-big: dynamic(null);
+$grid-column-sort-icon-spacing: dynamic($content-padding/4);
+$grid-column-sort-icon-font-size: dynamic(18px);
+$grid-column-sort-asc-icon: dynamic('arrow_upward' $grid-column-sort-icon-font-size $font-icon-font-family);
+$grid-column-sort-desc-icon: dynamic('arrow_downward' $grid-column-sort-icon-font-size $font-icon-font-family);
+
+$grid-column-border-color: dynamic(null $divider-color null null);
+$grid-column-border-width: dynamic(null 1px null null);
+$grid-column-border-style: dynamic(null solid null null)

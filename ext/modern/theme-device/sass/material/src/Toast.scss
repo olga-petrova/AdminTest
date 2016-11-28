@@ -1,0 +1,12 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}toast {
+      @include css-color-variable('text-color-md');
+      @include css-color-variable('background-color-md', 'background-color');
+      padding: $content-padding-md;
+      @include material-shadow(1);
+
+      @include material-font-style('body');
+    }
+  }
+}

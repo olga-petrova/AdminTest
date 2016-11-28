@@ -4,27 +4,30 @@
  *
  * Example for a value filter:
  *
- *      // This example will generate a column for each year
- *      // that has its grand total value between 1,000 and 15,000.
- *      aggregate: [{
- *          id:         'agg',
- *          dataIndex:  'value',
- *          aggregator: 'sum',
- *          header:     'Total'
- *      }],
- *      topAxis: [{
- *          dataIndex:  'year',
- *          header:     'Year',
- *          filter: {
- *              type:           'value',
- *              operator:       'between',
- *              dimensionId:    'agg',  // this is the id of an aggregate dimension
- *              value:          [1000, 15000]
- *          }
- *      }]
+ *      {
+ *          xtype: 'pivotgrid',
+ *          // This example will generate a column for each year
+ *          // that has its grand total value between 1,000 and 15,000.
+ *          aggregate: [{
+ *              id:         'agg',
+ *              dataIndex:  'value',
+ *              aggregator: 'sum',
+ *              header:     'Total'
+ *          }],
+ *          topAxis: [{
+ *              dataIndex:  'year',
+ *              header:     'Year',
+ *              filter: {
+ *                  type:           'value',
+ *                  operator:       'between',
+ *                  dimensionId:    'agg',  // this is the id of an aggregate dimension
+ *                  value:          [1000, 15000]
+ *              }
+ *          }]
+ *      }
  *
  *
- * Top 10 works as following:
+ * Top 10 filter works as following:
  *
  * First of all sort axis groups by grand total value of the specified dimension. The sorting
  * order depends on top/bottom configuration.
@@ -38,26 +41,29 @@
  *
  * Example for a top 10 value filter:
  *
- *      // This example will return the bottom 3 years that have the smallest
- *      // sum of value.
- *      aggregate: [{
- *          id:         'agg',
- *          dataIndex:  'value',
- *          aggregator: 'sum',
- *          header:     'Total'
- *      }],
- *      leftAxis: [{
- *          dataIndex:  'year',
- *          header:     'Year',
- *          filter: {
- *              type:           'value',
- *              operator:       'top10',
- *              dimensionId:    'agg',   // this is the id of an aggregate dimension
- *              topType:        'items',
- *              topOrder:       'bottom',
- *              value:          3
- *          }
- *      }]
+ *      {
+ *          xtype: 'pivotgrid',
+ *          // This example will return the bottom 3 years that have the smallest
+ *          // sum of value.
+ *          aggregate: [{
+ *              id:         'agg',
+ *              dataIndex:  'value',
+ *              aggregator: 'sum',
+ *              header:     'Total'
+ *          }],
+ *          leftAxis: [{
+ *              dataIndex:  'year',
+ *              header:     'Year',
+ *              filter: {
+ *                  type:           'value',
+ *                  operator:       'top10',
+ *                  dimensionId:    'agg',   // this is the id of an aggregate dimension
+ *                  topType:        'items',
+ *                  topOrder:       'bottom',
+ *                  value:          3
+ *              }
+ *          }]
+ *      }
  *
  */
 Ext.define('Ext.pivot.filter.Value', {
@@ -120,49 +126,32 @@ Ext.define('Ext.pivot.filter.Value', {
      */
     isTopFilter:    false,
     
-    constructor: function(){
-        var me = this,
-            ret = me.callParent(arguments);
+    constructor: function(config){
+        var ret = this.callParent([config]);
 
         //<debug>
-        if(Ext.isEmpty(me.dimensionId)){
+        if(Ext.isEmpty(this.dimensionId)){
             Ext.raise('dimensionId is mandatory on Value filters');
-        }else if(!me.parent.matrix.aggregate.getByKey(me.dimensionId)){
-            Ext.raise('There is no aggregate dimension that matches the dimensionId provided');
         }
         //</debug>
 
-        me.dimension = me.parent.matrix.aggregate.getByKey(me.dimensionId);
-        me.isTopFilter = (me.operator === 'top10');
+        this.isTopFilter = (this.operator === 'top10');
 
         return ret;
     },
 
     destroy: function(){
         this.dimension = null;
-        return this.callParent(arguments);
+        this.callParent();
     },
 
-    /**
-     * @inheritdoc
-     */
-    isMatch: function(value) {
-        // The value filters are called after the matrix has calculated everything
-        // and are used to filter the results. It might happen that the user is looking
-        // for the value 520.43 but the axis item value is 520.43243.
-        // We need to compare the values using the aggregate dimension renderer
-
-        var me = this,
-            temp = me.value,
-            match = me.callParent(arguments);
-
-        if(!match){
-            me.value = me.dimension.renderer(Ext.isNumeric(temp) ? parseFloat(temp) : temp);
-            match = me.callParent( [ me.dimension.renderer(Ext.isNumeric(value) ? parseFloat(value) : value) ] );
-            me.value = temp;
+    getDimension: function(){
+        //<debug>
+        if(!this.parent.matrix.aggregate.getByKey(this.dimensionId)){
+            Ext.raise('There is no aggregate dimension that matches the dimensionId provided');
         }
-
-        return match;
+        //</debug>
+        return this.parent.matrix.aggregate.getByKey(this.dimensionId);
     },
 
     /**

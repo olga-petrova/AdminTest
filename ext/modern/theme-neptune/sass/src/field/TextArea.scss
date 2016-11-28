@@ -2,19 +2,16 @@
  * @class Ext.field.TextArea
  */
 
-.x-field-textarea {
-    .x-component-outer {
+.x-textareafield {
+    .x-field-body {
         @include st-box;
         @include st-box-orient(vertical);
     }
-    .x-field-input {
+    .x-input {
         @include st-box-flex;
-        @include st-box;
-        @include st-box-orient(vertical);
     }
     .x-input-el {
-        @include st-box-flex;
-        min-height: 6em;
-        padding-top: .5em;
+        min-height: $textareafield-input-min-height;
+        padding: $textareafield-padding;
     }
 }

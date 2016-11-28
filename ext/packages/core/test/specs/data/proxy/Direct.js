@@ -1,5 +1,5 @@
 describe("Ext.data.proxy.Direct", function() {
-    var proxy, api, provider, spies,
+    var proxy, api, provider, spies, Writer, writer,
         readSpy, createSpy, updateSpy, destroySpy, directSpy, namedSpy, orderedSpy;
     
     function makeApi(cfg) {
@@ -13,6 +13,14 @@ describe("Ext.data.proxy.Direct", function() {
     }
     
     function makeProxy(cfg) {
+        var writerCfg = cfg && cfg.writer;
+        
+        writer = new Writer(writerCfg || {});
+        
+        cfg = Ext.apply({
+            writer: writer
+        }, cfg);
+        
         proxy = new Ext.data.proxy.Direct(cfg);
     }
 
@@ -48,17 +56,38 @@ describe("Ext.data.proxy.Direct", function() {
         
         proxyObject.erase(new Ext.data.operation.Destroy(operation || {}));
     }
+    
+    beforeEach(function() {
+        Writer = Ext.define(null, {
+            extend: 'Ext.data.writer.Json',
+            
+            write: function(request) {
+                var op = request.getOperation(),
+                    data = op.data;
+                
+                if (data) {
+                    request.setJsonData(data);
+                }
+                
+                return request;
+            }
+        });
+    });
 
     afterEach(function() {
         if (proxy) {
             Ext.destroy(proxy);
         }
         
+        if (writer) {
+            Ext.destroy(writer);
+        }
+        
         if (provider) {
             Ext.direct.Manager.removeProvider(provider);
         }
         
-        provider = proxy = null;
+        provider = proxy = Writer = writer = null;
         readSpy = createSpy = updateSpy = destroySpy = directSpy = null;
         namedSpy = orderedSpy = spies = null;
     });
@@ -359,6 +388,231 @@ describe("Ext.data.proxy.Direct", function() {
             
                 it("should resolve api.destroy", function() {
                     expect(proxy.api.destroy).toBe(destroySpy);
+                });
+            });
+        });
+    });
+    
+    describe("params", function() {
+        beforeEach(function() {
+            makeApi({
+                actions: {
+                    DirectSpecs: [{
+                        name: 'named',
+                        params: ['blerg']
+                    }, {
+                        name: 'ordered',
+                        len: 2
+                    }]
+                }
+            });
+        
+            namedSpy = makeSpy('named');
+            orderedSpy = makeSpy('ordered');
+        });
+        
+        describe("with named fn", function() {
+            beforeEach(function() {
+                makeProxy({ directFn: namedSpy });
+            });
+            
+            it("should pass params to read method", function() {
+                readSome(proxy, { params: { blerg: -1 } });
+                
+                expect(namedSpy.mostRecentCall.args[0]).toEqual({
+                    blerg: -1
+                });
+            });
+            
+            // Passing the data though the writer is a bit hacky
+            it("should pass params to create method", function() {
+                createSome(proxy, { data: { blerg: -2 } });
+                
+                expect(namedSpy.mostRecentCall.args[0]).toEqual({
+                    blerg: -2
+                });
+            });
+            
+            it("should pass params to update method", function() {
+                updateSome(proxy, { data: { blerg: -3 } });
+                
+                expect(namedSpy.mostRecentCall.args[0]).toEqual({
+                    blerg: -3
+                });
+            });
+            
+            it("should pass params to destroy method", function() {
+                destroySome(proxy, { data: { blerg: -4 } });
+                
+                expect(namedSpy.mostRecentCall.args[0]).toEqual({
+                    blerg: -4
+                });
+            });
+        });
+        
+        describe("with ordered fn", function() {
+            beforeEach(function() {
+                makeProxy({ directFn: orderedSpy });
+            });
+            
+            describe("paramOrder", function() {
+                beforeEach(function() {
+                    proxy.setParamOrder('foo,bar');
+                });
+                
+                describe("read", function() {
+                    it("should use paramOrder", function() {
+                        readSome(proxy, { params: { foo: 1, bar: 101 } });
+                        
+                        var args = orderedSpy.mostRecentCall.args;
+                        
+                        expect(args[0]).toBe(1);
+                        expect(args[1]).toBe(101);
+                    });
+                });
+                
+                describe("create", function() {
+                    it("should ignore paramOrder when object is passed", function() {
+                        createSome(proxy, { data: { foo: 2, bar: 102 } });
+                        
+                        expect(orderedSpy.mostRecentCall.args[0]).toEqual({
+                            foo: 2,
+                            bar: 102
+                        });
+                    });
+                    
+                    it("should ignore paramOrder when array is passed", function() {
+                        createSome(proxy, { data: [{ foo: 12, bar: 112 }] });
+                        
+                        expect(orderedSpy.mostRecentCall.args[0]).toEqual([{
+                            foo: 12,
+                            bar: 112
+                        }]);
+                    });
+                });
+                
+                describe("update", function() {
+                    it("should ignore paramOrder when object is passed", function() {
+                        updateSome(proxy, { data: { foo: 3, bar: 103 } });
+                        
+                        expect(orderedSpy.mostRecentCall.args[0]).toEqual({
+                            foo: 3,
+                            bar: 103
+                        });
+                    });
+                    
+                    it("should ignore paramOrder when array is passed", function() {
+                        updateSome(proxy, { data: [{ foo: 13, bar: 113 }] });
+                        
+                        expect(orderedSpy.mostRecentCall.args[0]).toEqual([{
+                            foo: 13,
+                            bar: 113
+                        }]);
+                    });
+                });
+                
+                describe("destroy", function() {
+                    it("should ignore paramOrder when object is passed", function() {
+                        destroySome(proxy, { data: { foo: 4, bar: 104 } });
+                        
+                        expect(orderedSpy.mostRecentCall.args[0]).toEqual({
+                            foo: 4,
+                            bar: 104
+                        });
+                    });
+                    
+                    it("should ignore paramOrder when array is passed", function() {
+                        destroySome(proxy, { data: [{ foo: 14, bar: 114 }] });
+                        
+                        expect(orderedSpy.mostRecentCall.args[0]).toEqual([{
+                            foo: 14,
+                            bar: 114
+                        }]);
+                    });
+                });
+            });
+            
+            describe("paramsAsHash == true", function() {
+                beforeEach(function() {
+                    proxy.setParamsAsHash(true);
+                });
+                
+                it("should pass an object to read method", function() {
+                    readSome(proxy, { params: { foo: 'bar', blerg: 'throbbe' } });
+                    
+                    expect(orderedSpy.mostRecentCall.args[0]).toEqual({
+                        foo: 'bar',
+                        blerg: 'throbbe'
+                    });
+                });
+                
+                it("should pass an object to create method", function() {
+                    createSome(proxy, { data: { foo: 'bar', blerg: 'throbbe' } });
+                    
+                    expect(orderedSpy.mostRecentCall.args[0]).toEqual({
+                        foo: 'bar',
+                        blerg: 'throbbe'
+                    });
+                });
+
+                it("should pass an object to update method", function() {
+                    updateSome(proxy, { data: { foo: 'bar', blerg: 'throbbe' } });
+                    
+                    expect(orderedSpy.mostRecentCall.args[0]).toEqual({
+                        foo: 'bar',
+                        blerg: 'throbbe'
+                    });
+                });
+
+                it("should pass an object to destroy method", function() {
+                    destroySome(proxy, { data: { foo: 'bar', blerg: 'throbbe' } });
+                    
+                    expect(orderedSpy.mostRecentCall.args[0]).toEqual({
+                        foo: 'bar',
+                        blerg: 'throbbe'
+                    });
+                });
+            });
+            
+            describe("paramsAsHash == false", function() {
+                beforeEach(function() {
+                    proxy.setParamsAsHash(false);
+                });
+                
+                it("should pass object as argument to read method", function() {
+                    readSome(proxy, { params: { throbbe: 'knurl', bonzo: 'gurgle' } });
+                    
+                    expect(orderedSpy.mostRecentCall.args[0]).toEqual({
+                        throbbe: 'knurl',
+                        bonzo: 'gurgle'
+                    });
+                });
+                
+                it("should pass object as argument to create method", function() {
+                    createSome(proxy, { data: { frob: 'qux', foo: true } });
+                    
+                    expect(orderedSpy.mostRecentCall.args[0]).toEqual({
+                        frob: 'qux',
+                        foo: true
+                    });
+                });
+                
+                it("should pass object as argument to update method", function() {
+                    updateSome(proxy, { data: { mymse: 42, blerg: null } });
+                    
+                    expect(orderedSpy.mostRecentCall.args[0]).toEqual({
+                        mymse: 42,
+                        blerg: null
+                    });
+                });
+                
+                it("should pass object as argument to destroy method", function() {
+                    destroySome(proxy, { data: { vita: 'voom', fred: { foo: 'bar' } } });
+                    
+                    expect(orderedSpy.mostRecentCall.args[0]).toEqual({
+                        vita: 'voom',
+                        fred: { foo: 'bar' }
+                    });
                 });
             });
         });
@@ -686,6 +940,92 @@ describe("Ext.data.proxy.Direct", function() {
                     });
                 });
             });
+        });
+    });
+    
+    describe("aborting", function() {
+        var operation, callback, directFn;
+        
+        beforeEach(function() {
+            makeApi({
+                actions: {
+                    DirectSpecs: [{
+                        len: 0,
+                        name: 'directFn'
+                    }]
+                }
+            });
+            
+            directFn = makeSpy('directFn').andCallFake(function(cb, proxy) {
+                callback = cb;
+            });
+            
+            makeProxy({
+                directFn: directFn
+            });
+            
+            spyOn(proxy, 'processResponse').andCallThrough();
+            spyOn(proxy, 'doRequest').andCallThrough();
+        });
+        
+        afterEach(function() {
+            operation = callback = directFn = null;
+        });
+        
+        it("should abort read operations", function() {
+            readSome();
+            
+            operation = proxy.doRequest.mostRecentCall.args[0];
+            
+            proxy.abort(operation);
+            expect(proxy.canceledOperations[operation.id]).toBe(true);
+            
+            callback({}, { success: true });
+            
+            expect(proxy.processResponse).not.toHaveBeenCalled();
+            expect(proxy.canceledOperations[operation.id]).not.toBeDefined();
+        });
+        
+        it("should abort create operations", function() {
+            createSome();
+            
+            operation = proxy.doRequest.mostRecentCall.args[0];
+            
+            proxy.abort(operation);
+            expect(proxy.canceledOperations[operation.id]).toBe(true);
+            
+            callback({}, { success: true });
+            
+            expect(proxy.processResponse).not.toHaveBeenCalled();
+            expect(proxy.canceledOperations[operation.id]).not.toBeDefined();
+        });
+        
+        it("should abort update operations", function() {
+            updateSome();
+            
+            operation = proxy.doRequest.mostRecentCall.args[0];
+            
+            proxy.abort(operation);
+            expect(proxy.canceledOperations[operation.id]).toBe(true);
+            
+            callback({}, { success: true });
+            
+            expect(proxy.processResponse).not.toHaveBeenCalled();
+            expect(proxy.canceledOperations[operation.id]).not.toBeDefined();
+        });
+        
+        it("should abort delete operations", function() {
+            destroySome();
+            
+            operation = proxy.doRequest.mostRecentCall.args[0];
+            
+            proxy.abort(operation);
+            expect(proxy.canceledOperations[operation.id]).toBe(true);
+            
+            callback({}, { success: true });
+            
+            expect(proxy.processResponse).not.toHaveBeenCalled();
+            expect(proxy.canceledOperations[operation.id]).not.toBeDefined();
         });
     });
 });

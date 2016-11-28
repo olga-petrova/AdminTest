@@ -382,6 +382,18 @@ Ext.define('Ext.grid.Grid', {
      * @param {Ext.grid.column.Column} column The sorted column.
      * @param {String} direction The direction of the sort on this Column. Either 'asc' or 'desc'.
      */
+    
+    customScrollCls: Ext.baseCSSPrefix + 'scroll-scroller-has-width',
+
+    getElementConfig: function() {
+        var config = this.callParent();
+        config.children.push({
+            reference: 'resizeMarker',
+            className: 'x-grid-resize-marker',
+            hidden: true
+        });
+        return config;
+    },
 
     initialize: function() {
         var me = this,
@@ -401,7 +413,9 @@ Ext.define('Ext.grid.Grid', {
         }
         container.add(headerContainer);
 
-        me.scrollElement.addCls(Ext.baseCSSPrefix + 'grid-scrollelement');
+        // We add a class here because we want to control the width of the scroll
+        // element, we don't want it to be auto
+        me.scrollElement.addCls(me.customScrollCls);
     },
 
     applyTitleBar: function(titleBar) {
@@ -546,14 +560,14 @@ Ext.define('Ext.grid.Grid', {
     },
 
     updateColumns: function(columns) {
+        var header = this.getHeaderContainer();
+
+        if(header) {
+            header.removeAll(true, true);
+        }
+
         if (columns && columns.length) {
-            var ln = columns.length,
-                i;
-
-            for (i = 0; i < ln; i++) {
-                this.addColumn(columns[i]);
-            }
-
+            this.addColumn(columns);
             this.updateTotalColumnWidth();
         }
     },
@@ -641,45 +655,61 @@ Ext.define('Ext.grid.Grid', {
         me.fireEvent('columnsort', me, column, direction);
     },
 
-    refreshScroller: function(skipOnRefresh) {
-        this.callParent([skipOnRefresh]);
-        this.getHeaderContainer().updateSpacer();
+    getTotalColumnWidth: function() {
+        return this.getColumnsWidth(this.getColumns());
     },
 
-    getTotalColumnWidth: function() {
-        var me = this,
-            columns = me.getColumns(),
+    getColumnsWidth: function(columns) {
+        var width = 0,
             ln = columns.length,
-            totalWidth = 0,
-            i, column, parent;
-
+            i, column;
 
         for (i = 0; i < ln; i++) {
             column = columns[i];
-            parent = column.getParent();
 
-            if (!column.isHidden() && (!parent.isHeaderGroup || !parent.isHidden())) {
-                totalWidth += column.getComputedWidth();
+            if (column.isHeaderGroup && !column.isHidden()) {
+                width += this.getColumnsWidth(column.getColumns());
+            } else if (!column.isHeaderGroup && !column.isHidden()) {
+                width += column.element.getWidth(false, true);
             }
         }
+        return width;
+    },
 
-        return totalWidth;
+    getVisibleColumns: function() {
+        var columns = this.getColumns,
+            len = columns.length, i, column,
+            result = [];
+
+        for (i = 0; i < len; i++) {
+            column = columns[i];
+            if (!column.isHeaderGroup && !column.isHidden()) {
+                result.push(column);
+            }
+        }
+        return result;
     },
 
     updateTotalColumnWidth: function() {
         var me = this,
             scroller = me.getScrollable(),
-            totalWidth = this.getTotalColumnWidth(),
-            header = me.getHeaderContainer();
+            headerScroller = me.getHeaderContainer().getScrollable(),
+            totalWidth = me.getTotalColumnWidth();
 
-        me.scrollElement.setWidth(totalWidth);
-        header.setTotalWidth(totalWidth);
-        header.updateSpacer();
-
-        scroller.setSize({
-            x: totalWidth,
-            y: scroller.getSize().y
-        });
+        if (totalWidth && !isNaN(totalWidth)) {
+            if (scroller) {
+                scroller.setSize({
+                    x: totalWidth,
+                    y: me.getInfinite() ? me.getItemMap().getTotalHeight() : null
+                });
+            }
+            if (headerScroller) {
+                headerScroller.setSize({
+                    x: totalWidth,
+                    y: null
+                });
+            }
+        }
     },
 
     createItem: function(config) {

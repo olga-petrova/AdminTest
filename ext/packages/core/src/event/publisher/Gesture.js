@@ -25,7 +25,7 @@ Ext.define('Ext.event.publisher.Gesture', {
          * such as tap behave the same as dom events such as click in that they fire
          * immediately with no delay
          */
-        async: true
+        async: false
     },
 
     isCancelEvent: {
@@ -110,11 +110,11 @@ Ext.define('Ext.event.publisher.Gesture', {
             mouseup: asyncTouchEnd
         };
 
-        // A map that tracks names of the handledEvents of all registered recognizers
         me.activeTouchesMap = {};
         me.activeTouches = [];
         me.changedTouches = [];
         me.recognizers = [];
+        me.eventToRecognizer = {};
 
         if (supportsTouchEvents) {
             // bind handlers that are only invoked when the browser has touchevents
@@ -161,7 +161,7 @@ Ext.define('Ext.event.publisher.Gesture', {
         var me = this,
             handledEvents = recognizer.handledEvents,
             ln = handledEvents.length,
-            i;
+            eventName, i;
 
         // The recognizer will call our onRecognized method when it determines that a
         // gesture has occurred.
@@ -171,7 +171,9 @@ Ext.define('Ext.event.publisher.Gesture', {
         // the gesture publishers handledEvents array is derived from the handledEvents
         // of all of its recognizers
         for (i = 0; i < ln; i++) {
-            me.handledEvents.push(handledEvents[i]);
+            eventName = handledEvents[i];
+            me.handledEvents.push(eventName);
+            me.eventToRecognizer[eventName] = recognizer;
         }
 
         me.registerEvents(handledEvents);
@@ -183,6 +185,7 @@ Ext.define('Ext.event.publisher.Gesture', {
         var me = this,
             changedTouches = e.changedTouches,
             ln = changedTouches.length,
+            events = me.events,
             targetGroups, targets, i, touch;
 
         info = info || {};
@@ -206,25 +209,42 @@ Ext.define('Ext.event.publisher.Gesture', {
         // that was cached when the first "start" event was received.
         info.target = changedTouches[0].target;
 
-        // reset isStopped just in case the event that we are wrapping had
-        // stoppedPropagation called
-        info.isStopped = false;
+        // reset stopped and claimed just in case the event that we are wrapping had
+        // stoppedPropagation or claimGesture called
+        info.stopped = false;
+        info.claimed = false;
+        info.isGesture = true;
 
         e = e.chain(info);
 
-        if (ln > 1) {
-            targetGroups = [];
-            for (i = 0; i < ln; i++) {
-                touch = changedTouches[i];
-                targetGroups.push(touch.targets);
+        if (!me.gestureTargets) {
+            if (ln > 1) {
+                targetGroups = [];
+                for (i = 0; i < ln; i++) {
+                    touch = changedTouches[i];
+                    targetGroups.push(touch.targets);
+                }
+
+                targets = me.getCommonTargets(targetGroups);
+            } else {
+                targets = changedTouches[0].targets;
             }
 
-            targets = me.getCommonTargets(targetGroups);
-        } else {
-            targets = changedTouches[0].targets;
+            // Cache targets so that they only have to be computed once if multiple
+            // gestures are currently being recognized.
+            me.gestureTargets = targets;
         }
 
-        me.publish(eventName, targets, e);
+        events.push(e);
+
+        if (events.length === 1) {
+            // if there were no events in the queue previously, it means the dom event
+            // has already been published, which means a recognizer must have recognized
+            // a gesture asynchronously (e.g. singletap fires on a timer)
+            // if this is the case we must publish now, otherwise we wait for the dom
+            // event handler to publish after it is finished invoking the recognizers
+            me.publishGestures();
+        }
     },
 
     getCommonTargets: function(targetGroups) {
@@ -277,6 +297,90 @@ Ext.define('Ext.event.publisher.Gesture', {
             if (recognizer.isActive && recognizer[methodName].call(recognizer, e) === false) {
                 recognizer.isActive = false;
             }
+        }
+    },
+
+    /**
+     * When a gesture has been claimed this method is invoked to remove gesture events of
+     * other kinds.  See implementation in Gesture publisher.
+     * @param {Ext.event.Event[]}events
+     * @param {String} claimedEvent
+     * @return {Number} The new index of the claimed event
+     * @private
+     */
+    filterClaimed: function(events, claimedEvent) {
+        var me = this,
+            eventToRecognizer = me.eventToRecognizer,
+            claimedEventType = claimedEvent.type,
+            claimedRecognizer = eventToRecognizer[claimedEventType],
+            claimedEventIndex, recognizer, type, i;
+
+        for (i = events.length; i--;) {
+            type = events[i].type;
+
+            if (type === claimedEventType) {
+                claimedEventIndex = i;
+            } else {
+                recognizer = eventToRecognizer[type];
+                // if there is no claimed recognizer it means the user must have invoked
+                // claimGesture on a dom event (touchstart, touchmove etc).  If this is the
+                // case we need to cease firing all gesture events, otherwise we allow only
+                // the "claimed" recognizer to continue to dispatch events.
+                if (!claimedRecognizer || (recognizer && (recognizer !== claimedRecognizer))) {
+                    events.splice(i, 1);
+
+                    if (claimedEventIndex) {
+                        claimedEventIndex--;
+                    }
+                }
+            }
+        }
+
+        me.claimRecognizer(claimedRecognizer, events[0]);
+
+        return claimedEventIndex;
+    },
+
+    /**
+     * Deactivates all recognizers other than the "claimed" recognizer
+     * @param {Ext.event.gesture.Recognizer} claimedRecognizer
+     * @param {Ext.event.Event} e
+     * @private
+     */
+    claimRecognizer: function(claimedRecognizer, e) {
+        var me = this,
+            recognizers = me.recognizers,
+            i, ln, recognizer;
+
+        for (i = 0, ln = recognizers.length; i < ln; i++) {
+            recognizer = recognizers[i];
+
+            // cancel recognition for all recognizers other than the one that was claimed
+            if (recognizer !== claimedRecognizer) {
+                recognizer.isActive = false;
+                recognizer.cancel(e);
+            }
+        }
+
+        if (me.events.length) {
+            // if any recognizers added cancelation events...
+            me.publishGestures(true);
+        }
+    },
+
+    publishGestures: function(claimed) {
+        var me = this,
+            events = me.events,
+            gestureTargets = me.gestureTargets;
+
+        // Reset the events variable to an empty array since since events may be added
+        // to the array during publishing. This can happen if an event is claimed, thus
+        // triggering "cancel" gesture events.
+        me.events = [];
+        me.gestureTargets = null;
+
+        if (events.length) {
+            me.publish(events, gestureTargets || me.getPropagatingTargets(events[0].target), claimed);
         }
     },
 
@@ -352,30 +456,22 @@ Ext.define('Ext.event.publisher.Gesture', {
         e.changedTouches = changedTouches;
     },
 
-    doDelegatedEvent: function(e) {
+    publishDelegatedDomEvent: function(e) {
         var me = this;
 
-        // call parent method to dispatch the browser event (e.g. touchstart, mousemove)
-        // before proceeding to the gesture recognition step.
-        e = me.callParent([e, false]);
+        if (!e.button || e.button < 1) {
+            // mouse gestures (and pointer gestures triggered by a mouse) can only be
+            // initiated using the left button (0).  button value < 0 is also acceptable
+            // (e.g. pointermove has a button value of -1)
 
-        // superclass method will return false if the event being handled is a
-        // "emulated" event.  This may include emulated mouse events on browsers that
-        // support touch events, or "compatibility" mouse events on browsers that
-        // support pointer events.  If this is the case, do not proceed with gesture
-        // recognition.
-        if (e) {
-            if (!e.button || e.button < 1) {
-                // mouse gestures (and pointer gestures triggered by a mouse) can only be
-                // initiated using the left button (0).  button value < 0 is also acceptable
-                // (e.g. pointermove has a button value of -1)
-                me.handlers[e.type].call(me, e);
-            }
+            // Track the event on the instance so it can be fired after gesture recognition
+            // completes (if any gestures are recognized they will be added to this array)
+            me.events = [e];
 
-            // wait until after handlers have been dispatched before calling afterEvent.
-            // this ensures that timestamps captured in afterEvent represent the time
-            // that event handling completed for this event.
-            me.afterEvent(e);
+            me.handlers[e.type].call(me, e);
+        } else {
+            // mouse events *with* button still need to be published.
+            me.callParent([e]);
         }
     },
 
@@ -406,19 +502,22 @@ Ext.define('Ext.event.publisher.Gesture', {
         me.updateTouches(e);
 
         if (!me.isStarted) {
-            // this is the first active touch - invoke "onStart" which indicates the
-            // beginning of a gesture
-            me.isStarted = true;
-            me.invokeRecognizers('onStart', e);
-
             // Disable garbage collection during gestures so that if the target element
             // of a gesture is removed from the dom, it does not get garbage collected
             // until the gesture is complete
             if (Ext.enableGarbageCollector) {
                 Ext.dom.GarbageCollector.pause();
             }
+
+            // this is the first active touch - invoke "onStart" which indicates the
+            // beginning of a gesture
+            me.isStarted = true;
+            me.invokeRecognizers('onStart', e);
         }
+
         me.invokeRecognizers('onTouchStart', e);
+
+        me.publishGestures();
     },
 
     onTouchMove: function(e) {
@@ -426,7 +525,7 @@ Ext.define('Ext.event.publisher.Gesture', {
             mousePointerType = me.mousePointerType;
 
         if (me.isStarted) {
-            // In IE10/11, the corresponding pointerup event is not fired after the pointerdown after 
+            // In IE10/11, the corresponding pointerup event is not fired after the pointerdown after
             // the mouse is released from the scrollbar. However, it does fire a pointermove event with buttons: 0, so
             // we capture that here and ensure the touch end process is completed.
             if (mousePointerType && e.browserEvent.pointerType === mousePointerType && e.buttons === 0) {
@@ -435,36 +534,56 @@ Ext.define('Ext.event.publisher.Gesture', {
                 me.onTouchEnd(e);
                 return;
             }
+
             me.updateTouches(e);
+
             if (e.changedTouches.length > 0) {
                 me.invokeRecognizers('onTouchMove', e);
             }
         }
+
+        me.publishGestures();
     },
 
     // This method serves as the handler for both "end" and "cancel" events.  This is
     // because they are handled identically with the exception of the recognizer method
     // that is called.
     onTouchEnd: function(e) {
-        var me = this;
+        var me = this,
+            touchCount;
 
         if (!me.isStarted) {
+            me.publishGestures();
             return;
         }
 
         me.updateTouches(e, true);
 
-        me.invokeRecognizers(me.isCancelEvent[e.type] ? 'onTouchCancel' : 'onTouchEnd', e);
+        touchCount = me.activeTouches.length;
 
-        if (!me.activeTouches.length) {
-            // no more active touches - invoke onEnd to indicate the end of the gesture
-            me.isStarted = false;
-            me.invokeRecognizers('onEnd', e);
+        // If an exception is thrown in any of the recognizers, we still need to run
+        // the cleanup. Otherwise the gesture might get "stuck" and *every* pointer event
+        // after that will fire the same handlers over and over, potentially spewing
+        // the same exceptions endlessly. See https://sencha.jira.com/browse/EXTJS-15674.
+        // We don't want to mask the original exception though, let it propagate.
+        try {
+            me.invokeRecognizers(me.isCancelEvent[e.type] ? 'onTouchCancel' : 'onTouchEnd', e);
+        }
+        finally {
+            if (!touchCount) {
+                // no more active touches - invoke onEnd to indicate the end of the gesture
+                me.isStarted = false;
+                me.invokeRecognizers('onEnd', e);
+            }
 
-            // Gesture is finished, safe to resume garbage collection so that any target
-            // elements destroyed while gesture was in progress can be collected
-            if (Ext.enableGarbageCollector) {
-                Ext.dom.GarbageCollector.resume();
+            me.publishGestures();
+
+            if (!touchCount) {
+                // Gesture is finished, safe to resume garbage collection so that any target
+                // elements destroyed while gesture was in progress can be collected
+                if (Ext.enableGarbageCollector) {
+                    Ext.dom.GarbageCollector.resume();
+                }
             }
         }
     },
@@ -543,6 +662,7 @@ Ext.define('Ext.event.publisher.Gesture', {
         me.activeTouches = [];
         me.changedTouches = [];
         me.isStarted = false;
+        me.gestureTargets = null;
 
         for (i = 0; i < ln; i++) {
             recognizer = recognizers[i];
@@ -578,5 +698,5 @@ Ext.define('Ext.event.publisher.Gesture', {
         }
     }
 }, function(Gesture) {
-    Gesture.instance = new Gesture();
+    Gesture.instance = Ext.$gesturePublisher = new Gesture();
 });

@@ -79,7 +79,13 @@ Ext.define('Ext.chart.interactions.Rotate', {
          * Saves the current rotation of the series. Accepts negative values and values > 360 ( / 180 * Math.PI)
          * @private
          */
-        rotation: 0
+        rotation: 0,
+
+        touchAction: {
+            panX: false,
+            panY: false,
+            pinchZoom: false
+        }
     },
 
     oldRotations: null,
@@ -115,6 +121,8 @@ Ext.define('Ext.chart.interactions.Rotate', {
         var me = this,
             radius = me.getRadius(e),
             eventRadius = me.getEventRadius(e);
+
+        e.claimGesture();
 
         if (radius >= eventRadius) {
             me.lockEvents('drag');

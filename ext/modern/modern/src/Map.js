@@ -1,9 +1,8 @@
 /**
  * Wraps a Google Map in an Ext.Component using the [Google Maps API](http://code.google.com/apis/maps/documentation/v3/introduction.html).
  *
- * To use this component you must include an additional JavaScript file from Google:
- *
- *     <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
+ * This component will automatically include the google maps API script from: 
+ * `//maps.google.com/maps/api/js`
  *
  * ## Example
  *
@@ -16,6 +15,11 @@ Ext.define('Ext.Map', {
     extend: 'Ext.Container',
     xtype : 'map',
     requires: ['Ext.util.Geolocation'],
+    mixins: ['Ext.mixin.Mashup'],
+
+    requiredScripts: [
+        '//maps.google.com/maps/api/js'
+    ],
 
     isMap: true,
 
@@ -306,6 +310,7 @@ Ext.define('Ext.Map', {
     },
 
     /**
+     * @method
      * @private
      */
     onGeoError: Ext.emptyFn,

@@ -9,7 +9,8 @@ Ext.define('Ext.view.AbstractView', {
         'Ext.LoadMask',
         'Ext.CompositeElementLite',
         'Ext.selection.DataViewModel',
-        'Ext.view.NavigationModel'
+        'Ext.view.NavigationModel',
+        'Ext.util.CSS'
     ],
     mixins: [
         'Ext.util.StoreHolder'
@@ -447,6 +448,7 @@ Ext.define('Ext.view.AbstractView', {
      * @param {Ext.data.Model} record The model instance
      * @param {Number} index The index of the record
      * @param {HTMLElement} node The node that has just been updated
+     * @param {Ext.view.View} view The view containing the item
      */
 
     /**
@@ -455,6 +457,7 @@ Ext.define('Ext.view.AbstractView', {
      * @param {Ext.data.Model[]} records The model instance
      * @param {Number} index The index at which the set of records was inserted
      * @param {HTMLElement[]} node The node that has just been updated
+     * @param {Ext.view.View} view The view adding the item
      */
 
     /**
@@ -600,7 +603,7 @@ Ext.define('Ext.view.AbstractView', {
         if (me.refreshNeeded && !me.pendingRefresh) {
             // If we have refreshed before, just call a refresh now.
             if (me.refreshCounter) {
-                me.refresh();
+                me.refreshView();
             }
             else {
                 me.doFirstRefresh(me.dataSource);
@@ -778,11 +781,27 @@ Ext.define('Ext.view.AbstractView', {
             navigationModel = me.getNavigationModel(),
             focusPosition;
 
+        // This is set on mousedown on the scrollbar in IE/Edge.
+        // Those browsers focus the element on mousedown on its scrollbar
+        // which is not what we want, so throw focus back in this
+        // situation.
+        // See Ext.view.navigationModel for this being set.
+        if (focusPosition === 'scrollbar') {
+            e.relatedTarget.focus();
+            return;
+        }
+
         // Disable tabbability of elements within this view.
         me.toggleChildrenTabbability(false);
         
         if (!me.itemFocused && me.all.getCount()) {
-            focusPosition = navigationModel.getLastFocused();
+
+            // SHIFT+TAB hit the tab guard - focus last item.
+            if (e.event.getTarget() === me.tabGuardEl) {
+                focusPosition = me.all.getCount() - 1;
+            } else {
+                focusPosition = navigationModel.getLastFocused();
+            }
             navigationModel.setPosition(focusPosition || 0, e.event, null, !focusPosition);
 
             // We now contain focus is that was successful
@@ -794,7 +813,11 @@ Ext.define('Ext.view.AbstractView', {
         // which will then bounce it back to the last focused item.
         // That would effectively make Shift-Tab unusable.
         if (me.itemFocused) {
-            this.el.dom.setAttribute('tabIndex', '-1');
+            me.el.dom.setAttribute('tabIndex', -1);
+            
+            if (me.tabGuardEl) {
+                me.tabGuardEl.setAttribute('tabIndex', -1);
+            }
         }
 
         me.callParent([e]);
@@ -812,6 +835,10 @@ Ext.define('Ext.view.AbstractView', {
 
             me.itemFocused = false;
             me.el.dom.setAttribute('tabIndex', 0);
+            
+            if (me.tabGuardEl) {
+                me.tabGuardEl.setAttribute('tabIndex', 0);
+            }
         }
 
         me.callParent([e]);
@@ -829,7 +856,7 @@ Ext.define('Ext.view.AbstractView', {
         var node = this.getNode(record);
         
         if (node) {
-            node.removeAttribute('aria-selected');
+            node.setAttribute('aria-selected', false);
         }
     },
 
@@ -844,6 +871,10 @@ Ext.define('Ext.view.AbstractView', {
     
     /**
      * Refreshes the view by reloading the data from the store and re-rendering the template.
+     *
+     * **Note:** This method should only be used when `bufferedRenderer` is set to `false`.  BufferedRender
+     * has its own methods for managing its data's state.
+     *
      * @since 2.3.0
      */
     refresh: function() {
@@ -858,6 +889,7 @@ Ext.define('Ext.view.AbstractView', {
             restoreFocus,
             // If there are items in the view, then honour preserveScrollOnRefresh
             scroller = refreshCounter && items.getCount() && me.preserveScrollOnRefresh && me.getScrollable(),
+            bufferedRenderer = me.bufferedRenderer,
             scrollPos;
 
         if (!me.rendered || me.destroyed) {
@@ -920,7 +952,7 @@ Ext.define('Ext.view.AbstractView', {
             // If number of items have changed, force a layout.
             me.refreshSize(items.getCount() !== prevItemCount);
 
-            me.fireEvent('refresh', me, records);
+            me.fireItemMutationEvent('refresh', me, records);
 
             if (scroller) {
                 scroller.scrollTo(scrollPos);
@@ -935,9 +967,30 @@ Ext.define('Ext.view.AbstractView', {
             }
             
             me.refreshing = false;
-            me.refreshScroll();
-            
+
+            if (bufferedRenderer) {
+                bufferedRenderer.refreshSize();
+            }
+
             me.cleanupData();
+        }
+
+        // The tabGuardEl is only needed before focus has entered the view to prevent
+        // naturally tabbable interior elements from attracting focus when using SHIFT+TAB
+        // from after the view. Once focus has entered, we disable tabbability on interior
+        // elements so it will not be needed.
+        // Subsequent *full* refreshes will destroy it.
+        // Buffer rendered refreshes are more granular, and do not destroy extraneous
+        // DOM, but this does not matter because tha tabGuardEl will be tabIndex="-1"
+        // so out of the tab order.
+        if (!me.tabGuardEl) {
+            // We only need an "after" tab guard.
+            // The View el is tabIndex="0", so captures forward TAB.
+            // It's only SHIFT+TAB that we have to guard against.
+            me.tabGuardEl = me.el.createChild({
+                cls: Ext.baseCSSPrefix + 'tab-guard ' + Ext.baseCSSPrefix + 'tab-guard-after',
+                tabIndex: "0"
+            }, null, true);
         }
     },
 
@@ -969,22 +1022,6 @@ Ext.define('Ext.view.AbstractView', {
         if (sizeModel.height.shrinkWrap || sizeModel.width.shrinkWrap || forceLayout) {
             me.updateLayout();
         }
-
-        // We need to refresh the Scroller (BufferedRenderer has to do this if present).
-        // But the first refresh takes place on the leading edge of the first layout
-        // before the Scroller has been initialized, so do it as soon
-        // as we reach boxready.
-        else if (me.touchScroll && !me.bufferedRenderer) {
-            if (scroller) {
-                scroller.refresh();
-            } else {
-                me.on({
-                    boxready: me.refreshScroll,
-                    scope: me,
-                    single: true
-                });
-            }
-        }
     },
 
     afterFirstLayout: function(width, height) {
@@ -1005,7 +1042,19 @@ Ext.define('Ext.view.AbstractView', {
     clearViewEl: function() {
         var me = this,
             targetEl = me.getTargetEl(),
+            all = me.all,
+            store = me.getStore(),
+            i, removedItems, removedRecs,
             nodeContainerIsTarget = me.getNodeContainer() === targetEl;
+
+        // We must ensure that the itemremove event is fired EVERY time an item is removed from the
+        // view. This is so that widgets rendered into a view by a WidgetColumn can be recycled.
+        removedItems = all.slice();
+        removedRecs = [];
+        for (i = all.startIndex; i <= all.endIndex; i++) {
+            removedRecs.push(store.getByInternalId(all.item(i, true).getAttribute('data-recordId')));  
+        }
+        me.fireItemMutationEvent('itemremove', removedRecs, all.startIndex || 0, removedItems, me);
 
         me.clearEmptyEl();
         // If nodeContainer is the el, just clear the innerHTML. Otherwise, we need
@@ -1152,6 +1201,46 @@ Ext.define('Ext.view.AbstractView', {
     },
 
     /**
+     * For use by the {@link Ext.view.DragZone} plugin on platforms which use the
+     * [Pointer Events standard](https://www.w3.org/TR/pointerevents/).
+     *
+     * If using touch scrolling, the `pointerdown` event is reserved for starting the scroll
+     * gesture. To enable dragging of items using the ExtJS drag/drop system, items
+     * must be set draggable. This means that `pointerdown` on view items initiate an ExtJS drag
+     * and *not* a scroll gesture.
+     *
+     * When items are set draggable: true, pointer events platforms can still scroll using two
+     * finger drag, or by dragging empty parts of the view.
+     *
+     * For normal dataviews, havig the backgrounc-color of items and the view be different will
+     * indicate where to touch to initiate a scroll.
+     *
+     * For grids, if rows need to be dragged, there must be some blank space after rows
+     * to touch to initiate the scroll gesture.
+     *
+     * @param {type} draggable
+     * @private
+     */
+    setItemsDraggable: function(draggable) {
+        var me = this,
+            selector = '#' + me.id + ' ' + me.getItemSelector(),
+            styleSheet = me.viewStyleSheet;
+        
+        if (draggable) {
+            if (!styleSheet) {
+                styleSheet = Ext.view.AbstractView.prototype.viewStyleSheet = Ext.util.CSS.createStyleSheet('', 'AbstractView');
+            }
+            // Pointer Events platforms implement the touch-action or -ms-touch-action properties
+            // which deicate how an element responds to touches.
+            // Non Pointer Events platforms such as iOS show a selection rectangle on longpress+drag, and that
+            // is disabled by -webkit-user-drag: none;
+            Ext.util.CSS.createRule(styleSheet, selector, 'touch-action: pinch-zoom double-tap-zoom;-ms-touch-action: pinch-zoom double-tap-zoom;-webkit-user-drag: none;');
+        } else if (styleSheet) {
+            Ext.util.CSS.deleteRule(selector);
+        }
+    },
+
+    /**
      * Returns a CSS selector which selects the element which contains record nodes.
      */
     getNodeContainerSelector: function() {
@@ -1172,7 +1261,11 @@ Ext.define('Ext.view.AbstractView', {
             if (me.throttledUpdate) {
                 me.statics().queueRecordChange(me, store, record, operation, modifiedFieldNames);
             } else {
-                me.handleUpdate.apply(me, arguments);
+                // Cannot use arguments array.
+                // TableView's signature acceses these arguments plus one more of its own.
+                // Event firing passes the addListener options object as rge final parameter
+                // and we must not pass that.
+                me.handleUpdate(store, record, operation, modifiedFieldNames, details);
             }
         }
     },
@@ -1183,7 +1276,7 @@ Ext.define('Ext.view.AbstractView', {
             node,
             selModel = me.getSelectionModel();
 
-        if (me.viewReady) {
+        if (me.viewReady && !me.refreshNeeded) {
             index = me.dataSource.indexOf(record);
 
             // If the record has been removed from the data source since the changes were made, do nothing
@@ -1200,7 +1293,7 @@ Ext.define('Ext.view.AbstractView', {
                         me.onItemSelect(record);
                     }
                     if (me.hasListeners.itemupdate) {
-                        me.fireEvent('itemupdate', record, index, node);
+                        me.fireEvent('itemupdate', record, index, node, me);
                     }
                     return node;
                 }
@@ -1256,13 +1349,9 @@ Ext.define('Ext.view.AbstractView', {
             // Update the row indices (TableView) doesn't do this.
             me.updateIndexes(startIndex);
 
-            if (me.hasListeners.itemremove) {
-                me.fireEvent('itemremove', oldRecords, origStart, oldItems, me);
-            }
+            me.fireItemMutationEvent('itemremove', oldRecords, origStart, oldItems, me);
 
-            if (me.hasListeners.itemadd) {
-                me.fireEvent('itemadd', newRecords, origStart, children);
-            }
+            me.fireItemMutationEvent('itemadd', newRecords, origStart, children, me);
 
             // If focus was in this view, this will restore it
             restoreFocus();
@@ -1276,7 +1365,7 @@ Ext.define('Ext.view.AbstractView', {
             nodes,
             selModel = me.getSelectionModel();
 
-        if (me.rendered) {
+        if (me.rendered && !me.refreshNeeded) {
             // If we are adding into an empty view, we must refresh in order that the *full tpl* is applied
             // which might create boilerplate content *around* the record nodes.
             if (me.all.getCount() === 0) {
@@ -1294,9 +1383,7 @@ Ext.define('Ext.view.AbstractView', {
                 me.refreshSizePending = true;
             }
 
-            if (me.hasListeners.itemadd) {
-                me.fireEvent('itemadd', records, index, nodes);
-            }
+            me.fireItemMutationEvent('itemadd', records, index, nodes, me);
         }
 
     },
@@ -1341,15 +1428,10 @@ Ext.define('Ext.view.AbstractView', {
     onRemove: function(store, records, index) {
         var me = this,
             rows = me.all,
-            fireItemRemove = me.hasListeners.itemremove,
             currIdx, i, record, nodes, node, restoreFocus;
 
-        if (rows.getCount()) {
+        if (me.rendered && !me.refreshNeeded && rows.getCount()) {
             if (me.dataSource.getCount() === 0) {
-                // Refresh so emptyText can be applied if necessary
-                if (fireItemRemove) {
-                    me.fireEvent('itemremove', records, index, me.getNodes(index, index + records.length - 1));
-                }
                 me.refresh();
             } else {
                 // If this view contains focus, this will return
@@ -1358,9 +1440,7 @@ Ext.define('Ext.view.AbstractView', {
 
                 // Just remove the elements which corresponds to the removed records
                 // The tpl's full HTML will still be in place.
-                if (fireItemRemove) {
-                    nodes = [];
-                }
+                nodes = [];
                 for (i = records.length - 1; i >= 0; --i) {
                     record = records[i];
                     currIdx = index + i;
@@ -1374,9 +1454,7 @@ Ext.define('Ext.view.AbstractView', {
                     }
                 }
 
-                if (fireItemRemove) {
-                    me.fireEvent('itemremove', records, index, nodes, me);
-                }
+                me.fireItemMutationEvent('itemremove', records, index, nodes, me);
 
                 // If focus was in this view, this will restore it
                 restoreFocus();
@@ -1391,7 +1469,24 @@ Ext.define('Ext.view.AbstractView', {
     doRemove: function(record, index) {
         this.all.removeElement(index, true);
     },
-    
+
+    eventLifecycleMap: {
+        refresh: 'onViewRefresh',
+        itemremove: 'onItemRemove',
+        itemadd: 'onItemAdd'
+    },
+
+    fireItemMutationEvent: function(eventName) {
+        var me = this,
+            ownerGrid = me.ownerGrid;
+
+        // Inform the ownerGrid.
+        if (ownerGrid) {
+            me.ownerGrid[me.eventLifecycleMap[eventName]].apply(me.ownerGrid, Ext.Array.slice(arguments, 1));
+        }
+        me.fireEvent.apply(me, arguments);
+    },
+
     /**
      * @private
      * Called prior to an operation which mey remove focus from this view by some kind of DOM operation.
@@ -1408,14 +1503,18 @@ Ext.define('Ext.view.AbstractView', {
             store = me.dataSource || me.store,
             navModel = me.getNavigationModel(),
             lastFocusedIndex = navModel.recordIndex,
-            lastFocusedRec = navModel.record;
+            lastFocusedRec = navModel.record,
+            containsFocus = me.el.contains(Ext.Element.getActiveElement());
 
-        // Check if we really have focus.
-        // Some NavigationModels record position with focus outside of the view.
-        // This happens in BoundLists when focus stays in the bound field.
-        if (me.el.contains(Ext.Element.getActiveElement())) {
+        // If there is a position to restore...
+        if (lastFocusedRec) {
+            // Check if we really have focus.
+            // Some NavigationModels record position with focus outside of the view.
+            // This happens in BoundLists when focus stays in the bound field.
             // Blur the focused descendant, but do not trigger focusLeave.
-            me.el.dom.focus();
+            if (containsFocus) {
+                me.el.dom.focus();
+            }
 
             // The following function will attempt to refocus back to the same record if it is still there,
             // or the same item index.
@@ -1426,7 +1525,7 @@ Ext.define('Ext.view.AbstractView', {
                     // Adjust expectations of where we are able to refocus according to what kind of destruction
                     // might have been wrought on this view's DOM during focus save.
                     lastFocusedIndex = Math.min(lastFocusedIndex, me.all.getCount() - 1);
-                    navModel.setPosition(store.contains(lastFocusedRec) ? lastFocusedRec : lastFocusedIndex, null, null, true);
+                    navModel.setPosition(store.contains(lastFocusedRec) ? lastFocusedRec : lastFocusedIndex, null, null, true, !containsFocus);
                 }
             };
         }
@@ -1472,7 +1571,7 @@ Ext.define('Ext.view.AbstractView', {
             selModel = me.getSelectionModel(),
             navModel = me.getNavigationModel();
 
-        selModel.bindStore(store);
+        selModel.bindStore(store, initial);
         selModel.bindComponent(store ? me : null);
         me.mixins.storeholder.bindStore.apply(me, arguments);
 
@@ -1482,7 +1581,7 @@ Ext.define('Ext.view.AbstractView', {
         // If we have already achieved our first layout, refresh immediately.
         // If we bind to the Store before the first layout, then beforeLayout will
         // call doFirstRefresh
-        if (store && me.componentLayoutCounter) {
+        if (store && me.componentLayoutCounter && !me.blockRefresh) {
             // If not the initial bind, we enforce noDefer.
             me.doFirstRefresh(store, !initial);
         }
@@ -1507,7 +1606,7 @@ Ext.define('Ext.view.AbstractView', {
             // on first layout, refresh regardless of record count.
             // Template may contain boilerplate HTML outside of record iteration loop.
             // Also, emptyText is appended by the refresh method.
-            if (store && !store.isLoading()) {
+            if (store && !me.deferRefreshForLoad(store)) {
                 me.refresh();
             }
         }
@@ -1597,9 +1696,9 @@ Ext.define('Ext.view.AbstractView', {
             preserveScrollOnRefresh = me.preserveScrollOnRefresh;
 
         // If this refresh event is fire from a store load, then use the 
-        // preserveScrollOnReLoad setting to decide whether to preserve scroll position
+        // preserveScrollOnReload setting to decide whether to preserve scroll position
         if (store.loadCount > me.lastRefreshLoadCount) {
-            me.preserveScrollOnRefresh = me.preserveScrollOnReLoad;
+            me.preserveScrollOnRefresh = me.preserveScrollOnReload;
         }
         me.refreshView();
         me.preserveScrollOnRefresh = preserveScrollOnRefresh;
@@ -1610,15 +1709,16 @@ Ext.define('Ext.view.AbstractView', {
         var me = this,
             // If we have an ancestor in a non-boxready state (collapsed or in-transition, or hidden), then block the
             // refresh because the next layout will trigger the refresh
-            blocked = me.blockRefresh || !me.rendered || me.up('[collapsed],[isCollapsingOrExpanding],[hidden]');
+            blocked = me.blockRefresh || !me.rendered || me.up('[collapsed],[isCollapsingOrExpanding],[hidden]'),
+            bufferedRenderer = me.bufferedRenderer;
 
         // If we are blocked in any way due to either a setting, or hidden or collapsed, or animating ancestor, then
         // the next refresh attempt at the upcoming layout must not defer.
         if (blocked) {
             me.refreshNeeded = true;
         } else {
-            if (me.bufferedRenderer) {
-                me.bufferedRenderer.refreshView();
+            if (bufferedRenderer) {
+                bufferedRenderer.refreshView();
             } else {
                 me.refresh();
             }
@@ -1805,7 +1905,8 @@ Ext.define('Ext.view.AbstractView', {
 
         me.all.clear();
         me.emptyEl = null;
-        
+        me.setItemsDraggable(false);
+
         me.callParent();
         me.bindStore(null);
         
@@ -1835,6 +1936,8 @@ Ext.define('Ext.view.AbstractView', {
         if (node) {
             Ext.fly(node).addCls(this.selectedItemCls);
         }
+        
+        return node;
     },
 
     // invoked by the selection model to maintain visual UI cues
@@ -1844,6 +1947,8 @@ Ext.define('Ext.view.AbstractView', {
         if (node) {
             Ext.fly(node).removeCls(this.selectedItemCls);
         }
+        
+        return node;
     },
 
     getItemSelector: function() {
@@ -1899,6 +2004,10 @@ Ext.define('Ext.view.AbstractView', {
     },
 
     privates: {
+        deferRefreshForLoad: function(store) {
+            return store.isLoading();
+        },
+        
         toggleChildrenTabbability: function(enableTabbing) {
             var focusEl = this.getTargetEl();
 
@@ -1976,10 +2085,6 @@ Ext.define('Ext.view.AbstractView', {
             // the superclass method calls this.getTargetEl, which sends us into an infinte
             // loop because our getTargetEl may call getScrollerEl(), which calls getOverflowEl()
             return Ext.Component.prototype.getTargetEl.call(this);
-        },
-
-        getTargetEl: function() {
-            return this.touchScroll ? this.getScrollerEl() : this.callParent();
         }
     }
 }, function() {

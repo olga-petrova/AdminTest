@@ -1,13 +1,15 @@
+/* global Ext, expect, jasmine, xit */
+
 describe("Ext.window.Window", function() {
     var win, container;
     
     function makeWindow(config, noShow) {
-        config = Ext.apply(config || {}, {
-            width: 200,
-            height: 200,
-            x: 10,
-            y: 10
-        });
+        config = Ext.apply({
+             width: 200,
+             height: 200,
+             x: 10,
+             y: 10
+        }, config);
         
         win = new Ext.window.Window(config);
         
@@ -28,6 +30,85 @@ describe("Ext.window.Window", function() {
             Ext.destroy(container);
             container = null;
         }
+    });
+    
+    describe("tools", function() {
+        var tool;
+        
+        afterEach(function() {
+            tool = null;
+        });
+        
+        describe("close", function() {
+            beforeEach(function() {
+                makeWindow({ closable: true });
+                
+                tool = win.down('tool[type=close]');
+            });
+            
+            it("should not be focusable", function() {
+                expect(tool.focusable).toBe(false);
+            });
+            
+            it("should have presentation role", function() {
+                expect(tool).toHaveAttr('role', 'presentation');
+            });
+            
+            it("should not be tabbable", function() {
+                expect(tool.el.isTabbable()).toBe(false);
+            });
+        });
+    });
+    
+    describe("header", function() {
+        var header;
+        
+        afterEach(function() {
+            header = null;
+        });
+        
+        describe("no focusable tools", function() {
+            beforeEach(function() {
+                makeWindow({ closable: true });
+                
+                header = win.header;
+            });
+            
+            it("should disable focusable container", function() {
+                expect(header.enableFocusableContainer).toBe(false);
+            });
+            
+            it("should have presentation role", function() {
+                expect(header).toHaveAttr('role', 'presentation');
+            });
+            
+            it("should not be tabbable", function() {
+                expect(header.ariaEl.isTabbable()).toBe(false);
+            });
+        });
+        
+        describe("with focusable tools", function() {
+            beforeEach(function() {
+                makeWindow({
+                    closable: true,
+                    collapsible: true
+                });
+                
+                header = win.header;
+            });
+            
+            it("should enable focusable container", function() {
+                expect(header.enableFocusableContainer).toBe(true);
+            });
+            
+            it("should have toolbar role", function() {
+                expect(header).toHaveAttr('role', 'toolbar');
+            });
+            
+            it("should be tabbable", function() {
+                expect(header.getFocusEl().isTabbable()).toBe(true);
+            });
+        });
     });
     
     describe("expandOnShow", function() {
@@ -288,7 +369,7 @@ describe("Ext.window.Window", function() {
             x = win.getLocalX();
             y = win.getLocalY();
             cw = container.getWidth();
-            ww = win.getWidth(),
+            ww = win.getWidth();
             box = Ext.Element.parseBox(win.constraintInsets);
             // We need to subtract 1 because the position
             // is constraintInset exclusive
@@ -316,7 +397,9 @@ describe("Ext.window.Window", function() {
             win = new Ext.window.Window({
                 height: 100, width: 100, header: false, maximized: true
             });
-            expect(function() { win.show() }).not.toThrow();
+            expect(function() {
+                win.show();
+            }).not.toThrow();
 
             // If maximizing a headerless window did not throw an error, we're good (EXTJSIV-8820)
         });
@@ -590,7 +673,7 @@ describe("Ext.window.Window", function() {
 
                 panelBody = panel.body;
                 win = panel.down('window');
-                borderTop = parseInt(win.header.el.getStyle('border-top'));
+                borderTop = parseInt(win.header.el.getStyle('border-top'), 10);
             });
 
             afterEach(function () {
@@ -608,6 +691,244 @@ describe("Ext.window.Window", function() {
                 winXY = win.getXY();
 
                 toggle(8);
+            });
+        });
+
+        describe("starting maximized", function() {
+            describe("without animation", function() {
+                it("should disable the drag/drop", function() {
+                    makeWindow({
+                        maximized: true
+                    });
+                    expect(win.dd.disabled).toBe(true);
+                }); 
+
+                it("should disable the resizer", function() {
+                    makeWindow({
+                        maximized: true
+                    });
+                    expect(win.resizer.disabled).toBe(true);
+                });
+
+                it("should have the tool be restore", function() {
+                    makeWindow({
+                        maximized: true,
+                        maximizable: true,
+                        closable: false
+                    });
+                    var tool = win.tools[0];
+                    expect(tool.type).toBe('restore');
+                    expect(tool.toolEl).toHaveCls('x-tool-maximize');
+                });
+
+                it("should not fire the maximize event", function() {
+                    var spy = jasmine.createSpy();
+
+                    makeWindow({
+                        maximized: true,
+                        maximizable: true,
+                        closable: false,
+                        listeners: {
+                            maximize: spy
+                        }
+                    });
+                    expect(spy.callCount).toBe(0);
+                });
+
+                describe("restoring", function() {
+                    it("should set the tool type back to maximize", function() {
+                        makeWindow({
+                            maximized: true,
+                            maximizable: true,
+                            closable: false
+                        });
+                        win.restore();
+                        expect(win.tools[0].type).toBe('maximize');
+                    });
+
+                    it("should restore configured dimensions", function() {
+                        makeWindow({
+                            maximized: true,
+                            width: 250,
+                            height: 250
+                        });
+                        win.restore();
+                        expect(win.getWidth()).toBe(250);
+                        expect(win.getHeight()).toBe(250);
+                    });
+
+                    it("should restore to a configured position", function() {
+                        makeWindow({
+                            maximized: true,
+                            width: 250,
+                            height: 250
+                        });
+                        win.restore();
+                        expect(win.getX()).toBe(10);
+                        expect(win.getY()).toBe(10);
+                    });
+
+                    it("should restore to a 0,0 with no position configured", function() {
+                        makeWindow({
+                            maximized: true,
+                            width: 250,
+                            height: 250,
+                            x: null,
+                            y: null
+                        });
+                        win.restore();
+                        expect(win.getX()).toBe(0);
+                        expect(win.getY()).toBe(0);
+                    });
+                });
+            });
+
+            describe("with animation", function() {
+                var animTarget;
+
+                function waitsForAnim() {
+                    waitsFor(function() {
+                        return !win.getActiveAnimation();
+                    });
+                }
+
+                function makeAnimWindow(cfg) {
+                    cfg.animateTarget = animTarget;
+                    makeWindow(cfg);
+                }
+
+                beforeEach(function() {
+                    animTarget = Ext.getBody().createChild({
+                        style: 'width: 100px; height: 100px; position: absolute; top: 50px; left: 50px'
+                    });
+                });
+
+                afterEach(function() {
+                    animTarget = Ext.destroy(animTarget);
+                    win.animateTarget = null;
+                });
+
+                it("should disable the drag/drop", function() {
+                    makeAnimWindow({
+                        maximized: true
+                    });
+                    waitsForAnim();
+                    runs(function() {
+                        expect(win.dd.disabled).toBe(true);
+                    });
+                }); 
+
+                it("should disable the resizer", function() {
+                    makeAnimWindow({
+                        maximized: true
+                    });
+                    waitsForAnim();
+                    runs(function() {
+                        expect(win.resizer.disabled).toBe(true);
+                    });
+                });
+
+                it("should have the tool be restore", function() {
+                    makeAnimWindow({
+                        maximized: true,
+                        maximizable: true,
+                        closable: false
+                    });
+                    waitsForAnim();
+                    runs(function() {
+                        var tool = win.tools[0];
+                        expect(tool.type).toBe('restore');
+                        expect(tool.toolEl).toHaveCls('x-tool-maximize');
+                    });
+                });
+
+                it("should not fire the maximize event", function() {
+                    var spy = jasmine.createSpy();
+
+                    makeWindow({
+                        maximized: true,
+                        maximizable: true,
+                        closable: false,
+                        listeners: {
+                            maximize: spy
+                        }
+                    });
+                    waitsForAnim();
+                    runs(function() {
+                        expect(spy.callCount).toBe(0);
+                    });
+                });
+
+                describe("restoring", function() {
+                    it("should set the tool type back to maximize", function() {
+                        makeAnimWindow({
+                            maximized: true,
+                            maximizable: true,
+                            closable: false
+                        });
+                        waitsForAnim();
+                        runs(function() {
+                            win.restore();
+                        });
+                        waitsForAnim();
+                        runs(function() {
+                            expect(win.tools[0].type).toBe('maximize');
+                        });
+                    });
+
+                    it("should restore configured dimensions", function() {
+                        makeAnimWindow({
+                            maximized: true,
+                            width: 250,
+                            height: 250
+                        });
+                        waitsForAnim();
+                        runs(function() {
+                            win.restore();
+                        });
+                        waitsForAnim();
+                        runs(function() {
+                            expect(win.getWidth()).toBe(250);
+                            expect(win.getHeight()).toBe(250);
+                        });
+                    });
+
+                    it("should restore to a configured position", function() {
+                        makeAnimWindow({
+                            maximized: true,
+                            width: 250,
+                            height: 250
+                        });
+                        waitsForAnim();
+                        runs(function() {
+                            win.restore();
+                        });
+                        waitsForAnim();
+                        runs(function() {
+                            expect(win.getX()).toBe(10);
+                            expect(win.getY()).toBe(10);
+                        });
+                    });
+
+                    it("should restore to a 0,0 with no position configured", function() {
+                        makeAnimWindow({
+                            maximized: true,
+                            width: 250,
+                            height: 250,
+                            x: null,
+                            y: null
+                        });
+                        waitsForAnim();
+                        runs(function() {
+                            win.restore();
+                        });
+                        waitsForAnim();
+                        runs(function() {
+                            expect(win.getX()).toBe(0);
+                            expect(win.getY()).toBe(0);
+                        });
+                    });
+                });
             });
         });
     });
@@ -678,6 +999,104 @@ describe("Ext.window.Window", function() {
         win.destroy();
     });
 
+    it("should restore focus after dragging", function() {
+        win = Ext.widget({
+            xtype: 'window',
+            renderTo: Ext.getBody(),
+            height: 100,
+            width: 300,
+            closable: true,
+            maximizable: true,
+            x: 0,
+            y: 0,
+            tools: [{type: 'pin'}],
+            header: {
+                title: 'Title',
+                titlePosition: 2
+            },
+            items: {
+                xtype: 'textfield'
+            }
+        }).show();
+        var t = win.down('textfield');
+
+        t.focus();
+
+        // Wait for any asynchronous focus on the input field
+        waitsFor(function() {
+            return win.containsFocus && Ext.Element.getActiveElement() === t.inputEl.dom;
+        });
+
+        // Begin a window drag operation, move it halfway
+        runs(function() {
+            jasmine.fireMouseEvent(win.header.el, 'mouseover', 5, 5);
+            jasmine.fireMouseEvent(win.header.el, 'mousedown', 5, 5);
+            jasmine.fireMouseEvent(win.header.el, 'mousemove', 55, 5);
+        });
+
+        // Wait for window to hide during drag
+        waitsFor(function() {
+            return win.el.isVisible() === false;
+        });
+
+        // Complete the window drag, 100px rightwards
+        runs(function() {
+            jasmine.fireMouseEvent(document.body, 'mousemove', 105, 5);
+            jasmine.fireMouseEvent(document.body, 'mouseup', 100, 5);
+            expect(win.x).toBe(100);
+            expect(win.y).toBe(0);
+        });
+
+        // Wait for any asynchronous focus on the input field
+        waitsFor(function() {
+            return Ext.Element.getActiveElement() === t.inputEl.dom;
+        });
+    });
+
+
+    it("should allow click to focus", function() {
+        win = Ext.widget({
+            xtype: 'window',
+            renderTo: Ext.getBody(),
+            height: 100,
+            width: 300,
+            closable: true,
+            maximizable: true,
+            x: 0,
+            y: 0,
+            tools: [{type: 'pin'}],
+            header: {
+                title: 'Title',
+                titlePosition: 2
+            },
+            items: [{
+                xtype: 'textfield'
+            }, {
+                xtype: 'textfield'
+            }]
+        }).show();
+        var ts = win.query('textfield');
+
+        ts[0].focus();
+
+        // Wait for any asynchronous focus on the input field
+        waitsFor(function() {
+            return win.containsFocus && Ext.Element.getActiveElement() === ts[0].inputEl.dom;
+        });
+
+        // Mousedown in the second field.
+        // Jasmine focuses a focusable mousedowned element after a
+        // mousedown which has NOT been preventDefaulted.
+        runs(function() {
+            jasmine.fireMouseEvent(ts[1].inputEl, 'mousedown');
+        });
+
+        // Wait for any asynchronous focus on the second field
+        waitsFor(function() {
+            return Ext.Element.getActiveElement() === ts[1].inputEl.dom;
+        });
+    });
+
     it("should correctly render the minimize/maximize tools when there is an iconCls present", function() {
         // https://sencha.jira.com/browse/EXTJS-13806
         win = Ext.create({
@@ -695,6 +1114,14 @@ describe("Ext.window.Window", function() {
 
         expect(header.items.getAt(1).type).toBe('minimize');
         expect(header.items.getAt(2).type).toBe('maximize');
+    });
+    
+    describe("focusability", function() {
+        it("should have focusable: true", function() {
+            makeWindow();
+            
+            expect(win.focusable).toBe(true);
+        });
     });
 
     describe("defaultFocus", function() {
@@ -997,20 +1424,12 @@ describe("Ext.window.Window", function() {
         
         describe("ARIA attributes", function() {
             beforeEach(function() {
-                makeWindow();
+                makeWindow({ collapsible: true });
             });
             
             function makeAttrSuite(position) {
                 describe(position + " guard", function() {
                     var guard;
-                    
-                    function expectAria(attr, value) {
-                        jasmine.expectAriaAttr(guard, attr, value);
-                    }
-                    
-                    function expectNoAria(attr) {
-                        jasmine.expectNoAriaAttr(guard, attr);
-                    }
                     
                     beforeEach(function() {
                         guard = position === 'top' ? win.tabGuardBeforeEl : win.tabGuardAfterEl;
@@ -1021,30 +1440,30 @@ describe("Ext.window.Window", function() {
                     });
                 
                     it("should have button role on the top guard", function() {
-                        expectAria('role', 'button');
+                        expect(guard).toHaveAttr('role', 'button');
                     });
             
                     it("should have aria-busy on the top guard", function() {
-                        expectAria('aria-busy', 'true');
+                        expect(guard).toHaveAttr('aria-busy', 'true');
                     });
                     
                     // It is important that tab guards are not published
                     // to Assistive Technologies as announceable entities,
                     // hence the tests.
                     it("should have no title", function() {
-                        expectNoAria('title');
+                        expect(guard).not.toHaveAttr('title');
                     });
                     
                     it("should not have aria-label", function() {
-                        expectNoAria('aria-label');
+                        expect(guard).not.toHaveAttr('aria-label');
                     });
                     
                     it("should not have aria-labelledby", function() {
-                        expectNoAria('aria-labelledby');
+                        expect(guard).not.toHaveAttr('aria-labelledby');
                     });
                     
                     it("should have no aria-describedby", function() {
-                        expectNoAria('aria-describedby');
+                        expect(guard).not.toHaveAttr('aria-describedby');
                     });
                 });
             }
@@ -1061,7 +1480,7 @@ describe("Ext.window.Window", function() {
         function makeTabSuite(modal) {
             var pressTab = jasmine.pressTabKey,
                 expectFocused = jasmine.expectFocused,
-                tool, fooField, barField, okBtn;
+                tool, fooField, barField, okBtn, cancelBtn;
             
             describe("tabbing with focusables inside, modal: " + modal, function() {
                 beforeEach(function() {
@@ -1107,6 +1526,7 @@ describe("Ext.window.Window", function() {
                     fooField = win.down('textfield[name=foo]');
                     barField = win.down('textfield[name=bar]');
                     okBtn = win.down('button[text=OK]');
+                    cancelBtn = win.down('button[text=Cancel]');
                     
                     after = new Ext.button.Button({
                         renderTo: docBody,
@@ -1122,10 +1542,10 @@ describe("Ext.window.Window", function() {
                         expectFocused(tool);
                     });
                     
-                    it("should shift-tab from after button to the OK button", function() {
+                    it("should shift-tab from after button to the Cancel button", function() {
                         pressTab(after, false);
                         
-                        expectFocused(okBtn);
+                        expectFocused(cancelBtn);
                     });
                 });
                 
@@ -1157,14 +1577,26 @@ describe("Ext.window.Window", function() {
                             expectFocused(okBtn);
                         });
                         
-                        it("should tab from OK button back to the first tool", function() {
+                        it("should tab from OK button to Cancel button", function() {
                             pressTab(okBtn, true);
+                            
+                            expectFocused(cancelBtn);
+                        });
+                        
+                        it("should tab from Cancel button back to the first tool", function() {
+                            pressTab(cancelBtn, true);
                             
                             expectFocused(tool);
                         });
                     });
                     
                     describe("backward", function() {
+                        it("should shift-tab from Cancel button to OK button", function() {
+                            pressTab(cancelBtn, false);
+                            
+                            expectFocused(okBtn);
+                        });
+                        
                         it("should shift-tab from Ok button to bar field", function() {
                             pressTab(okBtn, false);
                             
@@ -1177,16 +1609,16 @@ describe("Ext.window.Window", function() {
                             expectFocused(fooField);
                         });
                         
-                        it("should shift-tab from foo field to the firs tool", function() {
+                        it("should shift-tab from foo field to the first tool", function() {
                             pressTab(fooField, false);
                             
                             expectFocused(tool);
                         });
                         
-                        it("should shift-tab from the first tool back to OK button", function() {
+                        it("should shift-tab from the first tool back to Cancel button", function() {
                             pressTab(tool, false);
                             
-                            expectFocused(okBtn);
+                            expectFocused(cancelBtn);
                         });
                     });
                 });
@@ -1235,14 +1667,179 @@ describe("Ext.window.Window", function() {
                 });
             }
         }
+
+        makeTabSuite(false);
+        makeTabSuite(true);
+    });
+
+    describe('nested Windows', function() {
+        it('should disable tabbing in the parent window', function() {
+            Ext.define('spec.window.TestOneWindow', {
+                extend: 'Ext.window.Window',
+                alias: 'widget.testonewindow',
+                title: "Test Window 1",
+                height: 500,
+                width: 400,
+                modal: true,
+                defaultType: 'button',
+                items: [{
+                    xtype	: 'button',
+                    text	: 'Open Window 2',
+                    listeners: {
+                        click	: function() {
+                            win2 = win1.add({
+                                xtype: 'testtwowindow'
+                            });
+                            win2.show();
+                        }
+                    }
+                }, {
+                    xtype	: 'button',
+                    text	: 'Test Button 1'
+                }, {
+                    xtype: 'button',
+                    text:' Test Button 2'
+                }]
+            });
+
+            Ext.define('spec.window.TestTwoWindow', {
+                extend: 'Ext.window.Window',
+                alias: 'widget.testtwowindow',
+                title: "Test Window 2",
+                height: 300,
+                width: 300,
+                modal: true,
+                defaultType: 'button',
+                items: [{
+                    xtype: 'textfield'
+                }, {
+                    xtype: 'textfield'
+                }, {
+                    xtype	: 'button',
+                    text	: 'Open Window 3'
+                }, {
+                    xtype	: 'button',
+                    text	: 'Test Button 3'
+                }, {
+                    xtype: 'button',
+                    text:' Test Button 4'
+                }]
+            });
+ 
+            var rootPanel = Ext.create('Ext.panel.Panel', {
+                title: 'Hello',
+                renderTo: Ext.getBody(),
+                width: 800,
+                height: 500,
+                dockedItems: [{
+                    xtype: 'toolbar',
+                    dock: 'top',
+                    items: [{
+                        xtype:'button',
+                        text: 'Open Window 1',
+                        handler: function() {
+                            win1 = Ext.create({
+                                xtype: 'testonewindow'
+                            });
+                            win1.show();
+                        }
+                    }]
+                }]
+            }),
+            button1 = rootPanel.down('button[text=Open Window 1]'),
+            button2,
+            win1, win2;
+
+            jasmine.fireMouseEvent(button1.el, 'click');
+
+            // Three buttons in the body, before and after tab guard.
+            expect(win1.el.findTabbableElements().length).toBe(5);
+
+            button2 = win1.down('button[text=Open Window 2]');
+            jasmine.fireMouseEvent(button2.el, 'click');
+
+            // Should all be untabbable now
+            expect(win1.el.findTabbableElements().length).toBe(0);
+
+            // Three buttons, two input fields in the body, before and after tab guard.
+            expect(win2.el.findTabbableElements().length).toBe(7);
+
+            Ext.destroy([rootPanel, win1, win2]);
+        });
+    });
+
+    describe('maskClickAction', function() {
+        var field;
         
-        // Trapping focus within the window relies on finding next or previous
-        // tabbable element, which is done in Element.findTabbableElements().
-        // However that method is busted in IE8/9 due to a bug in querySelectorAll()
-        // See https://sencha.jira.com/browse/EXTJS-17170
-        if (!Ext.isIE9) {
-            makeTabSuite(false);
-            makeTabSuite(true);
-        }
+        afterEach(function() {
+            if (field) {
+                field = Ext.destroy(field);
+            }
+        });
+
+        it('should focus the window by default', function() {
+            win = makeWindow({
+                modal: true
+            });
+            field = new Ext.form.field.Text({
+                renderTo: document.body
+            });
+            field.focus();
+
+            waitsFor(function() {
+                return field.hasFocus;
+            }, 'field to be focused');
+
+            runs(function() {
+                jasmine.fireMouseEvent(win.zIndexManager.mask, 'click');
+            });
+
+            waitsFor(function() {
+                return win.containsFocus;
+            }, 'window to be focused');
+        });
+        it("should hide the window if configured with maskClickAction: 'hide'", function() {
+            win = makeWindow({
+                modal: true,
+                maskClickAction: 'hide'
+            });
+            jasmine.fireMouseEvent(win.zIndexManager.mask, 'click');
+            expect(win.isVisible()).toBe(false);
+            expect(win.destroyed).toBe(false);
+        });
+        it("should destroy the window if configured with maskClickAction: 'destroy'", function() {
+            win = makeWindow({
+                modal: true,
+                maskClickAction: 'destroy'
+            });
+            jasmine.fireMouseEvent(win.zIndexManager.mask, 'click');
+            expect(win.destroyed).toBe(true);
+        });
+        it("should not hide the window if configured with maskClickAction: 'hide', but the maskclick event was vetoed", function() {
+            win = makeWindow({
+                modal: true,
+                maskClickAction: 'hide',
+                listeners: {
+                    maskclick: function() {
+                        return false;
+                    }
+                }
+            });
+            jasmine.fireMouseEvent(win.zIndexManager.mask, 'click');
+            expect(win.isVisible()).toBe(true);
+        });
+        it("should destroy the window if configured with maskClickAction: 'destroy', but the maskclick event was vetoed", function() {
+            win = makeWindow({
+                modal: true,
+                maskClickAction: 'destroy',
+                listeners: {
+                    maskclick: function() {
+                        return false;
+                    }
+                }
+            });
+            jasmine.fireMouseEvent(win.zIndexManager.mask, 'click');
+            expect(win.destroyed).toBe(false);
+        });
     });
 });

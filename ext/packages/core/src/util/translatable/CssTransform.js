@@ -6,6 +6,8 @@
 Ext.define('Ext.util.translatable.CssTransform', {
     extend: 'Ext.util.translatable.Dom',
 
+    isCssTransform: true,
+
     doTranslate: function(x, y) {
         var element = this.getElement();
         if (!this.destroyed && !element.destroyed) {

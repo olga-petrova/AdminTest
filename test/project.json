@@ -1,19 +1,28 @@
 {
     "framework": "jasmine",
     "libs": [],
-    "coverageFilters": [],
+    "coverageFilters": [
+        {
+            "disabled": false,
+            "path": "^/new/Filter\\.js$"
+        }
+    ],
     "scenarios": [
         {
             "libs": [],
             "coverageFilters": [],
             "directory": "unit",
-            "name": "Unit Tests"
+            "name": "Unit Tests",
+            "launch": false,
+            "page": ""
         },
         {
             "libs": [],
             "coverageFilters": [],
             "directory": "uiunit",
-            "name": "UI Unit Tests"
+            "name": "UI Unit Tests",
+            "page": "",
+            "launch": false
         },
         {
             "libs": [],

@@ -18,7 +18,7 @@ Ext.define('Ext.ux.ajax.Simlet', function () {
                 value = parseInt(value, 10);
             } else if (floatRegex.test(value)) {
                 value = parseFloat(value);
-            } else if (!!(m = dateRegex.test(value))) {
+            } else if (!!(m = dateRegex.exec(value))) {
                 value = new Date(Date.UTC(+m[1], +m[2]-1, +m[3], +m[4], +m[5], +m[6]));
             }
         }
@@ -31,7 +31,7 @@ Ext.define('Ext.ux.ajax.Simlet', function () {
 
         isSimlet: true,
 
-        responseProps: ['responseText', 'responseXML', 'status', 'statusText'],
+        responseProps: ['responseText', 'responseXML', 'status', 'statusText', 'responseHeaders'],
 
         /**
          * @cfg {Number} responseText

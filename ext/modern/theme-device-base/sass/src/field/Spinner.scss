@@ -1,12 +1,12 @@
-.x-spinner-button-down:before {
+.x-spinnerfield-button-down:before {
     content: '-'
 }
-.x-spinner-button-up:before {
+.x-spinnerfield-button-up:before {
     content: '+'
 }
 
-.x-spinner {
-    .x-spinner-button {
+.x-spinnerfield {
+    .x-spinnerfield-button {
         border: 1px solid #ccc !important;
         background-color: #eee;
     }

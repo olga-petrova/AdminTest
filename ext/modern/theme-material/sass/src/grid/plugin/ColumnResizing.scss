@@ -1,0 +1,17 @@
+.#{$prefix}grid-column:after {
+  content: '';
+  width: 0;
+  background-color: $accent-light-color;
+  height: 100%;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.#{$prefix}grid-column.#{$prefix}grid-column-resizing:after {
+  width: 16px;
+}
+
+.#{$prefix}grid-resize-marker {
+  background-color: $divider-color;
+}

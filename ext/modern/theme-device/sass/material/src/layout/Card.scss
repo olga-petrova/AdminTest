@@ -1,0 +1,7 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}layout-card-item {
+      @include css-color-variable('background-color-md', 'background-color');
+    }
+  }
+}

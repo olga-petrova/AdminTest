@@ -1,0 +1,19 @@
+// Primary color used for headers, highlights, etc
+$primary-color-ios: dynamic(#157efb);
+
+// Color used to indicate a negative interaction or result
+$negative-color-ios: dynamic(#fc3e39);
+
+// Color used to indicate a positive interaction or result
+$positive-color-ios: dynamic(#53d769);
+
+// Light versions of the main colors used in this theme
+$primary-color-light-ios: dynamic(lighten($primary-color-ios, 30%));
+$negative-color-light-ios: dynamic(lighten($negative-color-ios, 30%));
+$positive-color-light-ios: dynamic(lighten($positive-color-ios, 30%));
+
+// Default text
+$text-color-ios: dynamic(#000);
+
+// Default Background color
+$background-color-ios: dynamic(#fff);

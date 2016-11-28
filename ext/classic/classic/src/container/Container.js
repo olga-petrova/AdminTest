@@ -66,8 +66,8 @@
  *         title: 'Results', // the title becomes the title of the tab
  *     });
  *
- *     myTabPanel.add(myNewGrid); // {@link Ext.tab.Panel} implicitly uses {@link Ext.layout.container.Card Card}
- *     myTabPanel.{@link Ext.tab.Panel#setActiveTab setActiveTab}(myNewGrid);
+ *     myTabPanel.add(myNewGrid); // Ext.tab.Panel implicitly uses Ext.layout.container.Card
+ *     myTabPanel.setActiveTab.(myNewGrid);
  *
  * The example above adds a newly created GridPanel to a TabPanel. Note that a TabPanel uses {@link
  * Ext.layout.container.Card} as its layout manager which means all its child items are sized to {@link
@@ -337,7 +337,7 @@
  *             }]
  *         }],
  *         buttons : ['->', {
- *            text : 'Login',
+ *             text : 'Login',
  *             listeners : {
  *                 click : 'onLoginClick'
  *             }
@@ -420,6 +420,7 @@ Ext.define('Ext.container.Container', {
     ],
 
     requires: [
+        'Ext.Action',
         'Ext.util.MixedCollection',
         'Ext.layout.container.Auto',
         'Ext.ZIndexManager',
@@ -437,6 +438,31 @@ Ext.define('Ext.container.Container', {
     // ***********************************************************************************
     // Begin Config
     // ***********************************************************************************
+
+    config: {
+        /**
+         * An object containing properties which define named {@link Ext.Actions} for this container
+         * and any descendant components.
+         *
+         * An Action encapsulates a shareable, reusable set of properties which define a "clickable"
+         * UI component such as a {@link Ext.button.Button button} or {@link Ext.menu.Item menu item},
+         * or {@link Ext.panel.Panel#tools panel header tool}, or an {@link Ext.grid.column.Action ActionColumn item}
+         *
+         * An Action, or more conveniently, the *name* of an action prefixed with `'@'` may be used
+         * as a config object for creating child components which use a `handler` config property to
+         * reference a Controller method to invoke when the component is clicked.
+         *
+         * The property name is the action name, which may then be used as a child item configuration
+         * in an {@link Ext.container.Container#items items} configuration in any descendant component
+         * such as a toolbar or a menu, or in a {@link Ext.panel.Panel#tools tools} configuration of
+         * a Panel.
+         *
+         * The property value is a configuration object for any clickable component.
+         *
+         * See the {@link Ext.Action} class for an example of reusable Actions.
+         */
+        actions: null
+    },
 
     /**
      * @cfg {String/Number} activeItem
@@ -653,6 +679,15 @@ Ext.define('Ext.container.Container', {
      * method is called. Should be a valid {@link Ext.ComponentQuery query} selector.
      */
     
+    /**
+     * When set to `true`, two elements are added to the panel's element. These are the
+     * `{@link #tabGuardBeforeEl}` and `{@link #tabGuardAfterEl}`.
+     * @cfg {Boolean} tabGuard
+     * @private
+     * @since 6.0.0
+     */
+    tabGuard: false,
+
     // ***********************************************************************************
     // End Config
     // ***********************************************************************************
@@ -662,6 +697,47 @@ Ext.define('Ext.container.Container', {
     // ***********************************************************************************
     // Begin Properties
     // ***********************************************************************************
+
+    /**
+     * @property {String/String[]/Ext.XTemplate} tabGuardTpl
+     * This template is used to generate the `tabGuard` elements. It is used once per
+     * element (see `{@link #tabGuardBeforeEl}` and `{@link #tabGuardAfterEl}`).
+     * @private
+     * @since 6.0.0
+     */
+    tabGuardTpl:
+        '<div id="{id}-{tabGuardEl}" data-ref="{tabGuardEl}" ' +
+            ' role="button" aria-hidden="true" tabIndex="0" class="' +
+            Ext.baseCSSPrefix + 'tab-guard ' +
+            Ext.baseCSSPrefix + 'tab-guard-{tabGuard}" ' +
+        '></div>',
+    
+    /**
+     * @property {Object} tabGuardElements
+     * Read only object containing property names for tab guard elements, keyed by position.
+     * @private
+     * @since 6.1.0
+     */
+    tabGuardElements: {
+        before: 'tabGuardBeforeEl',
+        after: 'tabGuardAfterEl'
+    },
+
+    /**
+     * This element reference is generated when `{@link #tabGuard}` is `true`. This element
+     * is generated before all `dockedItems` in the DOM.
+     * @property {Ext.dom.Element} tabGuardBeforeEl
+     * @private
+     * @since 6.0.0
+     */
+
+    /**
+     * This element reference is generated when `{@link #tabGuard}` is `true`. This element
+     * is generated after all `dockedItems` in the DOM.
+     * @property {Ext.dom.Element} tabGuardAfterEl
+     * @private
+     * @since 6.0.0
+     */
 
     /**
      * @private
@@ -779,11 +855,11 @@ Ext.define('Ext.container.Container', {
      * If adding multiple new child Components, pass them as an array to the `add` method,
      * so that only one layout recalculation is performed.
      *
-     *     tb = new {@link Ext.toolbar.Toolbar}({
+     *     tb = new Ext.toolbar.Toolbar({
      *         renderTo: document.body
      *     });  // toolbar is rendered
      *     // add multiple items.
-     *     // ({@link #defaultType} for {@link Ext.toolbar.Toolbar Toolbar} is 'button')
+     *     // default type for Toolbar is 'button')
      *     tb.add([{text:'Button 1'}, {text:'Button 2'}]);
      *
      * To inject components between existing ones, use the {@link #insert} method.
@@ -924,14 +1000,9 @@ Ext.define('Ext.container.Container', {
      * @protected
      */
     afterLayout: function(layout) {
-        var me = this,
-            scroller = me.getScrollable();
+        var me = this;
 
         ++me.layoutCounter;
-
-        if (scroller && me.layoutCounter > 1) {
-            scroller.refresh();
-        }
 
         if (me.hasListeners.afterlayout) {
             me.fireEvent('afterlayout', me, layout);
@@ -1061,8 +1132,10 @@ Ext.define('Ext.container.Container', {
 
     /**
      * Disables all child input fields and buttons.
+     * @param silent
+     * @param fromParent (private)
      */
-    disable: function(silent, /* private */fromParent) {
+    disable: function(silent, fromParent) {
         var me = this,
             wasDisabled = me.disabled,
             itemsToDisable, len, i;
@@ -1082,8 +1155,10 @@ Ext.define('Ext.container.Container', {
 
     /**
      * Enables all child input fields and buttons.
+     * @param silent
+     * @param fromParent (private)
      */
-    enable: function(silent, /* private */fromParent) {
+    enable: function(silent, fromParent) {
         var me = this,
             wasDisabled = me.disabled,
             itemsToDisable, len, i;
@@ -1169,9 +1244,13 @@ Ext.define('Ext.container.Container', {
      * @return {Ext.dom.Element} the focus holding element.
      */
     getFocusEl: function() {
-        var delegate = this.getDefaultFocus();
+        var delegate;
 
-        if (delegate) {
+        if (this.enableFocusableContainer) {
+            return this.getFocusableContainerEl();
+        }
+        // Assignment in conditional is intentional
+        else if (delegate = this.getDefaultFocus()) {
             return delegate;
         }
         else if (this.focusable) {
@@ -1387,7 +1466,7 @@ Ext.define('Ext.container.Container', {
     /**
      * @protected
      * Called when a raw config object is added to this container either during initialization of the {@link #cfg-items} config,
-     * or when new items are {@link #method-add added), or {@link #method-insert inserted}.
+     * or when new items are {@link #method-add added}, or {@link #method-insert inserted}.
      *
      * This method converts the passed object into an instanced child component.
      *
@@ -1397,12 +1476,33 @@ Ext.define('Ext.container.Container', {
      * @return {Ext.Component} The component to be added.
      */
     lookupComponent: function(comp) {
+        var me = this,
+            defaultType = me.defaultType,
+            wasAction;
+
         if (!comp.isComponent) {
             if (typeof comp === 'string') {
-                comp = Ext.ComponentManager.get(comp);
+                // First char '@' means its an Action name.
+                // Search this and all ancestors for a matching named Action
+                // with which to create the Component.
+                if (!(wasAction = (comp[0] === '@'))) {
+                    // String used as a global component ID. Deprecated practice!
+                    return Ext.ComponentManager.get(comp);
+                }
+
+                comp = me.getAction(comp.substr(1));
+                defaultType = me.defaultActionType || defaultType;
             }
-            else {
-                comp = Ext.ComponentManager.create(comp, this.defaultType);       
+
+            comp = Ext.ComponentManager.create(comp, defaultType);
+
+            // We need the inherited state to be invalidated upon add
+            // because the create will have been performed outside of the
+            // ownership hierarchy. The Action has no owner view (Actions are shareable).
+            // This flag indicates to the new item's onAdded->onInheritedAdded machinery
+            // that the inherited state must be invalidated.
+            if (wasAction) {
+                comp.instancedCmp = true;
             }
         }
         return comp;
@@ -1599,6 +1699,11 @@ Ext.define('Ext.container.Container', {
         this.repositionFloatingItems();
     },
 
+    /**
+     * @inheritdoc
+     * @protected
+     * @template
+     */
     onResize: function() {
         this.callParent(arguments);
         this.repositionFloatingItems();
@@ -1643,10 +1748,13 @@ Ext.define('Ext.container.Container', {
      *
      * @param {Ext.Component/String} component The component instance or id to remove.
      *
-     * @param {Boolean} [autoDestroy] True to automatically invoke the removed Component's
-     * {@link Ext.Component#method-destroy} function.
-     *
-     * Defaults to the value of this Container's {@link #autoDestroy} config.
+     * @param {Object} [disposition] Flags to determine what to do with the removed component.
+     * (May also be specified as a boolean `autoDestroy` flag for backward compatibility).
+     * @param {Boolean} [disposition.destroy] Defaults to this Container's {@link #autoDestroy} config.
+     * Specifies whether to destroy the component being removed.
+     * @param [disposition.detach] Defaults to the {@link #detachOnRemove} configuration
+     * Specifies whether to remove the component's DOM from the container and into
+     * the {@link Ext#getDetachedBody detached body element}
      *
      * @return {Ext.Component} component The Component that was removed.
      * @since 2.3.0
@@ -1800,6 +1908,33 @@ Ext.define('Ext.container.Container', {
         return this.getLayout().setActiveItem(item);
     },
 
+    updateActions: function(actions) {
+        var me = this,
+            actionName,
+            action;
+
+        // Convert action configs into Ext.Action instances.
+        for (actionName in actions) {
+            if (!actions[actionName].isAction) {
+                actions[actionName] = new Ext.Action(actions[actionName]);
+            }
+        }
+    },
+
+    /**
+     * Retrieves the named {@link Ext.Action Action} from this view or any ancestor which
+     * has that named Action. See {@link #actions}
+     */
+    getAction: function(name) {
+        var owner = this;
+        
+        for (var owner = this; owner; owner = owner.getRefOwner()) {
+            if (owner.actions && owner.actions[name]) {
+                return owner.actions[name];
+            }
+        }
+    },
+
     // ***********************************************************************************
     // End Methods
     // ***********************************************************************************
@@ -1859,17 +1994,27 @@ Ext.define('Ext.container.Container', {
         /**
          * @private
          */
-        doRemove: function(component, doDestroy) {
-            // Ensure the flag is set correctly
-            doDestroy = doDestroy === true || (doDestroy !== false && this.autoDestroy);
-
+        doRemove: function(component, flags) {
             var me = this,
+                doDestroy,
+                doDetach = me.detachOnRemove,
                 layout = me.layout,
                 hasLayout = layout && me.rendered,
+                isDestroying,
+                floating = component.floating;
+
+            // Ensure the flags are set correctly
+            if (flags === undefined) {
+                doDestroy = me.autoDestroy;
+            } else if (typeof flags === 'boolean') {
+                doDestroy = flags;
+            } else {
+                doDestroy = ('destroy' in flags) && flags.destroy;
+                doDetach = ('detach' in flags) && flags.detach;
+            }
 
             // isDestroying flag is true if the removal is taking place as part of destruction, OR if removal is intended to *cause* destruction
-            isDestroying = component.destroying || doDestroy,
-            floating = component.floating;
+            isDestroying = component.destroying || doDestroy;
 
             if (floating) {
                 me.floatingItems.remove(component);
@@ -1899,7 +2044,7 @@ Ext.define('Ext.container.Container', {
                 if (hasLayout && !floating) {
                     layout.afterRemove(component);
                 }
-                if (me.detachOnRemove && component.rendered) {
+                if (doDetach && component.rendered) {
                     me.detachComponent(component);
                 }
             }
@@ -1937,10 +2082,6 @@ Ext.define('Ext.container.Container', {
          */
         getDefaultContentTarget: function() {
             return this.el;
-        },
-
-        getScrollerEl: function() {
-            return this.layout.getScrollerEl() || this.callParent();
         },
 
         /**

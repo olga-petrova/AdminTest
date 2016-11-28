@@ -6,7 +6,7 @@
  * @var {color}
  * Toolbar background-color
  */
-$toolbar-background-color: dynamic(#fff);
+$toolbar-background-color: dynamic($background-color);
 
 /**
  * @var {string/list}
@@ -101,3 +101,5 @@ $toolbar-title-font-size-big: dynamic($toolbar-title-font-size);
  * Toolbar {@link Ext.Title Title} font-family
  */
 $toolbar-title-font-family: dynamic($font-family);
+
+$toolbar-color: dynamic(null);

@@ -4,27 +4,30 @@
  *
  * Example:
  *
- *      // This example will generate a grid column for the year 2012
- *      // instead of columns for all unique years.
- *      topAxis: [{
- *          dataIndex:  'year',
- *          header:     'Year',
- *          filter: {
- *              type:       'label',
- *              operator:   '=',
- *              value:      2012
- *          }
- *      }]
+ *      {
+ *          xtype: 'pivotgrid',
+ *          // This example will generate a grid column for the year 2012
+ *          // instead of columns for all unique years.
+ *          topAxis: [{
+ *              dataIndex:  'year',
+ *              header:     'Year',
+ *              filter: {
+ *                  type:       'label',
+ *                  operator:   '=',
+ *                  value:      2012
+ *              }
+ *          }]
  *
- *      leftAxis: [{
- *          dataIndex:  'country',
- *          header:     'Country',
- *          filter: {
- *              type:       'label',
- *              operator:   'in',
- *              value:      ['USA', 'Canada', 'Australia']
- *          }
- *      }]
+ *          leftAxis: [{
+ *              dataIndex:  'country',
+ *              header:     'Country',
+ *              filter: {
+ *                  type:       'label',
+ *                  operator:   'in',
+ *                  value:      ['USA', 'Canada', 'Australia']
+ *              }
+ *          }]
+ *      }
  *
  */
 Ext.define('Ext.pivot.filter.Label', {

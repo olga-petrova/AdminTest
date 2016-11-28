@@ -1,0 +1,17 @@
+.x-pickerfield .x-input-mask:after {
+    color: $selectfield-trigger-color;
+    position: absolute;
+    right: .4em;
+    height: $selectfield-trigger-size;
+    width: $selectfield-trigger-size;
+    font-size: $selectfield-trigger-font-size;
+    top: 50%;
+    margin-top: -($selectfield-trigger-size / 2);
+    @if $enable-big {
+        .x-big & {
+            font-size: $selectfield-trigger-font-size-big;
+        }
+    }
+    @include font-icon($selectfield-trigger-icon, $pseudo: false);
+    text-align: center;
+}

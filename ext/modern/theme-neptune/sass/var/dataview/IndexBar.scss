@@ -19,3 +19,31 @@ $index-bar-bg-color: dynamic(hsla(hue($base-color), 10%, 60%, .8));
  * Text color of the index bar.
  */
 $index-bar-color: dynamic(darken(desaturate($base-color, 5%), 15%));
+$index-bar-height: dynamic(null);
+
+$index-bar-horizontal-width: dynmaic(null);
+$index-bar-horizontal-height: dynamic($index-bar-width);
+
+$index-bar-padding: dynamic(.3em 0);
+$index-bar-pressed-border-radius: ($index-bar-width)/2;
+
+$index-bar-margin: dynamic(0 8px 0 0);
+$index-bar-horizontal-margin: dynamic(0 0 8px 0);
+
+$index-bar-display: dynamic(null);
+$index-bar-align-items: dynamic(null);
+$index-bar-justify-content: dynamic(null);
+$index-bar-opacity: dynamic(null);
+
+$index-bar-pressed-background-color: dynamic(null);
+$index-bar-pressed-opacity: dynamic(null);
+
+$index-bar-item-width: dynamic(null);
+$index-bar-item-height: dynamic(null);
+$index-bar-item-display: dynamic(null);
+$index-bar-item-justify-content: dynamic(null);
+$index-bar-item-align-items: dynamic(null);
+$index-bar-item-font-weight: dynamic(null);
+$index-bar-item-font-size: dynamic(null);
+$index-bar-item-font-line-height: dynamic(null);
+$index-bar-item-font-family: dynamic(null);

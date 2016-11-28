@@ -4,7 +4,13 @@ describe("Ext.toolbar.Paging", function() {
         describeNotIE9_10 = Ext.isIE9 || Ext.isIE10 ? xdescribe : describe,
         synchronousLoad = true,
         proxyStoreLoad = Ext.data.ProxyStore.prototype.load,
-        loadStore;
+        loadStore = function() {
+            proxyStoreLoad.apply(this, arguments);
+            if (synchronousLoad) {
+                this.flushLoad.apply(this, arguments);
+            }
+            return this;
+        };
     
     function makeToolbar(cfg, preventRender) {
         cfg = cfg || {};
@@ -21,7 +27,7 @@ describe("Ext.toolbar.Paging", function() {
         store = new Ext.data.Store({
             model: 'spec.PagingToolbarModel',
             storeId: 'pagingToolbarStore',
-            pageSize: pageSize || 5,
+            pageSize: pageSize != null ? pageSize : 5,
             proxy: {
                 type: 'ajax',
                 url: 'fakeUrl',
@@ -64,13 +70,7 @@ describe("Ext.toolbar.Paging", function() {
     
     beforeEach(function() {
         // Override so that we can control asynchronous loading
-        loadStore = Ext.data.ProxyStore.prototype.load = function() {
-            proxyStoreLoad.apply(this, arguments);
-            if (synchronousLoad) {
-                this.flushLoad.apply(this, arguments);
-            }
-            return this;
-        };
+        Ext.data.ProxyStore.prototype.load = loadStore;
 
         Ext.define('spec.PagingToolbarModel', {
             extend: 'Ext.data.Model',
@@ -154,6 +154,23 @@ describe("Ext.toolbar.Paging", function() {
             mockComplete(makeData(20, 10));
             tb.bindStore(store);
             expect(tb.down('#inputItem').getValue()).toBe(3);
+        });
+
+        it("should display the correct info for pageSize 0", function() {
+            store = makeStore(0);
+            store.load();
+            mockComplete(makeData(20, 10));
+            makeToolbar({
+                store: store
+            });
+
+            expect(tb.getPageData()).toEqual({
+                total: 20,
+                currentPage: 1,
+                pageCount: 1,
+                fromRecord: 1,
+                toRecord: 20
+            });
         });
     });
     

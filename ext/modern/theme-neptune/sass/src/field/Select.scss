@@ -2,27 +2,7 @@
  * @class Ext.field.Select
  */
 
-.x-field-select .x-field-mask:after {
-    color: $selectfield-trigger-color;
-    position: absolute;
-    right: .4em;
-    height: $selectfield-trigger-size;
-    width: $selectfield-trigger-size;
-    font-size: $selectfield-trigger-font-size;
-    top: 50%;
-    margin-top: -($selectfield-trigger-size / 2);
-    @if $enable-big {
-        .x-big & {
-            font-size: $selectfield-trigger-font-size-big;
-        }
-    }
-    @include font-icon($selectfield-trigger-icon, $pseudo: false);
-    text-align: center;
-}
-
-// Overlay
-
-.x-select-overlay {
+.x-selectfield-overlay {
     .x-list-item-label {
         height: 2.6em;
     }
@@ -43,3 +23,22 @@
         }
     }
 }
+
+.x-selectfield-overlay-left {
+    .x-list-label {
+        margin-left: 1.6em;
+    }
+
+    .x-item-selected {
+        &.x-list-item {
+            .x-list-label {
+                margin-right: 0;
+                @include font-icon($fa-var-check, $pseudo: after, $style-pseudo: true);
+                &:after {
+                    position: absolute;
+                    left: .6em;
+                }
+            }
+        }
+    }
+} 

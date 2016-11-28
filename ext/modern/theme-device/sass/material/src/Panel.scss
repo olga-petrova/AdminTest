@@ -1,0 +1,9 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}panel {
+      .#{$prefix}innerhtml {
+        padding: $content-padding-md/2 $content-padding-md 0 $content-padding-md;
+      }
+    }
+  }
+}

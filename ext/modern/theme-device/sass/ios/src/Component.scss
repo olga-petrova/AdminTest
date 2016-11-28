@@ -1,0 +1,21 @@
+@if ($include-ios) {
+  @include icon-font('iOS7', 'ios7/ios7');
+
+  html, body {
+    font-family: "Helvetica Neue", HelveticaNeue, "Helvetica-Neue", Helvetica, "BBAlpha Sans", sans-serif;
+    font-weight: normal;
+  }
+
+  .#{$prefix}html {
+    line-height: 1.5;
+    color: #333;
+    font-size: .8em;
+    padding: 1.2em;
+  }
+
+  .#{$prefix}layout-card-item {
+    background: $background-color-ios;
+  }
+
+  @include st-loading-spinner(1em, $primary-color-ios, .1em, .25em);
+}

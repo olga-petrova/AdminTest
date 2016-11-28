@@ -1,5 +1,3 @@
-.#{$prefix}ie .#{$prefix}field.#{$prefix}field-textarea {
-    .#{$prefix}field-mask {
-        z-index: -1;
-    }
+.#{$prefix}textarea {
+    resize: none;
 }

@@ -8,9 +8,9 @@
  * registering quick tips programmatically via the {@link #register} method.
  *
  * The singleton's instance of {@link Ext.tip.QuickTip} is available via
- * {@link #getQuickTip}, and supports all the methods, and all the all the
- * configuration properties of Ext.tip.QuickTip. These settings will apply to all
- * tooltips shown by the singleton.
+ * {@link #getQuickTip}, and supports all the methods and configuration properties
+ * of Ext.tip.QuickTip. These settings will apply to all tooltips shown by the
+ * singleton.
  *
  * Below is the summary of the configuration properties which can be used.
  * For detailed descriptions see the config options for the
@@ -163,6 +163,8 @@ Ext.define('Ext.tip.QuickTipManager', {
     destroy: function() {
         Ext.destroy(this.tip);
         this.tip = undefined;
+        Ext.quickTipsActive = false;
+
         // Don't callparent here, we're a singleton
     },
 

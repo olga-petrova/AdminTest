@@ -1,0 +1,44 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}toggle {
+    }
+    height: 14px;
+    border-radius: 14px;
+    width: 36px;
+    background-color: $text-color-lighter-md;
+    border: none;
+    overflow: visible;
+    margin-bottom: 4px;
+
+    .#{$prefix}thumb-inner {
+      @include css-color-variable('primary-color-pressed-md', 'background-color');
+      opacity: 0.4;
+      width: 32px;
+      height: 32px;
+      position: absolute;
+      top: -11px;
+      left: -9px;
+      border-radius: 50%;
+      transform: scale(0);
+    }
+
+    .#{$prefix}thumb {
+      transition: transform .2s ease-out;
+      &:after {
+        @include css-color-variable('background-color-light-md', 'background-color');
+        @include insertion(18px, 18px, -2px, 0px);
+        @include material-shadow(1);
+      }
+    }
+  }
+
+  .#{$prefix}toggle-on {
+    @include css-color-variable('primary-color-pressed-md', 'background-color');
+
+    .#{$prefix}thumb {
+      &:after {
+        @include css-color-variable('primary-color-md', 'background-color');
+      }
+    }
+  }
+}

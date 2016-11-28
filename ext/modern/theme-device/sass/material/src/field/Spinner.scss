@@ -1,0 +1,54 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}spinnerfield {
+      .#{$prefix}spinnerfield-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        @include css-color-variable('text-color-reverse-md');
+        position: relative;
+        top: -5px;
+        margin-left: $content-padding-md/2;
+
+        &.#{$prefix}button-pressed {
+          @include css-color-variable('text-color-reverse-md');
+        }
+      }
+
+      &.#{$prefix}item-disabled {
+        .#{$prefix}spinnerfield-button {
+          @include css-color-variable('text-color-lighter-md', 'background-color');
+        }
+      }
+
+      .#{$prefix}spinnerfield-button-down {
+        @include css-color-variable('negative-color-md', 'background-color');
+
+        @include material-icon('remove');
+        &:after {
+          font-size: 16px;
+        }
+
+        &.#{$prefix}button-pressed {
+          @include css-color-variable('negative-color-pressed-md', 'background-color');
+        }
+      }
+
+      .#{$prefix}spinnerfield-button-up {
+        @include css-color-variable('positive-color-md', 'background-color');
+
+        @include material-icon('add');
+        &:after {
+          font-size: 16px;
+        }
+
+        &.#{$prefix}button-pressed {
+          @include css-color-variable('positive-color-pressed-md', 'background-color');
+        }
+      }
+    }
+  }
+}

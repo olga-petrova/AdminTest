@@ -163,15 +163,12 @@ require('font-icon');
 
 @mixin font-icon-pseudo-content($char, $rotation, $rotation-origin) {
     content: $char;
+    font-feature-settings: 'liga';
 
     @if $rotation != null {
         display: inline-block;
         -webkit-transform: $rotation;
         -webkit-transform-origin: $rotation-origin;
-        -moz-transform: $rotation;
-        -moz-transform-origin: $rotation-origin;
-        -ms-transform: $rotation;
-        -ms-transform-origin: $rotation-origin;
         transform: $rotation;
         transform-origin: $rotation-origin;
     }

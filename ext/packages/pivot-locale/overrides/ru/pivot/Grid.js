@@ -1,4 +1,3 @@
-
 /**
  * Russian translation by Alexey Kushnikov (akushnikov@outlook.com)
  *

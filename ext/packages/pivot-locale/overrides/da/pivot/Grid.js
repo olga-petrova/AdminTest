@@ -1,4 +1,3 @@
-
 /**
  * Danish translation by Steen Ole Andersen
  *

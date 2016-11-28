@@ -1,0 +1,33 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}grid-column,
+    .#{$prefix}grid-headergroup-text {
+      position: relative;
+    }
+
+    .#{$prefix}column-sorted-asc > .#{$prefix}innerhtml:after, .#{$prefix}column-sorted-desc > .#{$prefix}innerhtml:after {
+      color: #919191;
+      display: inline-block;
+      text-align: center;
+      width: 1em;
+      margin-left: 0.23em;
+    }
+
+    .#{$prefix}grid-column {
+      &.#{$prefix}column-sorted-asc > .#{$prefix}innerhtml {
+        @include material-icon-style();
+        &:after {
+          content: 'arrow_upward';
+          font-size: 18px;
+        }
+      }
+      &.#{$prefix}column-sorted-desc > .#{$prefix}innerhtml {
+        @include material-icon-style();
+        &:after {
+          content: 'arrow_downward';
+          font-size: 18px;
+        }
+      }
+    }
+  }
+}

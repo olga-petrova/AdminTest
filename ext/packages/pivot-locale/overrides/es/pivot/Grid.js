@@ -1,4 +1,3 @@
-
 /**
  * Spanish translation by Gustavo Ruiz
  * The original translation was done for version 2.x.

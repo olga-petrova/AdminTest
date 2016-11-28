@@ -1,0 +1,17 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}form-fieldset .#{$prefix}form-fieldset-inner {
+      border: none;
+    }
+
+    .#{$prefix}form-fieldset-title {
+      @include material-font-style('subhead');
+    }
+
+    .#{$prefix}form-fieldset-instructions {
+      @include material-font-style('caption');
+      text-align: left;
+      @include css-color-variable('text-color-light-md');
+    }
+  }
+}

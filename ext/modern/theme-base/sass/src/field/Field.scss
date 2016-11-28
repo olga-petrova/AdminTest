@@ -1,42 +1,69 @@
 // Label
-.#{$prefix}form-label {
+.#{$prefix}field-label {
     display: none;
+}
 
-    .#{$prefix}form-label-nowrap & {
-        @include ellipsis();
-    }
+.#{$prefix}field-label-nowrap {
+    @include ellipsis();
 }
 
 //  Ext.field.Field
 .#{$prefix}field {
     @include st-box();
 
-    .#{$prefix}field-input {
+    .#{$prefix}input {
         position: relative;
-        min-width: 3.7em;
+        display: table;
+        table-layout: fixed;
     }
 
-    .#{$prefix}field-input,
-    .#{$prefix}input-el {
+    &.#{$prefix}field-labeled > .#{$prefix}field-label {
+        display: block;
+    }
+
+    .#{$prefix}field-body {
+        position: relative;
+    }
+}
+.#{$prefix}field-body {
+    @include st-box();
+    @include st-box-orient(horizontal);
+    @include st-box-align(center);
+
+    .#{$prefix}body-align-start > & {
+        @include st-box-pack(start);
+    }
+
+    .#{$prefix}body-align-center > & {
+        @include st-box-pack(center);
+    }
+
+    .#{$prefix}body-align-end > & {
+        @include st-box-pack(end);
+    }
+
+    .#{$prefix}body-align-stretch > & {
+        @include st-box-pack(stretch);
+    }
+}
+
+.#{$prefix}body-align-stretch {
+    .#{$prefix}field-body {
+        // just in case the input can't stretch (checkbox/radio)
+        @include st-box-pack(center);
+    }
+
+    .#{$prefix}input {
         width: 100%;
-    }
-
-    &.#{$prefix}field-labeled {
-        .#{$prefix}form-label {
-            display: block;
-        }
-    }
-
-    .#{$prefix}component-outer {
-        position: relative;
     }
 }
 
 .#{$prefix}label-align-left,
 .#{$prefix}label-align-right {
     @include st-box-orient(horizontal, important);
+    @include st-box-align(center);
 
-    .#{$prefix}component-outer {
+    .#{$prefix}field-body {
         @include st-box-flex(1, 0px);
     }
 }
@@ -54,26 +81,38 @@
     @include st-box-direction(reverse, column);
 }
 
+.#{$prefix}label-text-align-left {
+    text-align: left;
+}
+
+.#{$prefix}label-text-align-center {
+    text-align: center;
+}
+
+.#{$prefix}label-text-align-right {
+    text-align: right;
+}
+
 .#{$prefix}input-el {
     display: block;
 }
 
-.#{$prefix}field-mask {
+.#{$prefix}input-mask {
     @include absolute-fit();
 }
 
 .#{$prefix}ie .#{$prefix}field {
-    &.#{$prefix}field-text,
-    &.#{$prefix}field-textarea,
-    &.#{$prefix}field-search {
-        .#{$prefix}field-mask {
+    &.#{$prefix}textfield,
+    &.#{$prefix}textareafield,
+    &.#{$prefix}searchfield {
+        .#{$prefix}input-mask {
             z-index: -1;
         }
     }
 }
 
 // Required fields
-.#{$prefix}field-required .#{$prefix}form-label:after {
+.#{$prefix}field-required .#{$prefix}field-label:after {
     content: "*";
     display: inline;
 }
@@ -82,10 +121,8 @@ input[type="search"]::-webkit-search-cancel-button {
     -webkit-appearance: none;
 }
 
-.#{$prefix}field-input .#{$prefix}clear-icon, .#{$prefix}field-input .#{$prefix}reveal-icon {
+.#{$prefix}input .#{$prefix}clear-icon, .#{$prefix}input .#{$prefix}reveal-icon {
     display: none;
-    position: absolute;
-    top: 50%;
 }
 
 .#{$prefix}field-clearable {
@@ -98,16 +135,4 @@ input[type="search"]::-webkit-search-cancel-button {
     .#{$prefix}reveal-icon {
         display: block;
     }
-}
-
-.#{$prefix}android .#{$prefix}input-el {
-  -webkit-text-fill-color: #000;
-}
-
-.#{$prefix}android .#{$prefix}empty .#{$prefix}input-el {
-  -webkit-text-fill-color: #A9A9A9;
-}
-
-.#{$prefix}android .#{$prefix}item-disabled .#{$prefix}input-el {
-  -webkit-text-fill-color: #b3b3b3;
 }

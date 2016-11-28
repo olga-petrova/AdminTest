@@ -2,29 +2,36 @@
  * @class Ext.dataview.List
  */
 
-.x-list-item {
+.#{$prefix}list-item {
+    display: $list-item-display;
+    align-items: $list-item-align-items;
     background-color: $list-item-background-color;
     color: $list-item-color;
 
-    &.x-item-selected .x-dock-horizontal,
-    &.x-item-selected.x-list-item-tpl {
+    &.#{$prefix}item-selected .#{$prefix}dock-horizontal,
+    &.#{$prefix}item-selected.#{$prefix}list-item-tpl {
         background-color: $list-item-selected-background-color;
-        @include color-by-background($list-item-selected-background-color);
-    }
-
-    &.x-item-pressed {
-        &.x-list-item-tpl,
-        .x-dock-horizontal {
-            background: $list-item-pressed-background-color none;
+        @if $list-item-selected-color == null {
+            @include color-by-background($list-item-selected-background-color);
+        } @else {
+            color: $list-item-selected-color;
         }
     }
 
-    .x-list-item-body,
-    > .x-innerhtml {
+    &.#{$prefix}item-pressed {
+        &.#{$prefix}list-item-tpl,
+        .#{$prefix}dock-horizontal {
+            background: $list-item-pressed-background-color none;
+        }
+        color: $list-item-pressed-color;
+    }
+
+    .#{$prefix}list-item-body,
+    > .#{$prefix}innerhtml {
         padding: $list-item-padding;
         @include font($list-item-font-weight, $list-item-font-size, $list-item-line-height, $list-item-font-family);
         @if $enable-big {
-            .x-big & {
+            .#{$prefix}big & {
                 padding: $list-item-padding-big;
                 font-size: $list-item-font-size-big;
                 line-height: $list-item-line-height-big;
@@ -32,55 +39,81 @@
         }
     }
 
-    &.x-list-item-tpl,
-    .x-dock-horizontal {
-        border-top: 1px solid $list-item-border-color;
+    &.#{$prefix}list-item-tpl,
+    .#{$prefix}dock-horizontal {
+        @include border($list-item-border-width, $list-item-border-style, $list-item-border-color);
     }
 
 
-    &.x-list-item-tpl.x-list-footer-wrap,
-    &.x-list-footer-wrap .x-dock-horizontal {
-        border-bottom: 1px solid $list-item-border-color;
+    &.#{$prefix}list-item-tpl.#{$prefix}list-footer-wrap,
+    &.#{$prefix}list-footer-wrap .#{$prefix}dock-horizontal {
+        @include border($list-footer-item-border-width, $list-footer-item-border-style, $list-footer-item-border-color);
     }
 }
 
-.x-list-header {
+.#{$prefix}list-header {
     background-color: $list-group-header-background-color;
-    border-top: 1px solid $list-group-header-border-color;
-    border-bottom: 1px solid $list-group-header-border-color;
+    @include border($list-group-header-border-width, $list-group-header-border-style, $list-group-header-border-color);
 
     color: $list-group-header-color;
     @include font($list-group-header-font-weight, $list-group-header-font-size, $list-group-header-line-height, $list-group-header-font-family);
     padding: $list-group-header-padding;
 
     @if $enable-big {
-        .x-big & {
+        .#{$prefix}big & {
             font-size: $list-group-header-font-size-big;
             line-height: $list-group-header-line-height-big;
             padding: $list-group-header-padding-big;
         }
     }
+
+  // Pinned Header
+  &.#{$prefix}list-header-swap {
+    color: $list-group-header-pinned-color;
+    background-color: $list-group-header-pinned-background-color;
+  }
 }
 
-.x-list-disclosure {
-    position: absolute;
-    right: 0;
-    width: 1em;
-    height: 1em;
-    top: 50%;
-    margin-top: -.5em;
-    margin-right: .6em;
-    color: $neutral-dark-color;
-    text-align: center;
-    @include font-icon($fa-var-arrow-circle-right 1.24em $font-icon-font-family);
+.#{$prefix}list-indexed .#{$prefix}list-item {
+    padding: $list-item-indexed-padding;
+}
+
+.#{$prefix}list-disclosure {
+    position: $list-item-disclosure-position;
+    background-color: $list-item-disclosure-background-color;
+    right: $list-item-disclosure-right;
+    width: $list-item-disclosure-width;
+    height: $list-item-disclosure-height;
+    top: $list-item-disclosure-top;
+    margin: $list-item-disclosure-margin;
+    color: $list-item-disclosure-color;
+    text-align: $list-item-disclosure-text-align;
+    border-radius: $list-item-disclosure-border-radius;
+    padding: $list-item-disclosure-padding;
+    display: $list-item-disclosure-display;
+    justify-content: $list-item-disclosure-justify-content;
+    align-content: $list-item-disclosure-align-content;
+    align-items: $list-item-disclosure-align-items;
+
+
+    @include font-icon($list-item-disclosure-icon);
 
     @if $enable-big {
-        .x-big & {
-            font-size: 1.2em;
+        .#{$prefix}big & {
+            font-size: $list-item-disclosure-font-size-big;
         }
     }
 
-    .x-list-indexed & {
-        margin-right: 1.8em;
+    &.#{$prefix}disclosure-pressed {
+        background-color: $list-item-disclosure-pressed-background-color;
+        color: $list-item-disclosure-pressed-color;
     }
+
+    .#{$prefix}list-indexed & {
+        margin: $list-item-indexed-disclosure-margin;
+    }
+}
+
+.#{$prefix}item-pressed .#{$prefix}list-disclosure {
+    background-color: $list-item-disclosure-pressed-background-color;
 }

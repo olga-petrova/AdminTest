@@ -1,0 +1,7 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}form-inner {
+      padding: $content-padding-md/2 $content-padding-md $content-padding-md/2 $content-padding-md;
+    }
+  }
+}

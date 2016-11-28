@@ -1,16 +1,19 @@
 Ext.define('Ext.ux.dd.PanelFieldDragZone', {
-
     extend: 'Ext.dd.DragZone',
+    alias: 'plugin.ux-panelfielddragzone',
 
-    constructor: function(cfg){
-        cfg = cfg || {};
-        if (cfg.ddGroup) {
-            this.ddGroup = cfg.ddGroup;
+    scroll: false,
+
+    constructor: function (cfg) {
+        if (cfg) {
+            if (cfg.ddGroup) {
+                this.ddGroup = cfg.ddGroup;
+            }
         }
     },
 
-//  Call the DRagZone's constructor. The Panel must have been rendered.
-    init: function(panel) {
+    init: function (panel) {
+        // Call the DragZone's constructor. The Panel must have been rendered.
         // Panel is an HtmlElement
         if (panel.nodeType) {
             // Called via dragzone::init
@@ -27,21 +30,15 @@ Ext.define('Ext.ux.dd.PanelFieldDragZone', {
         }
     },
 
-    scroll: false,
-
-//  On mousedown, we ascertain whether it is on one of our draggable Fields.
-//  If so, we collect data about the draggable object, and return a drag data
-//  object which contains our own data, plus a "ddel" property which is a DOM
-//  node which provides a "view" of the dragged data.
-    getDragData: function(e) {
+    getDragData: function (e) {
+        // On mousedown, we ascertain whether it is on one of our draggable Fields.
+        // If so, we collect data about the draggable object, and return a drag data
+        // object which contains our own data, plus a "ddel" property which is a DOM
+        // node which provides a "view" of the dragged data.
         var targetLabel = e.getTarget('label', null, true),
-            text,
-            oldMark,
-            field,
-            dragEl;
+            text, oldMark, field, dragEl;
 
         if (targetLabel) {
-
             // Get the data we are dragging: the Field
             // create a ddel for the drag proxy to display
             field = Ext.getCmp(targetLabel.up('.' + Ext.form.Labelable.prototype.formItemCls).id);
@@ -49,26 +46,29 @@ Ext.define('Ext.ux.dd.PanelFieldDragZone', {
             // to the underlying dom element which can cause problems in IE
             oldMark = field.preventMark;
             field.preventMark = true;
+
             if (field.isValid()) {
                 field.preventMark = oldMark;
                 dragEl = document.createElement('div');
                 dragEl.className = Ext.baseCSSPrefix + 'form-text';
                 text = field.getRawValue();
                 dragEl.innerHTML = Ext.isEmpty(text) ? '&#160;' : text;
+
                 Ext.fly(dragEl).setWidth(field.getEl().getWidth());
+
                 return {
                     field: field,
                     ddel: dragEl
                 };
-            } else {
-                e.stopEvent();
             }
+
+            e.stopEvent();
             field.preventMark = oldMark;
         }
     },
 
-//  The coordinates to slide the drag proxy back to on failed drop.
     getRepairXY: function() {
+        // The coordinates to slide the drag proxy back to on failed drop.
         return this.dragData.field.getEl().getXY();
     }
 });

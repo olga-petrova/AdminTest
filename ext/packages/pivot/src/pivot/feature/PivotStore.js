@@ -2,33 +2,43 @@
  * This class remodels the grid store when required.
  *
  * @private
- *
  */
 Ext.define('Ext.pivot.feature.PivotStore', {
-    constructor: function(config) {
-        Ext.apply(this, config);
 
-        this.bindStore(config.store);
+    config: {
+        store:          null,
+        grid:           null,
+        matrix:         null,
+        clsGrandTotal:  '',
+        clsGroupTotal:  '',
+        summaryDataCls: '',
+        rowCls:         ''
+    },
+
+    constructor: function(config) {
+        this.initConfig(config);
+        return this.callParent(arguments);
     },
     
     destroy: function(){
         var me = this;
 
-        Ext.destroy(me.storeListeners);
+        Ext.destroy(me.storeListeners, me.matrixListeners);
 
-        me.store = me.matrix = me.pivotFeature = null;
-        me.storeInfo = me.storeListeners = me.store = null;
+        me.setConfig({
+            store:  null,
+            matrix: null,
+            grid:   null
+        });
+        me.storeInfo = me.storeListeners = null;
         
         me.callParent(arguments);
     },
     
-    bindStore: function(store) {
+    updateStore: function(store) {
         var me = this;
 
-        if (me.store) {
-            Ext.destroy(me.storeListeners);
-            me.store = null;
-        }
+        Ext.destroy(me.storeListeners);
         if (store) {
             me.storeListeners = store.on({
                 // this event is fired by the pivot grid for private use
@@ -36,115 +46,110 @@ Ext.define('Ext.pivot.feature.PivotStore', {
                 scope:              me,
                 destroyable:        true
             });
-            me.store = store;
+        }
+    },
+
+    updateMatrix: function(matrix){
+        var me = this;
+
+        Ext.destroy(me.matrixListeners);
+        if (matrix) {
+            me.matrixListeners = matrix.on({
+                // this event is fired by the pivot grid for private use
+                groupexpand:    me.onGroupExpand,
+                groupcollapse:  me.onGroupCollapse,
+                scope:          me,
+                destroyable:    true
+            });
         }
     },
     
     processStore: function(){
-        if(!this.matrix){
+        var me = this,
+            store = me.getStore(),
+            matrix = me.getMatrix(),
+            records = [],
+            isClassic = Ext.toolkit == 'classic',
+            items, length, i, group, fields;
+
+        if(!matrix || !store){
             return;
         }
-        
-        var me = this,
-            fn = me['processGroup' + Ext.String.capitalize(me.matrix.viewLayoutType)],
-            fields = me.matrix.getColumns(),
-            outputFn;
-        
-        me.store.model.replaceFields(fields, true);
-        me.store.removeAll(true);
-        me.store.suspendEvents(false);
+
+        fields = matrix.getColumns();
+
+        store.model.replaceFields(fields, true);
+        store.removeAll(true);
 
         me.storeInfo = {};
 
-        if(!Ext.isFunction(fn)){
-            // specified view type doesn't exist so let's use the outline view
-            fn = me.processGroupOutline;
+        if(matrix.rowGrandTotalsPosition == 'first'){
+            records.push.apply(records, me.processGrandTotal() || []);
         }
-        outputFn = Ext.Function.bind(fn, me);
-        
-        if(me.matrix.rowGrandTotalsPosition == 'first'){
-            me.processGrandTotal();
+
+        items = matrix.leftAxis.getTree();
+        length = items.length;
+
+        for(i = 0; i < length; i++){
+            group = items[i];
+            records.push.apply(records, me.processGroup({
+                    group:              group,
+                    previousExpanded:   (i > 0 ? items[i-1].expanded : false)
+                }) || []);
         }
-        
-        Ext.Array.each(me.matrix.leftAxis.getTree(), function(group, index, all){
-            me.store.add(outputFn({
-                group:              group,
-                previousExpanded:   (index > 0 ? all[index-1].expanded : false)
-            }));
-        }, me);
-        
-        if(me.matrix.rowGrandTotalsPosition == 'last'){
-            me.processGrandTotal();
+
+        if(matrix.rowGrandTotalsPosition == 'last'){
+            records.push.apply(records, me.processGrandTotal() || []);
         }
-        
-        me.store.resumeEvents();
-        me.store.fireEvent('refresh', me.store);
+
+        store.loadData(records);
+        if(!isClassic) {
+            store.fireEvent('load', store);
+        }
     },
     
     processGroup: function(config){
         var me = this,
-            fn = me['processGroup' + Ext.String.capitalize(me.matrix.viewLayoutType)],
-            outputFn;
+            fn = me['processGroup' + Ext.String.capitalize(me.getMatrix().viewLayoutType)];
         
         if(!Ext.isFunction(fn)){
             // specified view type doesn't exist so let's use the outline view
             fn = me.processGroupOutline;
         }
-        outputFn = Ext.Function.bind(fn, me);
-        
-        return outputFn(config);
-    },
-    
-    createGridStoreRecord: function(values){
-        var me = this,
-            data = me.matrix.preparePivotStoreRecordData(values || {}),
-            record;
-            
-        data.id = '';
-        record = new me.store.model(data);
-        if(Ext.isEmpty(values)){
-            Ext.Object.each(data, function(field){
-                if(field != 'id'){
-                    record.set(field, null);
-                }
-            });
-            record.commit();
-        }
-        
-        record.isPlaceholder = true;
-        //record.internalId = values.key;
-        
-        return record;
+
+        return fn.call(me, config);
     },
     
     processGrandTotal: function(){
         var me = this,
             found = false,
+            matrix = me.getMatrix(),
             group = {
-                key:    me.matrix.grandTotalKey
-            };
+                key:    matrix.grandTotalKey
+            },
+            records = [];
             
-        Ext.Array.forEach(me.matrix.totals || [], function(total){
+        Ext.Array.forEach(matrix.totals || [], function(total){
             var record = total.record,
-                i = me.matrix.leftAxis.dimensions.getCount();
+                i = matrix.leftAxis.dimensions.getCount();
             
             if(!(record instanceof Ext.data.Model)){
                 return;
             }
             
             me.storeInfo[record.internalId] = {
-                leftKey:        group.key,
-                rowStyle:       '',
-                rowClasses:    [me.pivotFeature.gridMaster.clsGrandTotal, me.pivotFeature.summaryDataCls],
-                rendererParams: {}
+                leftKey:            group.key,
+                rowStyle:           '',
+                rowClasses:         [me.getClsGrandTotal(), me.getSummaryDataCls()],
+                rendererParams:     {}
             };
-            
-            me.matrix.leftAxis.dimensions.each(function(column, index){
+
+            matrix.leftAxis.dimensions.each(function(column, index){
                 var key;
                 
-                if(me.matrix.viewLayoutType == 'compact' || index === 0){
-                    if(me.matrix.viewLayoutType == 'compact'){
-                        key = me.matrix.compactViewKey;
+                if(matrix.viewLayoutType == 'compact' || index === 0){
+                    if(matrix.viewLayoutType == 'compact'){
+                        key = matrix.compactViewKey;
                         i = 1;
                     }else{
                         key = column.getId();
@@ -169,14 +174,17 @@ Ext.define('Ext.pivot.feature.PivotStore', {
                     }; 
                     i--;
                 }
-                // for all top axis columns use a new renderer
-                me.storeInfo[record.internalId].rendererParams['topaxis'] = {
-                    fn: 'topAxisRenderer'
-                };
             });
-            
-            me.store.add(record);
+
+            // for all top axis columns use a new renderer
+            me.storeInfo[record.internalId].rendererParams['topaxis'] = {
+                fn: 'topAxisRenderer'
+            };
+
+            records.push(record);
         });
+
+        return records;
     },
     
 // Outline view functions    
@@ -204,20 +212,13 @@ Ext.define('Ext.pivot.feature.PivotStore', {
 
     processGroupOutlineWithChildren: function(config){
         var me = this,
+            matrix = me.getMatrix(),
             group = config['group'],
             previousExpanded = config['previousExpanded'],
-            hasSummaryData = false,
-            record, i;
+            hasSummaryData, record, i;
             
-        if(!group.expanded || (group.expanded && me.matrix.rowSubTotalsPosition == 'first')){
-            // summary row is on the group header
-            hasSummaryData = true;
-            record = me.createGridStoreRecord(group);
-        }else if(me.matrix.rowSubTotalsPosition == 'last' || me.matrix.rowSubTotalsPosition == 'none'){
-            record = me.createGridStoreRecord();
-            record.set(group.dimension.getId(), group.name);
-        }
-        record.commit();
+        hasSummaryData = (!group.expanded || (group.expanded && matrix.rowSubTotalsPosition == 'first'));
+        record = group.expanded ? group.records.expanded : group.records.collapsed;
         
         me.processGroupHeaderRecordOutline({
             results:            config.results,
@@ -243,10 +244,8 @@ Ext.define('Ext.pivot.feature.PivotStore', {
                     }
                 }
             }
-            if(me.matrix.rowSubTotalsPosition == 'last'){
-                record = me.createGridStoreRecord(group);
-                record.set(group.dimension.getId(), group.getTextTotal());
-                record.commit();
+            if(matrix.rowSubTotalsPosition == 'last'){
+                record = group.records.footer;
                 me.processGroupHeaderRecordOutline({
                     results:            config.results,
                     group:              group, 
@@ -261,22 +260,23 @@ Ext.define('Ext.pivot.feature.PivotStore', {
     
     processGroupHeaderRecordOutline: function(config){
         var me = this,
+            matrix = me.getMatrix(),
             group = config['group'], 
             record = config['record'], 
             previousExpanded = config['previousExpanded'], 
             subtotalRow = config['subtotalRow'],
             hasSummaryData = config['hasSummaryData'],
-            i = me.matrix.leftAxis.dimensions.getCount(), 
+            i = matrix.leftAxis.dimensions.getCount(),
             found = false;
             
         me.storeInfo[record.internalId] = {
-            leftKey:        group.key,
-            rowStyle:       '',
-            rowClasses:    [me.pivotFeature.gridMaster.clsGroupTotal, hasSummaryData ? me.pivotFeature.summaryDataCls : ''],
-            rendererParams: {}
+            leftKey:            group.key,
+            rowStyle:           '',
+            rowClasses:         [me.getClsGroupTotal(), hasSummaryData ? me.getSummaryDataCls() : ''],
+            rendererParams:     {}
         };
 
-        me.matrix.leftAxis.dimensions.each(function(column, index){
+        matrix.leftAxis.dimensions.each(function(column, index){
             if(column.getId() == group.dimension.getId()){
                 me.storeInfo[record.internalId].rendererParams[column.getId()] = {
                     fn:                 'groupOutlineRenderer',
@@ -312,17 +312,16 @@ Ext.define('Ext.pivot.feature.PivotStore', {
         var me = this,
             group = config['group'], 
             found = false,
-            //record = me.createGridStoreRecord(group);
             record = group.record;
 
         me.storeInfo[record.internalId] = {
-            leftKey:        group.key,
-            rowStyle:       '',
-            rowClasses:    [me.pivotFeature.rowCls, me.pivotFeature.summaryDataCls],
+            leftKey:            group.key,
+            rowStyle:           '',
+            rowClasses:         [me.getSummaryDataCls()],
             rendererParams: {}
         };
 
-        me.matrix.leftAxis.dimensions.each(function(column, index){
+        me.getMatrix().leftAxis.dimensions.each(function(column, index){
             if(column.getId() == group.dimension.getId()){
                 found = true;
             }
@@ -369,25 +368,17 @@ Ext.define('Ext.pivot.feature.PivotStore', {
 
     processGroupCompactWithChildren: function(config){
         var me = this,
+            matrix = me.getMatrix(),
             group = config['group'], 
             previousExpanded = config['previousExpanded'],
-            hasSummaryData = false,
-            record, i;
+            hasSummaryData, i;
             
-        if(!group.expanded || (group.expanded && me.matrix.rowSubTotalsPosition == 'first')){
-            // summary row is on the group header
-            hasSummaryData = true;
-            record = me.createGridStoreRecord(group);
-        }else if(me.matrix.rowSubTotalsPosition == 'last' || me.matrix.rowSubTotalsPosition == 'none'){
-            record = me.createGridStoreRecord();
-            record.set(me.matrix.compactViewKey, group.name);
-        }
-        record.commit();
-        
+        hasSummaryData = (!group.expanded || (group.expanded && matrix.rowSubTotalsPosition == 'first'));
+
         me.processGroupHeaderRecordCompact({
             results:            config.results,
             group:              group, 
-            record:             record, 
+            record:             group.expanded ? group.records.expanded : group.records.collapsed,
             previousExpanded:   previousExpanded,
             hasSummaryData:     hasSummaryData
         });
@@ -408,14 +399,11 @@ Ext.define('Ext.pivot.feature.PivotStore', {
                     }
                 }
             }
-            if(me.matrix.rowSubTotalsPosition == 'last'){
-                record = me.createGridStoreRecord(group);
-                record.set(me.matrix.compactViewKey, group.getTextTotal());
-                record.commit();
+            if(matrix.rowSubTotalsPosition == 'last'){
                 me.processGroupHeaderRecordCompact({
                     results:            config.results,
                     group:              group, 
-                    record:             record, 
+                    record:             group.records.footer,
                     previousExpanded:   previousExpanded, 
                     subtotalRow:        true,
                     hasSummaryData:     true
@@ -426,22 +414,21 @@ Ext.define('Ext.pivot.feature.PivotStore', {
     
     processGroupHeaderRecordCompact: function(config){
         var me = this,
+            matrix = me.getMatrix(),
             group = config['group'], 
             record = config['record'], 
             previousExpanded = config['previousExpanded'], 
             subtotalRow = config['subtotalRow'],
-            hasSummaryData = config['hasSummaryData'],
-            i = me.matrix.leftAxis.dimensions.getCount(), 
-            found = false;
+            hasSummaryData = config['hasSummaryData'];
             
         me.storeInfo[record.internalId] = {
-            leftKey:        group.key,
-            rowStyle:       '',
-            rowClasses:    [me.pivotFeature.gridMaster.clsGroupTotal, hasSummaryData ? me.pivotFeature.summaryDataCls : ''],
-            rendererParams: {}
+            leftKey:            group.key,
+            rowStyle:           '',
+            rowClasses:         [me.getClsGroupTotal(), hasSummaryData ? me.getSummaryDataCls() : ''],
+            rendererParams:     {}
         };
 
-        me.storeInfo[record.internalId].rendererParams[me.matrix.compactViewKey] = {
+        me.storeInfo[record.internalId].rendererParams[matrix.compactViewKey] = {
             fn:                 'groupCompactRenderer',
             group:              group, 
             colspan:            0, 
@@ -460,17 +447,16 @@ Ext.define('Ext.pivot.feature.PivotStore', {
     processRecordCompact: function(config){
         var me = this,
             group = config['group'], 
-            found = false,
-            record = me.createGridStoreRecord(group);
+            record = group.record;
             
         me.storeInfo[record.internalId] = {
-            leftKey:        group.key,
-            rowStyle:       '',
-            rowClasses:    [me.pivotFeature.rowCls, me.pivotFeature.summaryDataCls],
-            rendererParams: {}
+            leftKey:            group.key,
+            rowStyle:           '',
+            rowClasses:         [me.getSummaryDataCls()],
+            rendererParams:     {}
         };
         
-        me.storeInfo[record.internalId].rendererParams[me.matrix.compactViewKey] = {
+        me.storeInfo[record.internalId].rendererParams[me.getMatrix().compactViewKey] = {
             fn:         'recordCompactRenderer',
             group:      group
         }; 
@@ -485,57 +471,66 @@ Ext.define('Ext.pivot.feature.PivotStore', {
     
     doExpandCollapse: function(key, oldRecord){
         var me = this,
-            gridMaster = me.pivotFeature.gridMaster,
+            gridMaster = me.getGrid(),
             group;
-        
-        group = me.matrix.leftAxis.findTreeElement('key', key);
+
+        group = me.getMatrix().leftAxis.findTreeElement('key', key);
         if(!group){
             return;
         }
-        
-        me.doExpandCollapseInternal(group, oldRecord);
+
+        me.doExpandCollapseInternal(group.node, oldRecord);
 
         gridMaster.fireEvent((group.node.expanded ? 'pivotgroupexpand' : 'pivotgroupcollapse'), gridMaster, 'row', group.node);
     },
-    
+
     doExpandCollapseInternal: function(group, oldRecord){
         var me = this,
+            store = me.getStore(),
+            isClassic = Ext.toolkit == 'classic',
             items, oldItems, startIdx, len;
-        
+
+        group.expanded = !group.expanded;
+
         oldItems = me.processGroup({
-            group:              group.node,
+            group:              group,
             previousExpanded:   false
         });
         
-        group.node.expanded = !group.node.expanded;
+        group.expanded = !group.expanded;
         
         items = me.processGroup({
-            group:              group.node,
+            group:              group,
             previousExpanded:   false
         });
 
 
-        if(items.length && (startIdx = me.store.indexOf(oldRecord)) !== -1){
-            me.store.suspendEvents();
+        if(items.length && (startIdx = store.indexOf(oldRecord)) !== -1){
+            if(isClassic) {
+                store.suspendEvents();
+            }
 
-            if(group.node.expanded){
-                me.store.remove(me.store.getAt(startIdx));
-                me.store.insert(startIdx, items);
+            if(group.expanded){
+                store.remove(store.getAt(startIdx));
+                store.insert(startIdx, items);
 
                 oldItems = [oldRecord];
             }else{
                 len = oldItems.length;
-                oldItems = me.store.getRange(startIdx, startIdx + len - 1);
+                oldItems = store.getRange(startIdx, startIdx + len - 1);
 
-                me.store.remove(oldItems);
-                me.store.insert(startIdx, items);
+                store.remove(oldItems);
+                store.insert(startIdx, items);
 
             }
 
             me.removeStoreInfoData(oldItems);
 
-            me.store.resumeEvents();
-            me.store.fireEvent('replace', me.store, startIdx, oldItems, items);
+            if(isClassic) {
+                store.resumeEvents();
+                // the replace event is better than remove and inserts
+                store.fireEvent('replace', store, startIdx, oldItems, items);
+            }
         }
 
     },
@@ -546,5 +541,25 @@ Ext.define('Ext.pivot.feature.PivotStore', {
                 delete this.storeInfo[record.internalId];
             }
         }, this);
+    },
+
+    onGroupExpand: function(matrix, type, item){
+        if(type == 'row') {
+            if(item) {
+                this.doExpandCollapseInternal(item, item.records.collapsed);
+            }else{
+                this.processStore();
+            }
+        }
+    },
+
+    onGroupCollapse: function(matrix, type, item){
+        if(type == 'row') {
+            if(item) {
+                this.doExpandCollapseInternal(item, item.records.expanded);
+            }else{
+                this.processStore();
+            }
+        }
     }
 });

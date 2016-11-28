@@ -35,9 +35,10 @@
  * required.
  */
 Ext.define('Ext.form.FieldSet', {
-    extend  : 'Ext.Container',
-    alias   : 'widget.fieldset',
+    extend: 'Ext.Container',
+    alias: 'widget.fieldset',
     requires: ['Ext.Title'],
+    mixins: ['Ext.form.FieldContainer'],
 
     config: {
         /**
@@ -175,7 +176,6 @@ Ext.define('Ext.form.FieldSet', {
      * A convenient method to disable all fields in this FieldSet
      * @return {Ext.form.FieldSet} This FieldSet
      */
-     
     updateDisabled: function(newDisabled) {
         this.getFieldsAsArray().forEach(function(field) {
             field.setDisabled(newDisabled);

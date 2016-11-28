@@ -1,5 +1,24 @@
 /**
  * This class contains all predefined aggregator functions for the pivot grid.
+ *
+ * For each summary function (ie `fn`) defined in this class there's a property name (ie `fnText`) which will be
+ * used by the configurator plugin to display the function used for each aggregate dimension.
+ *
+ * Override this class if more aggregate functions are needed:
+ *
+ *      Ext.define('overrides.pivot.Aggregators', {
+ *          override: 'Ext.pivot.Aggregators',
+ *
+ *          fnText: 'My special fn', // useful when using the Configurator plugin
+ *          fn: function(records, measure, matrix, rowGroupKey, colGroupKey){
+ *              var result;
+ *
+ *              // ... calculate the result
+ *
+ *              return result;
+ *          }
+ *      });
+ *
  * @singleton
  *
  */
@@ -9,7 +28,125 @@ Ext.define('Ext.pivot.Aggregators', {
     ],
 
     singleton: true,
+
+    /**
+     * @property {String} customText
+     *
+     * **Note:** Used by the {@link Ext.pivot.plugin.Configurator configurator plugin} when listing all functions that can
+     * be used on an aggregate dimension.
+     */
+    customText: 'Custom',
+
+    /**
+     * @property {String} sumText
+     *
+     * Defines the name of the {@link #sum} function.
+     *
+     * **Note:** Used by the {@link Ext.pivot.plugin.Configurator configurator plugin} when listing all functions that can
+     * be used on an aggregate dimension.
+     */
+    sumText: 'Sum',
     
+    /**
+     * @property {String} avgText
+     *
+     * Defines the name of the {@link #avg} function.
+     *
+     * **Note:** Used by the {@link Ext.pivot.plugin.Configurator configurator plugin} when listing all functions that can
+     * be used on an aggregate dimension.
+     */
+    avgText: 'Avg',
+    
+    /**
+     * @property {String} minText
+     *
+     * Defines the name of the {@link #min} function.
+     *
+     * **Note:** Used by the {@link Ext.pivot.plugin.Configurator configurator plugin} when listing all functions that can
+     * be used on an aggregate dimension.
+     */
+    minText: 'Min',
+    
+    /**
+     * @property {String} maxText
+     *
+     * Defines the name of the {@link #max} function.
+     *
+     * **Note:** Used by the {@link Ext.pivot.plugin.Configurator configurator plugin} when listing all functions that can
+     * be used on an aggregate dimension.
+     */
+    maxText: 'Max',
+    
+    /**
+     * @property {String} countText
+     *
+     * Defines the name of the {@link #count} function.
+     *
+     * **Note:** Used by the {@link Ext.pivot.plugin.Configurator configurator plugin} when listing all functions that can
+     * be used on an aggregate dimension.
+     */
+    countText: 'Count',
+    
+    /**
+     * @property {String} groupSumPercentageText
+     *
+     * Defines the name of the {@link #groupSumPercentage} function.
+     *
+     * **Note:** Used by the {@link Ext.pivot.plugin.Configurator configurator plugin} when listing all functions that can
+     * be used on an aggregate dimension.
+     */
+    groupSumPercentageText: 'Group sum percentage',
+    
+    /**
+     * @property {String} groupCountPercentageText
+     *
+     * Defines the name of the {@link #groupCountPercentage} function.
+     *
+     * **Note:** Used by the {@link Ext.pivot.plugin.Configurator configurator plugin} when listing all functions that can
+     * be used on an aggregate dimension.
+     */
+    groupCountPercentageText: 'Group count percentage',
+    
+    /**
+     * @property {String} varianceText
+     *
+     * Defines the name of the {@link #variance} function.
+     *
+     * **Note:** Used by the {@link Ext.pivot.plugin.Configurator configurator plugin} when listing all functions that can
+     * be used on an aggregate dimension.
+     */
+    varianceText: 'Var',
+    
+    /**
+     * @property {String} variancePText
+     *
+     * Defines the name of the {@link #varianceP} function.
+     *
+     * **Note:** Used by the {@link Ext.pivot.plugin.Configurator configurator plugin} when listing all functions that can
+     * be used on an aggregate dimension.
+     */
+    variancePText: 'Varp',
+    
+    /**
+     * @property {String} stdDevText
+     *
+     * Defines the name of the {@link #stdDev} function.
+     *
+     * **Note:** Used by the {@link Ext.pivot.plugin.Configurator configurator plugin} when listing all functions that can
+     * be used on an aggregate dimension.
+     */
+    stdDevText: 'StdDev',
+    
+    /**
+     * @property {String} stdDevPText
+     *
+     * Defines the name of the {@link #stdDevP} function.
+     *
+     * **Note:** Used by the {@link Ext.pivot.plugin.Configurator configurator plugin} when listing all functions that can
+     * be used on an aggregate dimension.
+     */
+    stdDevPText: 'StdDevp',
+
     /**
      * Calculates the sum of all records using the measure field.
      *

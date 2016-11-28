@@ -8,11 +8,11 @@
 //     }
 // }
 
-.x-form-label {
+.x-field-label {
     @include label();
     padding: $form-spacing;
 }
 
-.x-label-align-top .x-form-label {
+.x-label-align-top .x-field-label {
 	border-bottom: 1px solid $base-color;
 }

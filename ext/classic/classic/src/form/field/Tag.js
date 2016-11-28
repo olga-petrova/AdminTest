@@ -35,8 +35,8 @@
  *       
  * ### History
  *
- * Inspired by the [SuperBoxSelect component for ExtJS 3](http://technomedia.co.uk/SuperBoxSelect/examples3.html),
- * which in turn was inspired by the [BoxSelect component for ExtJS 2](http://efattal.fr/en/extjs/extuxboxselect/).
+ * Inspired by the SuperBoxSelect component for ExtJS 3,
+ * which in turn was inspired by the BoxSelect component for ExtJS 2.
  *
  * Various contributions and suggestions made by many members of the ExtJS community which can be seen
  * in the [user extension forum post](http://www.sencha.com/forum/showthread.php?134751-Ext.ux.form.field.BoxSelect).
@@ -48,7 +48,8 @@ Ext.define('Ext.form.field.Tag', {
     requires: [
         'Ext.selection.Model',
         'Ext.data.Store',
-        'Ext.data.ChainedStore'
+        'Ext.data.ChainedStore',
+        'Ext.view.TagKeyNav'
     ],
 
     xtype: 'tagfield',
@@ -131,6 +132,8 @@ Ext.define('Ext.form.field.Tag', {
      * {@link #autoSelect} and {@link #selectOnTab}. If those are true and an existing
      * item would have been selected as a result, the partial text the user has entered will
      * be discarded and the existing item will be added to the selection.
+     *
+     * Setting this option to `true` is not recommended for accessible applications.
      */
     createNewOnBlur: false,
 
@@ -164,10 +167,18 @@ Ext.define('Ext.form.field.Tag', {
      * @cfg {Boolean} filterPickList
      * True to hide the currently selected values from the drop down list.
      *
+     * Setting this option to `true` is not recommended for accessible applications.
+     *
      * - `true` to hide currently selected values from the drop down pick list
      * - `false` to keep the item in the pick list as a selected item
      */
     filterPickList: false,
+    
+    /**
+     * @cfg {Boolean} [clearOnBackspace=true] Set to `false` to disable clearing selected
+     * values with Backspace key. This mode is recommended for accessible applications.
+     */
+    clearOnBackspace: true,
 
     /**
      * @cfg {Boolean}
@@ -215,7 +226,58 @@ Ext.define('Ext.form.field.Tag', {
      * Currently unsupported since this is used for horizontal growth and this component
      * only supports vertical growth.
      */
-
+    
+    //<locale>
+    /**
+     * @cfg {String} ariaHelpText The text to be announced by screen readers when input element is
+     * focused. This text is used when this component is configured not to allow creating
+     * new values; when {@link #createNewOnEnter} is set to `true`, {@link #ariaHelpTextEditable}
+     * will be used instead.
+     */
+    ariaHelpText: 'Use Up and Down arrows to view available values, Enter to select. ' +
+                  'Use Left and Right arrows to view selected values, Delete key to deselect.',
+    
+    /**
+     * @cfg {String} ariaHelpTextEditable The text to be announced by screen readers when
+     * input element is focused. This text is used when {@link #createNewOnEnter} is set to `true`;
+     * see also {@link #ariaHelpText}.
+     */
+    ariaHelpTextEditable: 'Use Up and Down arrows to view available values, Enter to select. ' +
+                          'Type and press Enter to create a new value. ' +
+                          'Use Left and Right arrows to view selected values, Delete key to deselect.',
+    
+    /**
+     * @cfg {String} ariaSelectedText Template text for announcing selected values to screen
+     * reader users. '{0}' will be replaced with the list of selected values.
+     */
+    ariaSelectedText: 'Selected {0}.',
+    
+    /**
+     * @cfg {String} ariaDeselectedText Template text for announcing deselected values to
+     * screen reader users. '{0}' will be replaced with the list of values removed from
+     * selected list.
+     */
+    ariaDeselectedText: '{0} removed from selection.',
+    
+    /**
+     * @cfg {String} ariaNoneSelectedText Text to announce to screen reader users when no
+     * values are currently selected. This text is used when Tag field is focused.
+     */
+    ariaNoneSelectedText: 'No value selected.',
+    
+    /**
+     * @cfg {String} ariaSelectedListLabel Label to be announced to screen reader users
+     * when they use Left and Right arrow keys to navigate the list of currently selected values.
+     */
+    ariaSelectedListLabel: 'Selected values',
+    
+    /**
+     * @cfg {String} ariaAvailableListLabel Label to be announced to screen reader users
+     * when they use Up and Down arrow keys to navigate the list of available values.
+     */
+    ariaAvailableListLabel: 'Available values',
+    //</locale>
+    
     /**
      * @event autosize
      * Fires when the **{@link #autoSize}** function is triggered and the field is resized according to the
@@ -230,31 +292,43 @@ Ext.define('Ext.form.field.Tag', {
      * @cfg
      */
     fieldSubTpl: [
-        '<div id="{cmpId}-listWrapper" data-ref="listWrapper" class="' + Ext.baseCSSPrefix + 'tagfield {fieldCls} {typeCls} {typeCls}-{ui}" style="{wrapperStyle}">',
-            '<ul id="{cmpId}-itemList" data-ref="itemList" class="' + Ext.baseCSSPrefix + 'tagfield-list{itemListCls}">',
-                '<li id="{cmpId}-inputElCt" data-ref="inputElCt" class="' + Ext.baseCSSPrefix + 'tagfield-input">',
-                    '<div id="{cmpId}-emptyEl" data-ref="emptyEl" class="{emptyCls}">{emptyText}</div>',
+        // listWrapper div is tabbable in Firefox, for some unfathomable reason
+        '<div id="{cmpId}-listWrapper" data-ref="listWrapper"' + (Ext.isGecko ? ' tabindex="-1"' : ''),
+            '<tpl foreach="ariaElAttributes"> {$}="{.}"</tpl>',
+            ' class="' + Ext.baseCSSPrefix + 'tagfield {fieldCls} {typeCls} {typeCls}-{ui}"<tpl if="wrapperStyle"> style="{wrapperStyle}"</tpl>>',
+            '<span id="{cmpId}-selectedText" data-ref="selectedText" aria-hidden="true" class="' + Ext.baseCSSPrefix + 'hidden-clip"></span>',
+            '<ul id="{cmpId}-itemList" data-ref="itemList" role="presentation" class="' + Ext.baseCSSPrefix + 'tagfield-list{itemListCls}">',
+                '<li id="{cmpId}-inputElCt" data-ref="inputElCt" role="presentation" class="' + Ext.baseCSSPrefix + 'tagfield-input">',
+                    '<div id="{cmpId}-emptyEl" data-ref="emptyEl" role="presentation" class="{emptyCls}">{emptyText}</div>',
                     '<input id="{cmpId}-inputEl" data-ref="inputEl" type="{type}" ',
                     '<tpl if="name">name="{name}" </tpl>',
                     '<tpl if="value"> value="{[Ext.util.Format.htmlEncode(values.value)]}"</tpl>',
                     '<tpl if="size">size="{size}" </tpl>',
                     '<tpl if="tabIdx != null">tabindex="{tabIdx}" </tpl>',
                     '<tpl if="disabled"> disabled="disabled"</tpl>',
+                    '<tpl foreach="inputElAriaAttributes"> {$}="{.}"</tpl>',
                     'class="' + Ext.baseCSSPrefix + 'tagfield-input-field {inputElCls}" autocomplete="off">',
                 '</li>',
             '</ul>',
-        '</div>',
+            '<ul id="{cmpId}-ariaList" data-ref="ariaList" role="listbox"',
+                '<tpl if="ariaSelectedListLabel"> aria-label="{ariaSelectedListLabel}"</tpl>',
+                '<tpl if="multiSelect"> aria-multiselectable="true"</tpl>',
+                ' class="' + Ext.baseCSSPrefix + 'tagfield-arialist">',
+            '</ul>',
+          '</div>',
         {
             disableFormats: true
         }
     ],
-
+    
     extraFieldBodyCls: Ext.baseCSSPrefix + 'tagfield-body',
 
     /**
      * @private
      */
-    childEls: [ 'listWrapper', 'itemList', 'inputEl', 'inputElCt', 'emptyEl' ],
+    childEls: [
+        'listWrapper', 'itemList', 'inputEl', 'inputElCt', 'emptyEl', 'selectedText', 'ariaList'
+    ],
 
     /**
      * @private
@@ -265,6 +339,8 @@ Ext.define('Ext.form.field.Tag', {
      * @private
      */
     clearValueOnEmpty: false,
+    ariaSelectable: true,
+    ariaEl: 'listWrapper',
 
     tagItemCls: Ext.baseCSSPrefix + 'tagfield-item',
     tagItemTextCls: Ext.baseCSSPrefix + 'tagfield-item-text',
@@ -311,6 +387,11 @@ Ext.define('Ext.form.field.Tag', {
             }
         });
 
+        // Users might want to implement centralized help
+        if (!me.ariaHelp) {
+            me.ariaHelp = me.createNewOnEnter ? me.ariaHelpTextEditable : me.ariaHelpText;
+        }
+        
         me.callParent();
 
         me.typeAhead = typeAhead;
@@ -337,7 +418,27 @@ Ext.define('Ext.form.field.Tag', {
             mousedown: me.onItemMouseDown
         });
     },
-
+    
+    createPicker: function() {
+        var me = this,
+            config;
+        
+        // Avoid munging config on the prototype
+        config = Ext.apply({
+            navigationModel: 'tagfield'
+        }, me.defaultListConfig);
+        
+        if (me.ariaAvailableListLabel) {
+            config.ariaRenderAttributes = {
+                'aria-label': Ext.String.htmlEncode(me.ariaAvailableListLabel)
+            };
+        }
+        
+        me.defaultListConfig = config;
+        
+        return me.callParent();
+    },
+    
     isValid: function() {
         var me = this,
             disabled = me.disabled,
@@ -350,13 +451,17 @@ Ext.define('Ext.form.field.Tag', {
         var me = this;
 
         me.callParent([store]);
+        
         if (store) {
             // We collect picked records in a value store so that a selection model can track selection
             me.valueStore = new Ext.data.Store({
                 model: store.getModel(),
+                // Assign a proxy here so we don't get the proxy from the model
+                proxy: 'memory',
                 // We may have the empty store here, so just ignore empty models
                 useModelWarning: false
             });
+            
             me.selectionModel.bindStore(me.valueStore);
 
             // Picked records disappear from the BoundList
@@ -371,7 +476,7 @@ Ext.define('Ext.form.field.Tag', {
             }
         }
     },
-
+    
     filterPicked: function(rec) {
         return !this.valueCollection.contains(rec);
     },
@@ -398,6 +503,30 @@ Ext.define('Ext.form.field.Tag', {
         me.callParent(arguments);
     },
 
+    clearInput: function() {
+        var me = this,
+            valueRecords = me.getValueRecords(),
+            inputValue = me.inputEl && me.inputEl.dom.value,
+            lastDisplayValue;
+
+        if (valueRecords.length && inputValue) {
+            lastDisplayValue = valueRecords[valueRecords.length-1].get(me.displayField);
+
+            if(!Ext.String.startsWith(lastDisplayValue, inputValue, true)) {
+                return;
+            }
+            
+            me.inputEl.dom.value = '';
+            
+            if (me.queryMode == 'local') {
+                me.clearLocalFilter();
+                // we need to refresh the picker after removing 
+                // the local filter to display the updated data
+                me.getPicker().refresh();
+            }
+        }
+    },
+
     onValueCollectionEndUpdate: function() {
         var me = this,
             pickedRecords = me.valueCollection.items,
@@ -413,14 +542,17 @@ Ext.define('Ext.form.field.Tag', {
             me.store.filter(me.listFilter);
             me.changingFilters = false;
         }
+        
         me.callParent();
-
+        
         Ext.suspendLayouts();
         if (valueStore) {
             valueStore.suspendEvents();
             valueStore.loadRecords(pickedRecords);
             valueStore.resumeEvents();
         }
+
+        me.clearInput();
         Ext.resumeLayouts(true);
         me.alignPicker();
     },
@@ -428,12 +560,49 @@ Ext.define('Ext.form.field.Tag', {
     checkValueOnDataChange: Ext.emptyFn,
 
     onSelectionChange: function(selModel, selectedRecs) {
-        this.applyMultiselectItemMarkup();
-        this.fireEvent('valueselectionchange', this, selectedRecs);
+        var me = this,
+            inputEl = me.inputEl,
+            picker, item;
+        
+        me.applyMultiselectItemMarkup();
+        me.applyAriaListMarkup();
+        me.applyAriaSelectedText();
+        
+        // Focus does not really change but we're pretending it does
+        if (inputEl) {
+            picker = me.getPicker();
+            
+            if (selectedRecs.length === 0) {
+                inputEl.dom.removeAttribute('aria-activedescendant');
+            }
+            else {
+                item = me.getAriaListNode(selectedRecs[0]);
+                
+                if (item) {
+                    inputEl.dom.setAttribute('aria-activedescendant', item.id);
+                }
+            }
+        }
+        
+        me.fireEvent('valueselectionchange', me, selectedRecs);
     },
 
     onFocusChange: function(selectionModel, oldFocused, newFocused) {
-        this.fireEvent('valuefocuschange', this, oldFocused, newFocused);
+        var me = this;
+        
+        me.callParent([selectionModel, oldFocused, newFocused]);
+        me.fireEvent('valuefocuschange', me, oldFocused, newFocused);
+    },
+    
+    getAriaListNode: function(record) {
+        var ariaList = this.ariaList,
+            node;
+        
+        if (ariaList && record) {
+            node = ariaList.selectNode('[data-recordid="' + record.internalId + '"]');
+        }
+        
+        return node;
     },
 
     onDestroy: function() {
@@ -445,13 +614,15 @@ Ext.define('Ext.form.field.Tag', {
 
     getSubTplData: function(fieldData) {
         var me = this,
+            id = me.id,
             data = me.callParent(arguments),
             emptyText = me.emptyText,
             emptyInputCls = me.emptyInputCls,
             isEmpty = emptyText && data.value.length < 1,
             growMin = me.growMin,
             growMax = me.growMax,
-            wrapperStyle = '';
+            wrapperStyle = '',
+            attr;
 
         data.value = '';
         data.emptyText = isEmpty ? emptyText : '';
@@ -477,6 +648,22 @@ Ext.define('Ext.form.field.Tag', {
         if (!me.multiSelect) {
             data.itemListCls += ' ' + Ext.baseCSSPrefix + 'tagfield-singleselect';
         }
+        
+        if (!me.ariaStaticRoles[me.ariaRole]) {
+            data.multiSelect = me.multiSelect;
+            data.ariaSelectedListLabel = Ext.String.htmlEncode(me.ariaSelectedListLabel);
+            
+            attr = data.ariaElAttributes;
+            if (attr) {
+                attr['aria-owns'] = id + '-inputEl ' + id + '-picker ' + id + '-ariaList';
+            }
+            
+            attr = data.inputElAriaAttributes;
+            if (attr) {
+                attr.role = 'textbox';
+                attr['aria-describedby'] = id + '-selectedText ' + (attr['aria-describedby'] || '');
+            }
+        }
 
         return data;
     },
@@ -496,6 +683,8 @@ Ext.define('Ext.form.field.Tag', {
         }
 
         me.applyMultiselectItemMarkup();
+        me.applyAriaListMarkup();
+        me.applyAriaSelectedText();
 
         me.callParent(arguments);
     },
@@ -561,45 +750,75 @@ Ext.define('Ext.form.field.Tag', {
         var me = this,
             key = e.getKey(),
             inputEl = me.inputEl,
-            rawValue = inputEl.dom.value,
+            rawValue = inputEl && inputEl.dom.value,
             valueCollection = me.valueCollection,
             selModel = me.selectionModel,
             stopEvent = false,
-            lastSelectionIndex;
+            valueCount, lastSelectionIndex, records, text, i, len;
 
-        if (me.readOnly || me.disabled || !me.editable) {
+        if (me.destroyed || me.readOnly || me.disabled || !me.editable) {
             return;
         }
+        
+        valueCount = valueCollection.getCount();
 
-        if (valueCollection.getCount() > 0 && (rawValue === '' || (me.getCursorPosition() === 0 && !me.hasSelectedText()))) {
+        if (valueCount > 0 && rawValue === '') {
             // Keyboard navigation of current values
             lastSelectionIndex = (selModel.getCount() > 0) ? valueCollection.indexOf(selModel.getLastSelected()) : -1;
-
-            if (key === e.BACKSPACE || key === e.DELETE) {
+            
+            // Backspace can be used to clear the rightmost selected value.
+            // Delete key should only remove selected value if it is highlighted.
+            if ((key === e.BACKSPACE && me.clearOnBackspace) ||
+                (key === e.DELETE && lastSelectionIndex > -1)) {
                 // Delete token
                 if (lastSelectionIndex > -1) {
                     if (selModel.getCount() > 1) {
                         lastSelectionIndex = -1;
                     }
-                    valueCollection.remove(selModel.getSelection());
-                } else {
-                    valueCollection.remove(valueCollection.last());
+                    
+                    records = selModel.getSelection();
+                    text = [];
+                    
+                    for (i = 0, len = records.length; i < len; i++) {
+                        text.push(records[i].get(me.displayField));
+                    }
+                    
+                    text = text.join(', ');
                 }
+                else {
+                    records = valueCollection.last();
+                    text = records.get(me.displayField);
+                }
+                
+                valueCollection.remove(records);
+
+                // Announce the change
+                if (text) {
+                    me.ariaErrorEl.dom.innerHTML = Ext.String.formatEncode(me.ariaDeselectedText, text);
+                }
+                
                 selModel.clearSelections();
-                if (lastSelectionIndex > 0) {
-                    selModel.select(lastSelectionIndex - 1);
-                } else if (valueCollection.getCount()) {
+                
+                if (lastSelectionIndex === (valueCount - 1)) {
                     selModel.select(valueCollection.last());
                 }
+                else if (lastSelectionIndex > -1) {
+                    selModel.select(lastSelectionIndex);
+                }
+                else if (valueCollection.getCount()) {
+                    selModel.select(valueCollection.last());
+                }
+                
                 stopEvent = true;
-            } else if (key === e.RIGHT || key === e.LEFT) {
+            }
+            else if (key === e.RIGHT || key === e.LEFT) {
                 // Navigate and select tokens
                 if (lastSelectionIndex === -1 && key === e.LEFT) {
                     selModel.select(valueCollection.last());
                     stopEvent = true;
                 } else if (lastSelectionIndex > -1) {
                     if (key === e.RIGHT) {
-                        if (lastSelectionIndex < (valueCollection.getCount() - 1)) {
+                        if (lastSelectionIndex < (valueCount - 1)) {
                             selModel.select(lastSelectionIndex + 1, e.shiftKey);
                             stopEvent = true;
                         } else if (!e.shiftKey) {
@@ -647,7 +866,8 @@ Ext.define('Ext.form.field.Tag', {
         var me = this,
             inputEl = me.inputEl,
             rawValue = inputEl.dom.value,
-            preventKeyUpEvent = me.preventKeyUpEvent;
+            preventKeyUpEvent = me.preventKeyUpEvent,
+            selectedEl = me.selectedText.dom;
 
         if (me.preventKeyUpEvent) {
             e.stopEvent();
@@ -659,13 +879,32 @@ Ext.define('Ext.form.field.Tag', {
 
         if (me.multiSelect && me.delimiterRegexp && me.delimiterRegexp.test(rawValue) ||
                 (me.createNewOnEnter && e.getKey() === e.ENTER)) {
+            // Announce new value(s)
+            if (me.createNewOnEnter && rawValue) {
+                me.ariaErrorEl.dom.innerHTML = Ext.String.formatEncode(me.ariaSelectedText, rawValue);
+            }
+            
             rawValue = Ext.Array.clean(rawValue.split(me.delimiterRegexp));
             inputEl.dom.value = '';
             me.setValue(me.valueStore.getRange().concat(rawValue));
             inputEl.focus();
         }
 
-        me.callParent([e,t]);
+        me.callParent([e, t]);
+    },
+    
+    onEsc: function(e) {
+        var me = this,
+            selModel = me.selectionModel,
+            isExpanded = me.isExpanded;
+        
+        me.callParent([e]);
+        
+        if (!isExpanded && selModel.getCount() > 0) {
+            selModel.deselectAll();
+        }
+        
+        e.stopEvent();
     },
 
     /**
@@ -676,7 +915,6 @@ Ext.define('Ext.form.field.Tag', {
         var me = this,
             displayField = me.displayField,
             inputElDom = me.inputEl.dom,
-            boundList = me.getPicker(),
             record = me.getStore().findRecord(displayField, inputElDom.value),
             newValue, len, selStart;
 
@@ -684,8 +922,12 @@ Ext.define('Ext.form.field.Tag', {
             newValue = record.get(displayField);
             len = newValue.length;
             selStart = inputElDom.value.length;
-            boundList.highlightItem(boundList.getNode(record));
+
             if (selStart !== 0 && selStart !== len) {
+                // Setting the raw value will cause a field mutation event.
+                // Prime the lastMutatedValue so that this does not cause a requery.
+                me.lastMutatedValue = newValue;
+
                 inputElDom.value = newValue;
                 me.selectText(selStart, newValue.length);
             }
@@ -759,7 +1001,7 @@ Ext.define('Ext.form.field.Tag', {
 
             me.multiSelectItemTpl = new Ext.XTemplate([
                 '<tpl for=".">',
-                    '<li data-selectionIndex="{[xindex - 1]}" data-recordId="{internalId}" class="' + me.tagItemCls + childElCls,
+                    '<li data-selectionIndex="{[xindex - 1]}" data-recordId="{internalId}" role="presentation" class="' + me.tagItemCls + childElCls,
                     '<tpl if="this.isSelected(values)">',
                     ' ' + me.tagSelectedCls,
                     '</tpl>',
@@ -767,8 +1009,8 @@ Ext.define('Ext.form.field.Tag', {
                         'values = values.data;',
                     '%}',
                     me.tipTpl ? '" data-qtip="{[this.getTip(values)]}">' : '">',
-                    '<div class="' + me.tagItemTextCls + '">{[this.getItemLabel(values)]}</div>',
-                    '<div class="' + me.tagItemCloseCls + childElCls + '"></div>' ,
+                    '<div role="presentation" class="' + me.tagItemTextCls + '">{[this.getItemLabel(values)]}</div>',
+                    '<div role="presentation" class="' + me.tagItemCloseCls + childElCls + '"></div>' ,
                     '</li>' ,
                 '</tpl>',
                 {
@@ -804,6 +1046,97 @@ Ext.define('Ext.form.field.Tag', {
             itemList.select('.' + Ext.baseCSSPrefix + 'tagfield-item').destroy();
             me.inputElCt.insertHtml('beforeBegin', me.getMultiSelectItemMarkup());
             me.autoSize();
+        }
+    },
+    
+    /**
+     * Build the markup for ARIA listbox.
+     * @private
+     */
+    getAriaListMarkup: function() {
+        var me = this,
+            store, values;
+        
+        if (!me.ariaListItemTpl) {
+            me.ariaListItemTpl = new Ext.XTemplate([
+                '<tpl for=".">',
+                    '<li id="' + me.id + '-{internalId}" role="option"',
+                        ' class="' + Ext.baseCSSPrefix + 'tagfield-arialist-item"',
+                        ' aria-selected="{[this.isPicked(values)]}"',
+                        '  data-recordId="{internalId}"',
+                        '>',
+                            '{[this.getItemLabel(values.data)]}',
+                    '</li>',
+                '</tpl>',
+                {
+                    isPicked: function(rec) {
+                        return me.filterPicked(rec) ? 'false' : 'true';
+                    },
+                    isSelected: function(rec) {
+                        return me.selectionModel.isSelected(rec) ? 'true' : 'false';
+                    },
+                    getItemLabel: function(values) {
+                        return Ext.String.htmlEncode(me.labelTpl.apply(values));
+                    },
+                    strict: true
+                }
+            ]);
+        }
+        
+        if (!me.ariaListItemTpl.isTemplate) {
+            me.ariaListtemTpl = me.getTpl('ariaListItemTpl');
+        }
+        
+        values = me.valueCollection.getRange();
+        
+        return me.ariaListItemTpl.apply(values);
+    },
+    
+    applyAriaListMarkup: function() {
+        var me = this,
+            ariaList = me.ariaList;
+        
+        if (ariaList) {
+            ariaList.select('*').destroy();
+            ariaList.insertHtml('afterBegin', me.getAriaListMarkup());
+        }
+    },
+    
+    getAriaSelectedText: function(values) {
+        var me = this;
+        
+        if (!me.ariaSelectedItemTpl) {
+            me.ariaSelectedItemTpl = new Ext.XTemplate([
+                '<tpl for="." between=", ">',
+                    '{[this.getItemLabel(values.data)]}',
+                '</tpl>',
+                {
+                    getItemLabel: function(values) {
+                        return Ext.String.htmlEncode(me.labelTpl.apply(values));
+                    },
+                    strict: true
+                }
+            ]);
+        }
+        
+        if (!me.ariaSelectedItemTpl.isTemplate) {
+            me.ariaSelectedItemTpl = me.getTpl('ariaSelectedItemTpl');
+        }
+        
+        return Ext.String.format(me.ariaSelectedText, me.ariaSelectedItemTpl.apply(values));
+    },
+    
+    applyAriaSelectedText: function() {
+        var me = this,
+            selectedText = me.selectedText,
+            records, text;
+        
+        if (selectedText) {
+            records = me.valueCollection.getRange();
+            text = records.length ? me.getAriaSelectedText(records) : me.ariaNoneSelectedText;
+            
+            // selectedText element is not aria-live so OK to update every time
+            selectedText.dom.innerHTML = Ext.String.htmlEncode(text);
         }
     },
 
@@ -933,9 +1266,11 @@ Ext.define('Ext.form.field.Tag', {
      * 3. Otherwise, unknown values will be removed.
      *
      * @param {Mixed} value The value(s) to be set, see method documentation for details
+     * @param add (private)
+     * @param skipLoad (private)
      * @return {Ext.form.field.Field/Boolean} this, or `false` if asynchronously querying for unknown values
      */
-    setValue: function(value, /* private */ add, skipLoad) {
+    setValue: function(value, add, skipLoad) {
         var me = this,
             valueStore = me.valueStore,
             valueField = me.valueField,
@@ -945,17 +1280,18 @@ Ext.define('Ext.form.field.Tag', {
             isLoaded = store.getCount() > 0 || store.isLoaded(),
             pendingLoad = store.hasPendingLoad(),
             unloaded = autoLoadOnValue && !isLoaded && !pendingLoad,
-            record, len, i, valueRecord, cls, params;
+            record, len, i, valueRecord, cls, params, isNull;
 
         if (Ext.isEmpty(value)) {
             value = null;
+            isNull = true;
         } else if (Ext.isString(value) && me.multiSelect) {
             value = value.split(me.delimiter);
         } else {
             value = Ext.Array.from(value, true);
         }
 
-        if (value && me.queryMode === 'remote' && !store.isEmptyStore && skipLoad !== true && unloaded) {
+        if (!isNull && me.queryMode === 'remote' && !store.isEmptyStore && skipLoad !== true && unloaded) {
             for (i = 0, len = value.length; i < len; i++) {
                 record = value[i];
                 if (!record || !record.isModel) {
@@ -999,7 +1335,7 @@ Ext.define('Ext.form.field.Tag', {
         }
 
         // For single-select boxes, use the last good (formal record) value if possible
-        if (!me.multiSelect && value.length > 0) {
+        if (!isNull && !me.multiSelect && value.length > 0) {
             for (i = value.length - 1; i >= 0; i--) {
                 if (value[i].isModel) {
                     value = value[i];
@@ -1034,6 +1370,8 @@ Ext.define('Ext.form.field.Tag', {
         }
 
         me.applyMultiselectItemMarkup();
+        me.applyAriaListMarkup();
+        me.applyAriaSelectedText();
         me.checkChange();
         me.applyEmptyText();
     },
@@ -1133,12 +1471,12 @@ Ext.define('Ext.form.field.Tag', {
                 emptyEl.setHtml(emptyText);
                 emptyEl.addCls(emptyCls);
                 emptyEl.removeCls(emptyInputCls);
-                listWrapper.addCls(emptyCls);
+                listWrapper.addCls(me.emptyUICls);
                 inputEl.addCls(emptyInputCls);
             } else {
                 emptyEl.addCls(emptyInputCls);
                 emptyEl.removeCls(emptyCls);
-                listWrapper.removeCls(emptyCls);
+                listWrapper.removeCls(me.emptyUICls);
                 inputEl.removeCls(emptyInputCls);
             }
             me.autoSize();
@@ -1148,14 +1486,14 @@ Ext.define('Ext.form.field.Tag', {
     /**
      * Overridden to use inputEl instead of raw value and to avoid the use of placeholder
      */
-    preFocus : function(){
+    preFocus: function() {
         var me = this,
             inputEl = me.inputEl,
             isEmpty = inputEl.dom.value === '';
 
         me.emptyEl.addCls(me.emptyInputCls);
         me.emptyEl.removeCls(me.emptyCls);
-        me.listWrapper.removeCls(me.emptyCls);
+        me.listWrapper.removeCls(me.emptyUICls);
         me.inputEl.removeCls(me.emptyInputCls);
 
         if (me.selectOnFocus || isEmpty) {
@@ -1178,7 +1516,7 @@ Ext.define('Ext.form.field.Tag', {
 
         me.callParent(arguments);
     },
-
+    
     /**
      * Intercept calls to onBlur to remove focusCls, because the base field
      * classes assume this should be applied to inputEl

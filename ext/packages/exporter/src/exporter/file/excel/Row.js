@@ -75,7 +75,7 @@ Ext.define('Ext.exporter.file.excel.Row', {
             '<tpl if="this.exists(height)"> ss:Height="{height}"</tpl>',
             '<tpl if="this.exists(styleId)"> ss:StyleID="{styleId}"</tpl>',
         '>\n',
-        '<tpl for="cells">{[values.render()]}</tpl>',
+        '<tpl if="cells"><tpl for="cells.getRange()">{[values.render()]}</tpl></tpl>',
         '           </Row>\n',
         {
             exists: function(value){
@@ -89,8 +89,8 @@ Ext.define('Ext.exporter.file.excel.Row', {
     ],
 
     destroy: function(){
-        this.getCells().destroy();
-        return this.callParent(arguments);
+        this.callParent();
+        this.setCells(null);
     },
 
     applyCells: function(data, dataCollection){
@@ -113,12 +113,6 @@ Ext.define('Ext.exporter.file.excel.Row', {
      */
     getCell: function(id){
         return this.getCells().get(id);
-    },
-
-    getRenderData: function(){
-        return Ext.apply(this.callParent(arguments), {
-            cells: this.getCells().getRange()
-        });
     }
 
 });

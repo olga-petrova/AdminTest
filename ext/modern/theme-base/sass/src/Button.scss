@@ -15,6 +15,10 @@
     &.x-hasbadge {
         overflow: visible;
     }
+
+    &.x-item-disabled {
+        cursor: default;
+    }
 }
 
 .x-button-icon {
@@ -67,6 +71,7 @@
 
 // Button labels
 .x-button-label {
+    @include st-box-flex(1);
     text-align: center;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -85,5 +90,7 @@
 .x-badge {
     z-index: 2;
     position: absolute;
+    white-space: nowrap;
+    overflow: hidden;
     text-overflow: ellipsis;
 }

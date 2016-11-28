@@ -1,0 +1,127 @@
+@if ($include-material) {
+
+  // Add in extra CSS Variables if that's your thing
+  @if ($enable-css-color-variables) {
+    :root {
+      // dark mode does not effect run-time styles, only used for querying current state of darkness
+      --dark-mode-md: $dark-mode-md;
+      --primary-color-md: $primary-color-md;
+      --primary-color-light-md: $primary-color-light-md;
+      --primary-color-dark-md: $primary-color-dark-md;
+      --primary-color-invisible-md: $primary-color-invisible-md;
+      --primary-color-pressed-md: $primary-color-pressed-md;
+      --accent-color-md: $accent-color-md;
+      --accent-color-light-md: $accent-color-light-md;
+      --accent-color-dark-md: $accent-color-dark-md;
+      --accent-color-invisible-md: $accent-color-invisible-md;
+      --accent-color-pressed-md: $accent-color-pressed-md;
+      --positive-color-md: $positive-color-md;
+      --positive-color-pressed-md: $positive-color-pressed-md;
+      --negative-color-md: $negative-color-md;
+      --negative-color-pressed-md: $negative-color-pressed-md;
+      --text-color-base-md: $text-color-base-md;
+      --text-color-reverse-md: $text-color-reverse-md;
+      --background-color-md: $background-color-md;
+      --background-color-light-md: $background-color-light-md;
+      --text-color-md: $text-color-md;
+      --text-color-light-md: $text-color-light-md;
+      --text-color-lighter-md: $text-color-lighter-md;
+      --text-color-lightest-md: $text-color-lightest-md;
+      --text-color-reverse-light-md: $text-color-reverse-light-md;
+      --text-color-reverse-lighter-md: $text-color-reverse-lighter-md;
+      --text-color-reverse-lightest-md: $text-color-reverse-lightest-md;
+      --overlay-color-md: $overlay-color-md;
+    }
+  }
+
+  // Includes all Material Design colors as classes
+  @if ($include-color-classes-md) {
+    @each $color-name, $color-variants in $material-colors {
+      @each $color-variant, $hex-value in $color-variants {
+        .md-color-#{$color-name}-#{$color-variant} {
+          color: #{$hex-value}
+        }
+        .md-bg-color-#{$color-name}-#{$color-variant} {
+          background-color: #{$hex-value}
+        }
+      }
+    }
+  }
+
+  // Icon Styles
+  .md-icon {
+    @include material-icon-style();
+  }
+
+  // Add all the icons
+  @if ($include-all-icon-classes-md) {
+    @each $icon in $material-icons {
+      @include material-icon-class($icon);
+    }
+  }
+
+  $font-path-md: get-resource-path('fonts');
+  $roboto-path-md: $font-path-md + '/Roboto';
+  @font-face {
+    font-family: 'Roboto';
+    font-weight: 400; //normal
+    font-style: normal;
+    // Chrome for md does not properly support local 'Roboto' https://code.google.com/p/chromium/issues/detail?id=536928 // Chrome also does not properly respect weights for local fonts https://code.google.com/p/chromium/issues/detail?id=578275
+    src: local('Roboto Regular'), local('Roboto-Regular'), url($roboto-path-md + '/Roboto-Regular.ttf') format('truetype');
+  }
+  @font-face {
+    font-family: 'Roboto';
+    font-weight: 100;
+    font-style: normal;
+    // Chrome for md does not properly support local 'Roboto' https://code.google.com/p/chromium/issues/detail?id=536928
+    // Chrome also does not properly respect weights for local fonts https://code.google.com/p/chromium/issues/detail?id=578275
+    src: local('Roboto Light'), local('Roboto-Light'), url($roboto-path-md + '/Roboto-Light.ttf') format('truetype');
+  }
+
+  @font-face {
+    font-family: 'Roboto';
+    font-weight: 600;
+    font-style: normal;
+    // Chrome for md does not properly support local 'Roboto' https://code.google.com/p/chromium/issues/detail?id=536928
+    // Chrome also does not properly respect weights for local fonts https://code.google.com/p/chromium/issues/detail?id=578275
+    src: local('Roboto Medium'), local('Roboto-Medium'), url($roboto-path-md + '/Roboto-Medium.ttf') format('truetype');
+  }
+
+  @font-face {
+    font-family: 'Roboto';
+    font-weight: 900;
+    font-style: normal;
+    // Chrome for md does not properly support local 'Roboto' https://code.google.com/p/chromium/issues/detail?id=536928
+    // Chrome also does not properly respect weights for local fonts https://code.google.com/p/chromium/issues/detail?id=578275
+    src: local('Roboto Bold'), local('Roboto-Bold'), url($roboto-path-md + '/Roboto-Bold.ttf') format('truetype');
+  }
+
+  @font-face {
+    font-family: 'Roboto';
+    font-weight: normal;
+    font-style: italic;
+    // Chrome for md does not properly support local 'Roboto' https://code.google.com/p/chromium/issues/detail?id=536928
+    // Chrome also does not properly respect weights for local fonts https://code.google.com/p/chromium/issues/detail?id=578275
+    src: local('Roboto Italic'), local('Roboto-Italic'), url($roboto-path-md + '/Roboto-Italic.ttf') format('truetype');
+  }
+
+  // From https://github.com/google/material-design-icons
+  // All Icons are listed here https://design.google.com/icons/
+  @font-face {
+    font-family: 'Material Icons';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Material Icons'),
+    local('MaterialIcons-Regular'),
+    url($font-path-md + '/MaterialIcons-Regular.ttf') format('truetype');
+  }
+
+  .material-icons {
+    @include material-icon-style();
+  }
+
+  html, body#{$material-selector} {
+    font-family: 'Roboto', sans-serif;
+    @include css-color-variable('text-color-base-md');
+  }
+}

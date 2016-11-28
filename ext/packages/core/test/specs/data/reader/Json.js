@@ -1673,6 +1673,12 @@ describe("Ext.data.reader.Json", function() {
                     expect(spy.callCount).toBe(1);
                 });
             });
+
+            describe("if the responseText is empty", function() {
+                it("should return the null result set", function() {
+                    expect(doRead({responseText: ''})).toBe(reader.getNullResultSet());
+                });
+            });
         });
 
         describe("if there is no responseText property", function() {            

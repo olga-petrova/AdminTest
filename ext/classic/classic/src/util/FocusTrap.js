@@ -47,8 +47,9 @@ Ext.define('Ext.util.FocusTrap', {
                 posAttr = me.tabGuardPositionAttribute,
                 beforeGuard = me.tabGuardBeforeEl,
                 afterGuard = me.tabGuardAfterEl,
-                tabIndex = me.tabGuardIndex,
-                nodes;
+                tabMin = me.tabGuardIndex,
+                tabMax = me.tabGuardIndex,
+                i, tabIndex, nodes;
             
             if (!me.rendered || !me.tabGuard) {
                 return;
@@ -66,12 +67,22 @@ Ext.define('Ext.util.FocusTrap', {
             if (nodes.length && nodes[nodes.length - 1].hasAttribute(posAttr)) {
                 nodes.pop();
             }
-            
+
             if (nodes.length) {
-                beforeGuard.dom.setAttribute('tabIndex', tabIndex);
+                for (i = 0; i < nodes.length; i++) {
+                    tabIndex = +nodes[i].getAttribute('tabIndex') || 0;
+                    if (tabIndex === 0) {
+                        continue;
+                    }
+
+                    tabMin = tabMin === 0 ? tabIndex : Math.min(tabMin, tabIndex);
+                    tabMax = Math.max(tabMax, tabIndex);
+                }
+
+                beforeGuard.dom.setAttribute('tabIndex', tabMin);
                 beforeGuard.on('focusenter', me.onTabGuardFocusEnter, me);
-                
-                afterGuard.dom.setAttribute('tabIndex', tabIndex);
+
+                afterGuard.dom.setAttribute('tabIndex', tabMax);
                 afterGuard.on('focusenter',  me.onTabGuardFocusEnter, me);
             }
             else {

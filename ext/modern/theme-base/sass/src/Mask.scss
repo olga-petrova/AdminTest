@@ -83,7 +83,7 @@
 
 .x-ie .x-mask {
     // Input fields always get focus in IE mobile when tapping on them even if they are overlapped by other elements.
-    // So we need to hide them when oberlay opens over the inputs.
+    // So we need to hide them when overlay opens over the inputs.
     &[visibility='visible'],
     &:not(.x-item-hidden) {
         ~ div:not(.x-mask),
@@ -96,4 +96,9 @@
             }
         }
     }
+}
+
+.x-float-wrap > .x-mask {
+    z-index: 0;
+    pointer-events: all;
 }

@@ -541,7 +541,7 @@ Ext.Configurator.prototype = {
                         if (valuesKey && valuesKey.constructor === Object) {
                             value = ExtObject.merge(values[name], value);
                         } else {
-                            value = Ext.clone(value);
+                            value = Ext.clone(value, false);
                         }
                     }
                 }
@@ -649,7 +649,7 @@ Ext.Configurator.prototype = {
                     if (baseValue && baseValue.constructor === Object) {
                         value = Ext.Object.merge(baseValue, value);
                     } else {
-                        value = Ext.clone(value);
+                        value = Ext.clone(value, false);
                     }
                 }
             }

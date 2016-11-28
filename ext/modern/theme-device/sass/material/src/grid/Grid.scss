@@ -1,0 +1,75 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}grid {
+      overflow: hidden;
+    }
+
+    .#{$prefix}grid-header-container {
+      padding: 0;
+      @include material-shadow(1);
+    }
+
+    .#{$prefix}grid-header {
+      padding: 8px 16px;
+      @include css-color-variable('primary-color-dark-md', 'background-color');
+      color: #fff;
+      &.#{$prefix}grid-header-swap {
+        @include material-shadow(1);
+      }
+    }
+
+    .#{$prefix}grid-headergroup {
+      border-right: 1px solid;
+      @include css-color-variable('text-color-lightest-md', 'border-right-color');
+
+      .#{$prefix}grid-column:last-child,  {
+        border-right: none;
+      }
+    }
+
+    .#{$prefix}grid-headergroup-text {
+      @include material-font-style('subhead');
+      font-weight: bold;
+      position: relative;
+      &:after {
+        content: '';
+        position: absolute;
+        border: 1px solid;
+        @include css-color-variable('text-color-lightest-md', 'border-color');
+        bottom: -1px;
+        width: 98%;
+        left: 1%;
+      }
+    }
+
+    .#{$prefix}grid-row {
+      display: table;
+      padding: 0;
+
+      &.x-item-selected {
+        @include css-color-variable('primary-color-light-md', 'background-color');
+        animation: none;
+      }
+
+      &:after {
+        content: '';
+        position: absolute;
+        border: 1px solid;
+        @include css-color-variable('text-color-lightest-md', 'border-color');
+        bottom: -1px;
+        width: 98%;
+        left: 1%;
+      }
+    }
+
+    .#{$prefix}grid-column {
+      @include material-font-style('subhead');
+      line-height: 24px;
+      border-right: 1px solid;
+      @include css-color-variable('text-color-lightest-md', 'border-right-color');
+      .#{$prefix}innerhtml {
+        justify-content: center;
+      }
+    }
+  }
+}

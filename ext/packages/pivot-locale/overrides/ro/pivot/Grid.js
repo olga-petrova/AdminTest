@@ -1,4 +1,3 @@
-
 Ext.define('Ext.locale.ro.pivot.Grid', {
     override: 'Ext.pivot.Grid',
 

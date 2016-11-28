@@ -208,15 +208,17 @@ Ext.define('Ext.util.Draggable', {
 
     getContainerConstraint: function() {
         var container = this.getContainer(),
-            element = this.getElement();
+            element = this.getElement(),
+            borders;
 
         if (!container || !element.dom) {
             return this.defaultConstraint;
         }
 
+        borders = container.getBorders();
         return {
             min: { x: 0, y: 0 },
-            max: { x: this.containerWidth - this.width, y: this.containerHeight - this.height }
+            max: { x: this.containerWidth - this.width - borders.beforeX - borders.afterX, y: this.containerHeight - this.height - borders.beforeY - borders.afterY }
         };
     },
 

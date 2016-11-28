@@ -227,6 +227,30 @@ Ext.define('Ext.chart.theme.Base', {
         },
 
         /**
+         * Style information for the {Ext.chart.legend.SpriteLegend sprite legend}.
+         * If the {@link Ext.chart.legend.Legend DOM} legend is used, this config is ignored.
+         * For additional details see {@link Ext.chart.AbstractChart#legend}.
+         * @cfg {Object} legend
+         * @cfg {Ext.chart.legend.sprite.Item} legend.item
+         * @cfg {Object} legend.border See {@link Ext.chart.legend.SpriteLegend#border}.
+         */
+        legend: {
+            label: {
+                fontSize: 14,
+                fontWeight: 'default',
+                fontFamily: 'default',
+                fillStyle: 'black'
+            },
+            border: {
+                lineWidth: 1,
+                radius: 4,
+                fillStyle: 'none',
+                strokeStyle: 'gray'
+            },
+            background: 'white'
+        },
+
+        /**
          * @private
          * An object with the following structure:
          * {
@@ -280,6 +304,7 @@ Ext.define('Ext.chart.theme.Base', {
         var me = this;
         Ext.onReady(function () {
             var sprites = Ext.clone(me.getSprites()),
+                legend = Ext.clone(me.getLegend()),
                 axis = Ext.clone(me.getAxis()),
                 series = Ext.clone(me.getSeries()),
                 div, key, config;
@@ -298,6 +323,9 @@ Ext.define('Ext.chart.theme.Base', {
 
             me.replaceDefaults(sprites.text);
             me.setSprites(sprites);
+
+            me.replaceDefaults(legend.label);
+            me.setLegend(legend);
 
             for (key in axis) {
                 config = axis[key];

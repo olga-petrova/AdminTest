@@ -1,0 +1,48 @@
+@if ($include-ios) {
+  #{$ios-selector} {
+    // Private variables
+    $form-thumb-size: 2.1em;
+    $form-slider-size: .2em;
+    $form-toggle-size: 1.75em;
+    $form-thumb-space: ($form-thumb-size - $form-toggle-size) / 2;
+
+    .#{$prefix}slider,
+    .#{$prefix}toggle {
+      height: $form-thumb-size;
+    }
+
+    .#{$prefix}slider.#{$prefix}item-disabled {
+      opacity: .6;
+    }
+
+    .#{$prefix}thumb {
+      height: $form-thumb-size;
+      width: $form-thumb-size;
+      background: transparent none;
+      border: 0;
+
+      // The actual thumb
+      &:after {
+        @include insertion($form-toggle-size, $form-toggle-size, $form-thumb-space, $form-thumb-space);
+        @include box-shadow(0 2px 1px rgba(0, 0, 0, .3));
+        @include border-radius($form-toggle-size/2);
+        background-color: #fff;
+        border: .1em solid #dbdbdb;
+      }
+
+      &.#{$prefix}dragging {
+        opacity: 1;
+      }
+    }
+
+    // Create the slider track
+    .#{$prefix}slider:before {
+      margin: 0 $form-toggle-size/2;
+      border-bottom: 0;
+      background-color: #b5b5b6;
+
+      @include insertion(auto, $form-slider-size, $form-toggle-size / 2 - $form-slider-size/2 + .3em - $form-thumb-space / 2, 0);
+      @include border-radius($form-slider-size/2);
+    }
+  }
+}

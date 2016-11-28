@@ -1,0 +1,29 @@
+@if ($include-ios) {
+  #{$ios-selector} {
+    .#{$prefix}radiofield .#{$prefix}input-mask {
+      @include material-icon('check');
+      &::after {
+        position: absolute;
+        top: 10px;
+        font-weight: bold;
+        right: 12px;
+        bottom: 0;
+        color: #ccc;
+      }
+    }
+
+    .#{$prefix}radio {
+      visibility: hidden;
+    }
+
+    .#{$prefix}radio:checked + .#{$prefix}input-mask::after {
+      color: $primary-color-ios;
+    }
+
+    .#{$prefix}item-disabled {
+      .#{$prefix}radio:checked + .#{$prefix}input-mask::after {
+        color: lighten($primary-color-ios, 20%);
+      }
+    }
+  }
+}

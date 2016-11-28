@@ -38,6 +38,12 @@ Ext.define('Ext.grid.header.Container', {
         'Ext.util.FocusableContainer'
     ],
 
+    config: {
+        scrollable: {
+            indicators: false
+        }
+    },
+
     border: true,
 
     alias: 'widget.headercontainer',
@@ -54,8 +60,6 @@ Ext.define('Ext.grid.header.Container', {
     weight: 100,
 
     defaultType: 'gridcolumn',
-
-    detachOnRemove: false,
 
     /**
      * @cfg {Number} defaultWidth
@@ -296,28 +300,6 @@ Ext.define('Ext.grid.header.Container', {
         me.callParent();
     },
 
-    insertNestedHeader: function (moveHeader) {
-        var me = this,
-            fromCt = moveHeader.ownerCt,
-            toCt = me.ownerCt,
-            layoutOwner = toCt.layout.owner,
-            toIndex;
-
-        if (fromCt) {
-            if (me.isGroupHeader && !toCt.isNestedParent) {
-                toIndex = layoutOwner.items.indexOf(me);
-            }
-
-            fromCt.remove(moveHeader, false);
-        }
-
-        if (toIndex === undefined) {
-            toIndex = layoutOwner.items.indexOf(me);
-        }
-
-        layoutOwner.insert(toIndex, moveHeader);
-    },
-
     isNested: function () {
         return !!this.getRootHeaderCt().down('[isNestedParent]');
     },
@@ -507,11 +489,15 @@ Ext.define('Ext.grid.header.Container', {
     onHeaderCtLongPress: function(e) {
         var me = this,
             headerEl = me.getHeaderElByEvent(e),
-            header = Ext.getCmp(headerEl.id);
+            header;
 
-        if (!header.menuDisabled) {
-            me.longPressFired = true;
-            me.showMenuBy(e, headerEl, header);
+        // Might be outside the headers.
+        if (headerEl) {
+            header = Ext.getCmp(headerEl.id);
+            if (header && !header.menuDisabled) {
+                me.longPressFired = true;
+                me.showMenuBy(e, headerEl, header);
+            }
         }
     },
 
@@ -549,8 +535,8 @@ Ext.define('Ext.grid.header.Container', {
         me.columnManager = me.visibleColumnManager = null;
     },
 
-    applyColumnsState: function(columns, storeState) {
-        if (!columns || !columns.length) {
+    applyColumnsState: function(columnsState, storeState) {
+        if (!columnsState) {
             return;
         }
 
@@ -558,33 +544,15 @@ Ext.define('Ext.grid.header.Container', {
             items  = me.items.items,
             count  = items.length,
             i      = 0,
-            length = columns.length,
+            length,
             c, col, columnState, index,
             moved = false,
             newOrder = [],
-            stateHash = {},
             newCols = [];
-
-        // Create state lookup hash
-        // {
-        //      col_name: {
-        //          index: 0,
-        //          width: 100
-        //      },
-        //      col_email: {
-        //          index: 1,
-        //          width: 100
-        //      }
-        // }
-        for (c = 0; c < length; c++) {
-            columnState = columns[c];
-            columnState.index = c;
-            stateHash[columnState.id] = columnState;
-        }
 
         for (i = 0; i < count; i++) {
             col = items[i];
-            columnState = stateHash[col.getStateId()];
+            columnState = columnsState[col.getStateId()];
 
             // There's a column state for this column.
             // Add it to the newOrder array at the specified index
@@ -661,13 +629,14 @@ Ext.define('Ext.grid.header.Container', {
         var me = this;
 
         //<debug>
+        var stateId = c.getStateId();
         if (!me._usedIDs) {
             me._usedIDs = {};
         }
-        if (me._usedIDs[c.headerId]) {
-            Ext.log.warn(this.$className + ' attempted to reuse an existing id: ' + c.headerId);
+        if (me._usedIDs[stateId] && me._usedIDs[stateId] !== c) {
+            Ext.log.warn(this.$className + ' attempted to reuse an existing id: ' + stateId);
         }
-        me._usedIDs[c.headerId] = true;
+        me._usedIDs[stateId] = c;
         //</debug>
 
         me.callParent(arguments);
@@ -827,13 +796,18 @@ Ext.define('Ext.grid.header.Container', {
 
             // Column item (and its associated menu) menu has to be destroyed (if it exits) when columns are changed.
             // It will be recreated just before the main container menu is next shown.
-            if (menu && (columnItemSeparator = menu.child('#columnItemSeparator'))) {
+            if (menu) {
+                columnItemSeparator = menu.child('#columnItemSeparator');
                 columnItem = menu.child('#columnItem');
 
                 // Destroy the column visibility items
                 // They will be recreated before the next show
-                columnItemSeparator.destroy();
-                columnItem.destroy();
+                if (columnItemSeparator) {
+                    columnItemSeparator.destroy();
+                }
+                if (columnItem) {
+                    columnItem.destroy();
+                }
             }
         }
     },
@@ -1002,14 +976,18 @@ Ext.define('Ext.grid.header.Container', {
 
     onHeaderClick: function(header, e, t) {
         var me = this,
-            selModel = header.getView().getSelectionModel();
+            selModel = header.getView().getSelectionModel(),
+            ret;
 
         header.fireEvent('headerclick', me, header, e, t);
-        if (me.fireEvent('headerclick', me, header, e, t) !== false) {
+        ret = me.fireEvent('headerclick', me, header, e, t);
+        if (ret !== false) {
             if (selModel.onHeaderClick) {
                 selModel.onHeaderClick(me, header, e);
             }
         }
+
+        return ret;
     },
 
     onHeaderContextMenu: function(header, e, t) {
@@ -1369,7 +1347,6 @@ Ext.define('Ext.grid.header.Container', {
      * @return {Ext.grid.column.Column[]} columns An array of columns.  Returns an
      * empty array if no columns are found.
      */
-    /** @ignore */
     getGridColumns: function(/* private - used in recursion*/inResult, hiddenAncestor) {
         if (!inResult && this.gridDataColumns) {
             return this.gridDataColumns;
@@ -1565,14 +1542,14 @@ Ext.define('Ext.grid.header.Container', {
         header.flex = null;
 
         if (hidden) {
-            myWidth = header.width || header.savedWidth;
+            myWidth = header.width || header.savedWidth || Math.floor(maxAvailFlexOneColumn/(items.length + 1));
             header.savedWidth = null;
         } else {
             myWidth = view.getMaxContentWidth(header);
         }
 
         // We need to know if the max content width of the selected column would blow out the
-        // grid. If so, all the other visible columns will be flexed to minWidth.
+        // grid. If so, all the other visible columns will be flexed to minWidth. 
         if (myWidth >  maxAvailFlexOneColumn) {
             header.width = maxAvailFlexOneColumn;
             useMinWidthForFlex = true;
@@ -1679,20 +1656,50 @@ Ext.define('Ext.grid.header.Container', {
                     if (lastFocused) {
                         view.ownerCt.ensureVisible(lastFocused.record);
                     }
+                } else if (e.getKey() === e.SPACE) {
+                    column.onTitleElClick(e, e.target, this.sortOnClick);
                 }
+
                 // onHeaderClick is a necessary part of accessibility processing, sortable or not.
-                this.onHeaderClick(column, e, column.el);
+                return this.onHeaderClick(column, e, column.el);
+            }
+        },
+        
+        onOwnerGridReconfigure: function(storeChanged, columnsChanged) {
+            var me = this;
+            
+            if (!me.rendered || me.destroying || me.destroyed) {
+                return;
+            }
+            
+            // Adding or removing columns during reconfiguration could result
+            // in changed FocusableContainer state.
+            if (storeChanged || columnsChanged) {
+                me.initFocusableContainer();
             }
         },
 
         onFocusableContainerMousedown: function(e, target) {
-            var targetCmp = Ext.Component.fromElement(target);
+            var targetCmp = Ext.Component.fromElement(target),
+                cols, i, len, scrollable, col;
 
             if (targetCmp === this) {
                 e.preventDefault();
             } else {
                 // The DDManager (Header Containers are draggable) prevents mousedown default
                 // So we must explicitly focus the header
+                if (targetCmp.isGroupHeader) {
+                    cols = targetCmp.getVisibleGridColumns();
+                    scrollable = this.getScrollable();
+
+                    for (i = 0, len = cols.length; i < len; ++i) {
+                        col = cols[i];
+                        if (scrollable.doIsInView(col.el, true).x) {
+                            targetCmp = col;
+                            break;
+                        }
+                    }
+                }
                 targetCmp.focus();
             }
         }

@@ -31,7 +31,7 @@ Ext.define('Ext.pivot.axis.Local', {
         
         for(i = 0; i < dimCount; i++){
             dimension = me.dimensions.getAt(i);
-            groupValue = dimension.grouperFn(record);
+            groupValue = Ext.callback(dimension.groupFn, dimension.getScope() || 'self.controller', [record], 0, me.matrix.cmp);
             groupKey = parentKey ? parentKey + me.matrix.keysSeparator : '';
                 
             groupValue = Ext.isEmpty(groupValue) ? dimension.blankText : groupValue;

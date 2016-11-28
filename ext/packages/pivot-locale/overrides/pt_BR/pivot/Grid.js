@@ -1,4 +1,3 @@
-
 /**
  * Portuguese (Brasil) translation by Rivaldo C Carvalho.
  *

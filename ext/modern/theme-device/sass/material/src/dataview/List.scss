@@ -1,0 +1,97 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}list {
+      @include css-color-variable('background-color-md', 'background-color');
+    }
+
+    // Normal List Items
+    .#{$prefix}list-item {
+      padding: 8px 16px 8px 16px;
+      display: flex;
+      align-items: center;
+      @include material-font-style('subhead');
+      //transition: background-color 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+
+
+      &.#{$prefix}material-bordered {
+        border-bottom: 1px solid;
+        @include css-color-variable('text-color-lightest-md', 'border-bottom-color');
+      }
+
+      &.x-item-pressed {
+        @include css-color-variable('primary-color-pressed-md', 'background-color');
+
+        // When the Item is pressed remove the BGF color from the disclosure to hide the circle
+        .#{$prefix}list-disclosure {
+          transition: background-color 0s;
+          background-color: transparent;
+        }
+      }
+
+      &.x-item-selected {
+        @include css-color-variable('primary-color-pressed-md', 'background-color');
+        animation: md-list-item-selected .75s ease-out forwards;
+      }
+    }
+
+    .#{$prefix}list-indexed {
+      .#{$prefix}list-item {
+        padding-left: 72px;
+      }
+    }
+
+    .#{$prefix}list-header {
+      @include css-color-variable('text-color-light-md');
+      padding-left: $content-padding-md;
+      padding-top: 8px;
+
+      &.#{$prefix}list-header-swap {
+        @include css-color-variable('text-color-md');
+        @include css-color-variable('background-color-md', 'background-color');
+        width: auto;
+        padding-top: 8px;
+      }
+    }
+
+    .#{$prefix}list-disclosure {
+      position: absolute;
+      @include css-color-variable('background-color-md', 'background-color');
+      right: 0;
+      width: 28px;
+      height: 28px;
+      top: 50%;
+      // Half the height for proper center alignment
+      margin-top: -14px;
+      margin-right: 12px;
+      @include css-color-variable('text-color-light-md');
+      text-align: center;
+      border-radius: 50%;
+      padding: 14px;
+      display: flex;
+      justify-content: center;
+      align-content: center;
+      align-items: center;
+      transition: background-color 0.28s cubic-bezier(0.4, 0, 0.2, 1), color .28s ease-out;
+
+      @include material-icon-style('before');
+      &:before {
+        content: 'arrow_forward';
+        font-size: 20px;
+      }
+
+      &.x-disclosure-pressed {
+        @include css-color-variable('primary-color-pressed-md', 'background-color');
+        @include css-color-variable('text-color-reverse-md');
+      }
+    }
+  }
+
+  @keyframes md-list-item-selected {
+    0% {
+      @include css-color-variable('primary-color-pressed-md', 'background-color');
+    }
+    100% {
+      @include css-color-variable('primary-color-invisible-md', 'background-color');
+    }
+  }
+}

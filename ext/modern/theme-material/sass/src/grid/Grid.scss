@@ -1,0 +1,24 @@
+.#{$prefix}grid-header-container {
+  @include material-shadow(1);
+}
+
+.#{$prefix}grid-header {
+  &.#{$prefix}grid-header-swap {
+    @include material-shadow(1);
+  }
+}
+
+.#{$prefix}grid-pagingtoolbar {
+  .#{$prefix}sliderfield {
+    border: none;
+    padding: 0;
+
+    .#{$prefix}thumb:before {
+      background-color: transparent;
+    }
+    .#{$prefix}thumb:after {
+      background-color: $accent-color;
+    }
+  }
+
+}

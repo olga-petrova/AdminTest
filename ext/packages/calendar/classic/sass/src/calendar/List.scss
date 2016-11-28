@@ -1,0 +1,19 @@
+/**
+ * @class Ext.calendar.List
+ */
+
+.#{$prefix}calendar-list-item {
+    position: relative;
+    cursor: pointer;
+}
+
+.#{$prefix}calendar-list-icon {
+    position: absolute;
+}
+
+@include ext-calendar-calendarlist(
+    $item-margin: $calendar-list-item-margin,
+    $item-height: $calendar-list-item-height,
+    $item-icon-spacing: $calendar-list-item-icon-spacing,
+    $item-hidden-opacity: $calendar-list-item-hidden-opacity
+);

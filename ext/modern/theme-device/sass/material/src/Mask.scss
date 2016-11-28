@@ -1,0 +1,12 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}mask {
+      .#{$prefix}mask-inner {
+        @include css-color-variable('background-color-md', 'background-color');
+      }
+      .#{$prefix}mask-message {
+        @include css-color-variable('text-color-base-md');
+      }
+    }
+  }
+}

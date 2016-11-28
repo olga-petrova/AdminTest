@@ -48,17 +48,18 @@
                 <basename file="@{build.locale.dir}"
                           property="build.locale"/>
 
-                <echo>Building locale ${build.locale}</echo>
+                <x-echo>Building locale ${build.locale}</x-echo>
 
-                <concat encoding="UTF-8" outputencoding="UTF-8" destfile="${build.dir}/${package.name}-${build.locale}-debug.js">
+                <concat encoding="UTF-8" outputencoding="UTF-8" destfile="${build.dir}/${toolkit.name}/${package.name}-${build.locale}-debug.js" append="yes">
                     <fileset dir="@{build.locale.dir}" includes="**/*.js"/>
+                    <fileset dir="${package.dir}/${toolkit.name}/overrides/${build.locale}" includes="**/*.js" erroronmissingdir="false"/>
                     <filterchain>
                         <deletecharacters chars="&#xFEFF;" />
                     </filterchain>
                 </concat>
 
-                <x-compress-js srcfile="${build.dir}/${package.name}-${build.locale}-debug.js"
-                               outfile="${build.dir}/${package.name}-${build.locale}.js"/>
+                <x-compress-js srcfile="${build.dir}/${toolkit.name}/${package.name}-${build.locale}-debug.js"
+                               outfile="${build.dir}/${toolkit.name}/${package.name}-${build.locale}.js"/>
 
                 <!--
                 <ant antfile="${package.dir}/build.xml"

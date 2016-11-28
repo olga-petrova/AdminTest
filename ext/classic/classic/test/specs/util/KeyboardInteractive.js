@@ -1,3 +1,5 @@
+/* global Ext, jasmine, expect */
+
 describe("Ext.util.KeyboardInteractive", function() {
     var Event = Ext.event.Event,
         createSpy = jasmine.createSpy,
@@ -38,51 +40,75 @@ describe("Ext.util.KeyboardInteractive", function() {
         c = null;
     });
     
-    describe("config handling", function() {
-        beforeEach(function() {
-            makeComponent();
+    describe("config", function() {
+        describe("extending", function() {
+            it("should allow nulling keyMap config", function() {
+                var ParentClass = Ext.define(null, {
+                    extend: 'Ext.Component',
+                    keyMap: {
+                        ENTER: 'onKeyEnter'
+                    },
+                    onKeyEnter: Ext.emptyFn
+                });
+                
+                var ChildClass = Ext.define(null, {
+                    extend: ParentClass,
+                    keyMap: null
+                });
+                
+                c = new ChildClass();
+                
+                expect(c.getKeyMap()).toBe(null);
+            });
         });
         
-        it("should accept binding as function", function() {
-            spyOn(Ext.log, 'warn');
+        describe("handling", function() {
+            beforeEach(function() {
+                makeComponent();
+            });
             
-            c.setKeyHandlers({ UP: Ext.emptyFn });
+            it("should accept binding as function", function() {
+                spyOn(Ext.log, 'warn');
+                
+                c.setKeyMap({ UP: Ext.emptyFn });
+                
+                expect(Ext.log.warn).not.toHaveBeenCalled();
+                
+                var handlers = c.getKeyMap();
+                
+                expect(handlers.UP.handler).toBe(Ext.emptyFn);
+            });
             
-            expect(Ext.log.warn).not.toHaveBeenCalled();
+            it("should accept binding as fn name", function() {
+                c.setKeyMap({ DOWN: 'onKeyDefault' });
+                
+                var handlers = c.getKeyMap();
+                
+                expect(handlers.DOWN.handler).toBe('onKeyDefault');
+            });
             
-            var handlers = c.getKeyHandlers();
+            it("should throw on unknown keycode", function() {
+                var err = 'Invalid kepMap key specification "FOO"';
+                
+                expect(function() {
+                    c.setKeyMap({ FOO: 'onKeyFoo' });
+                }).toThrow(err);
+            });
             
-            expect(handlers.UP).toBe(Ext.emptyFn);
-        });
-        
-        it("should accept binding as fn name", function() {
-            c.setKeyHandlers({ DOWN: 'onKeyDefault' });
+            it("should throw an error on undefined binding", function() {
+                expect(function() {
+                    c.setKeyMap({ UP: undefined });
+                }).toThrow();            
+            });
             
-            var handlers = c.getKeyHandlers();
-            
-            expect(handlers.DOWN).toBe(Ext.emptyFn);
-        });
-        
-        it("should throw on unknown keycode", function() {
-            var err = "Unknown key: FOO in keyHandlers config for " + c.id +
-                      ". Key names should be in UPPER CASE.";
-            
-            expect(function() {
-                c.setKeyHandlers({ FOO: 'onKeyFoo' });
-            }).toThrow(err);
-        });
-        
-        it("should warn on undefined binding", function() {
-            // The warning is expected
-            spyOn(Ext.log, 'warn');
-            
-            c.setKeyHandlers({ UP: 'onKeyUp' });
-            
-            var have = Ext.log.warn.mostRecentCall.args[0],
-                want = "Undefined binding onKeyUp for UP key " +
-                       "in keyHandlers config for " + c.id;
-            
-            expect(have).toBe(want);
+            it("should allow disabled option", function() {
+                c.setKeyMap({
+                    UP: Ext.emptyFn,
+                    disabled: true
+                });
+                
+                expect(c.getKeyMap().disabled).toBe(true);
+            });
         });
     });
     
@@ -99,7 +125,7 @@ describe("Ext.util.KeyboardInteractive", function() {
             });
             
             it("should attach listener on config update", function() {
-                c.setKeyHandlers({ HOME: 'onKeyDefault' });
+                c.setKeyMap({ HOME: 'onKeyDefault' });
                 
                 expect(focusEl.hasListener('keydown')).toBe(true);
             });
@@ -108,7 +134,8 @@ describe("Ext.util.KeyboardInteractive", function() {
         describe("with config", function() {
             beforeEach(function() {
                 makeComponent({
-                    keyHandlers: {
+                    keyMap: {
+                        target: 'focusEl',
                         LEFT: 'onKeyDefault'
                     }
                 });
@@ -121,7 +148,7 @@ describe("Ext.util.KeyboardInteractive", function() {
             });
             
             it("should not attach listener more than once", function() {
-                c.setKeyHandlers({ RIGHT: 'onKeyDefault' });
+                c.setKeyMap({ RIGHT: 'onKeyDefault' });
                 
                 expect(focusEl.hasListeners.keydown).toBe(1);
             });
@@ -129,21 +156,27 @@ describe("Ext.util.KeyboardInteractive", function() {
     });
     
     describe("handlers", function() {
-        var leftSpy, rightSpy;
+        var leftSpy, rightSpy, handleEventSpy;
         
         beforeEach(function() {
             leftSpy = createSpy('left');
             rightSpy = createSpy('right');
             
             makeComponent({
-                keyHandlers: {
+                keyMap: {
                     LEFT: 'onKeyLeft',
                     RIGHT: 'onKeyRight'
                 },
                 
                 onKeyLeft: leftSpy,
-                onKeyRight: rightSpy
+                onKeyRight: rightSpy,
+                
+                renderTo: null
             });
+            
+            handleEventSpy = spyOn(c, 'handleEvent').andCallThrough();
+            
+            c.render(Ext.getBody());
         });
         
         afterEach(function() {
@@ -152,9 +185,14 @@ describe("Ext.util.KeyboardInteractive", function() {
         
         describe("resolving", function() {
             it("should resolve handler name to function", function() {
-                var handlers = c.getKeyHandlers();
-                
-                expect(handlers.LEFT).toBe(leftSpy);
+
+                jasmine.fireKeyEvent(c.el, 'keydown', Ext.event.Event.LEFT);
+                expect(leftSpy.callCount).toBe(1);
+                expect(rightSpy.callCount).toBe(0);
+
+                jasmine.fireKeyEvent(c.el, 'keydown', Ext.event.Event.RIGHT);
+                expect(leftSpy.callCount).toBe(1);
+                expect(rightSpy.callCount).toBe(01);
             });
         });
         
@@ -182,6 +220,22 @@ describe("Ext.util.KeyboardInteractive", function() {
                             ev = args[0];
                         
                         expect(ev.getKey()).toBe(Event.RIGHT);
+                    });
+                });
+            });
+            
+            describe("disabled keyMap", function() {
+                beforeEach(function() {
+                    c.getKeyMap().disabled = true;
+                });
+                
+                it("should not invoke the handler", function() {
+                    pressArrowKey(c, 'left');
+                    
+                    waitForSpy(handleEventSpy);
+                    
+                    runs(function() {
+                        expect(leftSpy).not.toHaveBeenCalled();
                     });
                 });
             });

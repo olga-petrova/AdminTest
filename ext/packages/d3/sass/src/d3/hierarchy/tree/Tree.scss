@@ -1,0 +1,31 @@
+/**
+ * @class Ext.d3.hierarchy.Tree
+ */
+
+.#{$d3-prefix}tree {
+
+  .#{$d3-prefix}link {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 2px;
+  }
+
+  .#{$d3-prefix}node {
+    stroke-width: 2px;
+    stroke: #779;
+    fill: #99A;
+
+    &.#{$d3-prefix}selected {
+      stroke: #f00;
+    }
+  }
+
+  .#{$d3-prefix}label {
+    font-size: 1em;
+    fill: #000;
+    stroke: none;
+    // IE and Edge don't support this CSS property.
+    dominant-baseline: middle;
+  }
+
+}

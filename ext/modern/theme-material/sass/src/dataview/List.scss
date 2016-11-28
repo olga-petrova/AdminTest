@@ -1,0 +1,29 @@
+
+
+.#{$prefix}list-item {
+  &.x-item-pressed {
+    .#{$prefix}list-disclosure {
+      transition: background-color 0s;
+    }
+  }
+
+  &.x-item-selected .x-dock-horizontal,
+  &.x-item-selected.x-list-item-tpl {
+    @include animation(md-list-item-selected .75s ease-out forwards);
+  }
+}
+
+.#{$prefix}list-disclosure {
+  transition: background-color 0.28s cubic-bezier(0.4, 0, 0.2, 1), color .28s ease-out;
+}
+
+@include keyframes(md-list-item-selected) {
+  0% {
+    background-color: $base-pressed-color;
+    color: $reverse-color;
+  }
+  100% {
+    background-color: $base-invisible-color;
+    color: $color;
+  }
+}

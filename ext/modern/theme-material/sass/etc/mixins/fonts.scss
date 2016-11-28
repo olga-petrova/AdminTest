@@ -1,0 +1,101 @@
+$material-button-font-size: 14px;
+$material-button-font-weight: 600;
+$material-button-line-height: 32px;
+
+$material-caption-font-size: 12px;
+$material-caption-font-weight: 400;
+$material-caption-line-height: 32px;
+
+$material-body-font-size: 14px;
+$material-body-font-weight: 400;
+$material-body-line-height: 25px;
+
+$material-menu-font-size: 14px;
+$material-menu-font-weight: 600;
+$material-menu-line-height: 32px;
+
+$material-label-font-size: 14px;
+$material-label-font-weight: 400;
+$material-label-line-height: 32px;
+
+$material-subhead-font-size: 16px;
+$material-subhead-font-weight: 400;
+$material-subhead-line-height: 32px;
+
+$material-title-font-size: 20px;
+$material-title-font-weight: 600;
+$material-title-line-height: 44px;
+
+$material-headline-font-size: 24px;
+$material-headline-font-weight: 400;
+$material-headline-line-height: 44px;
+
+$material-display-1-font-size: 34px;
+$material-display-1-font-weight: 400;
+$material-display-1-line-height: 52px;
+
+$material-display-2-font-size: 45px;
+$material-display-2-font-weight: 400;
+$material-display-2-line-height: 64px;
+
+$material-display-3-font-size: 56px;
+$material-display-3-font-weight: 400;
+$material-display-3-line-height: 64px;
+
+$material-display-4-font-size: 112px;
+$material-display-4-font-weight: 300;
+$material-display-4-line-height: 128px;
+
+// Font size conversions based on http://brm.io/material-design-type/
+@mixin material-font-style($type) {
+  @if $type == 'button' {
+    font-size: $material-button-font-size;
+    text-transform: uppercase;
+    font-weight: $material-button-font-weight;
+    line-height: $material-button-line-height;
+  } @else if $type == 'caption' {
+    font-size: $material-caption-font-size;
+    font-weight: $material-caption-font-weight;
+    line-height: $material-caption-line-height;
+  } @else if $type == 'body' {
+    font-size: $material-body-font-weight;
+    font-weight: $material-body-font-weight;
+    line-height: $material-button-line-height;
+  } @else if $type == 'menu' {
+    font-size: $material-menu-font-size;
+    font-weight: $material-menu-font-weight;
+    line-height: $material-menu-line-height;
+  } @else if $type == 'label' {
+    font-size: $material-label-font-size;
+    font-weight: $material-label-font-weight;
+    line-height: $material-label-line-height;
+  } @else if $type == 'subhead' {
+    font-size: $material-subhead-font-size;
+    font-weight: $material-subhead-font-weight;
+    line-height: $material-subhead-line-height;
+  } @else if $type == 'title' {
+    font-size: $material-title-font-size;
+    font-weight: $material-title-font-weight;
+    line-height: $material-title-line-height;
+  } @else if $type == 'headline' {
+    font-size: $material-headline-font-size;
+    font-weight: $material-headline-font-weight;
+    line-height: $material-headline-line-height;
+  } @else if $type == 'display-1' {
+    font-size: $material-display-1-font-size;
+    font-weight: $material-display-1-font-weight;
+    line-height: $material-display-1-line-height;
+  } @else if $type == 'display-2' {
+    font-size: $material-display-2-font-size;
+    font-weight: $material-display-2-font-weight;
+    line-height: $material-display-2-line-height;
+  } @else if $type == 'display-3' {
+    font-size: $material-display-3-font-size;
+    font-weight: $material-display-3-font-weight;
+    line-height: $material-display-3-line-height;
+  } @else if $type == 'display-4' {
+    font-size: $material-display-4-font-size;
+    font-weight: $material-display-4-font-weight;
+    line-height: $material-display-4-line-height;
+  }
+}

@@ -1,0 +1,20 @@
+.x-grid-column {
+  .x-innerhtml {
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    display: flex;
+
+    // Vertically center text
+    justify-content: center;
+
+    // Boxes run downwards
+    flex-direction: column;
+  }
+}
+
+.x-grid-column-trigger {
+  position: absolute;
+  right: 0;
+  cursor: pointer;
+}

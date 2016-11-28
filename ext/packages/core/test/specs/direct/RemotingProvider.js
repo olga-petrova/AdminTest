@@ -857,17 +857,71 @@ describe("Ext.direct.RemotingProvider", function() {
         });
         
         describe("successfully connected:", function() {
-            it("fires 'data' event", function() {
-                runs(function() {
-                    provider.on('data', handler);
-            
-                    ns.TestAction.echo('foo', echoResult, this);
+            describe("events", function() {
+                describe("data", function() {
+                    beforeEach(function() {
+                        provider.on('data', handler);
+                        
+                        // Sanity check, this is applied to every it()
+                        expect(handler).not.toHaveBeenCalled();
+                    });
+                    
+                    it("fires for valid responses", function() {
+                        runs(function() {
+                            ns.TestAction.echo('foo', echoResult, this);
+                        });
+                        
+                        waitForEcho();
+                        
+                        runs(function() {
+                            expect(handler).toHaveBeenCalled();
+                        });
+                    });
+                    
+                    it("fires for exceptions", function() {
+                        runs(function() {
+                            ns.TestAction.echo('foo', echoStatus, this, { timeout: 666 });
+                        });
+                        
+                        waitForEcho();
+                        
+                        runs(function() {
+                            expect(handler).toHaveBeenCalled();
+                        });
+                    });
                 });
                 
-                waitForEcho();
-                
-                runs(function() {
-                    expect(handler).toHaveBeenCalled();
+                describe("exception", function() {
+                    beforeEach(function() {
+                        provider.on('exception', handler);
+                        
+                        // Sanity check
+                        expect(handler).not.toHaveBeenCalled();
+                    });
+                    
+                    it("fires for exceptions", function() {
+                        runs(function() {
+                            ns.TestAction.echo('throbbe', echoStatus, this, { timeout: 666 });
+                        });
+                        
+                        waitForEcho();
+                        
+                        runs(function() {
+                            expect(handler).toHaveBeenCalled();
+                        });
+                    });
+                    
+                    it("does NOT fire for valid responses", function() {
+                        runs(function() {
+                            ns.TestAction.echo('blerg', echoResult, this);
+                        });
+                        
+                        waitForEcho();
+                        
+                        runs(function() {
+                            expect(handler).not.toHaveBeenCalled();
+                        });
+                    });
                 });
             });
             

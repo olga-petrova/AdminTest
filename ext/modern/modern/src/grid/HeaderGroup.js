@@ -80,13 +80,27 @@ Ext.define('Ext.grid.HeaderGroup', {
             scope: 'this'
         });
 
+        me.textElement.on({
+            tap: 'onHeaderGroupTap',
+            longpress: 'onHeaderGroupLongPress',
+            scope: this
+        });
+
         me.callParent();
 
         me.doVisibilityCheck();
     },
 
+    onHeaderGroupTap: function(e) {
+        this.fireEvent('tap', this, e);
+    },
+
+    onHeaderGroupLongPress: function(e) {
+        this.fireEvent('longpress', this, e);
+    },
+
     onColumnShow: function(column) {
-        if (this.getVisibleCount() === this.getInnerItems().length) {
+        if (this.getVisibleCount() > 0) {
             this.show();
         }
     },
@@ -145,7 +159,11 @@ Ext.define('Ext.grid.HeaderGroup', {
                 i;
 
             for (i = 0; i < len; ++i) {
-                count += columns[i].isHidden() ? 0 : 1;
+                if(columns[i].isHeaderGroup){
+                    count += columns[i].getVisibleCount();
+                }else {
+                    count += columns[i].isHidden() ? 0 : 1;
+                }
             }
 
             return count;

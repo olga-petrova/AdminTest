@@ -1,4 +1,3 @@
-
 /**
  * Turkish translation by Deniz Girginer
  *

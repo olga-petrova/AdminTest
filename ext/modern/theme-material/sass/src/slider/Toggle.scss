@@ -1,0 +1,14 @@
+.#{$prefix}toggle {
+  overflow: visible;
+
+  .#{$prefix}toggle-inner {
+    overflow: visible;
+  }
+
+  .#{$prefix}thumb {
+    transition: transform .2s ease-out;
+    &:after {
+      @include material-shadow(1);
+    }
+  }
+}

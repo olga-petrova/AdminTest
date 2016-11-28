@@ -1,0 +1,11 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}grid-summaryrow {
+      padding: 8px 0;
+
+      .#{$prefix}grid-expander-cell:before {
+        display: none;
+      }
+    }
+  }
+}

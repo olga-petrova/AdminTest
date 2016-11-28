@@ -1,0 +1,8 @@
+.#{$prefix}toast {
+  color: $color;
+  background-color: $background-color;
+  padding: $content-padding;
+  @include material-shadow(1);
+
+  @include material-font-style('body');
+}

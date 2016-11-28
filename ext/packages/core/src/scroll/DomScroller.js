@@ -8,6 +8,8 @@ Ext.define('Ext.scroll.DomScroller', {
 
     isDomScroller: true,
 
+    _elementCls: Ext.baseCSSPrefix + 'domscroller',
+
     getMaxPosition: function() {
         var element = this.getElement(),
             x = 0,
@@ -80,6 +82,7 @@ Ext.define('Ext.scroll.DomScroller', {
     updateElement: function(element, oldElement) {
         this.initXStyle();
         this.initYStyle();
+        element.addCls(this._elementCls);
     },
 
     updateX: function(x) {
@@ -95,7 +98,7 @@ Ext.define('Ext.scroll.DomScroller', {
             // There is an IE8 override of this method; when making changes here
             // don't forget to update the override as well
             var me = this,
-                element = me.getElement(),
+                element = me.getScrollElement(),
                 maxPosition, dom, to, xInf, yInf,
                 i;
 
@@ -167,16 +170,4 @@ Ext.define('Ext.scroll.DomScroller', {
             }
         }
     }
-}, function(DomScroller) {
-    // Ensure the global Ext scroll event fires when the document scrolls.
-    // This is for when a non-viewport based app is used.
-    // DOM scroll events are used for document scrolls.
-    // The Viewport plugin destroys this Scroller at startup.
-    Ext.onDocumentReady(function() {
-        DomScroller.document = new DomScroller({
-            x: true,
-            y: true,
-            element: document.body
-        });
-    });
 });

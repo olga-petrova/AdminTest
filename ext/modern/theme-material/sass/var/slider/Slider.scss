@@ -1,0 +1,25 @@
+/**
+ * @class Ext.field.Slider
+ */
+
+$slider-height: dynamic(32px);
+$slider-disabled-opacity: dynamic(1);
+
+$slider-thumb-size: dynamic(18px);
+$slider-thumb-border: dynamic(0);
+$slider-thumb-border-radius: dynamic(50%);
+$slider-thumb-background-color: dynamic($base-color);
+$slider-thumb-background-gradient: dynamic(null);
+$slider-thumb-dragging-background-color: dynamic($base-dark-color);
+$slider-thumb-disabled-background-color: dynamic($faded-color);
+$slider-track-fill-background-color: dynamic($base-color);
+$slider-thumb-disabled-border: dynamic(2px solid $background-color);
+$slider-thumb-top: dynamic($content-padding/2);
+
+$slider-track-height: dynamic(2px);
+$slider-track-top: dynamic($content-padding);
+$slider-track-left: dynamic(0);
+$slider-track-border: dynamic(0);
+$slider-track-background-color: dynamic($divider-color);
+$slider-track-background-gradient: dynamic(null);
+$slider-track-box-shadow: dynamic(null);

@@ -1,0 +1,158 @@
+.#{$prefix}button {
+  text-transform: uppercase;
+  border: 0;
+
+  &:not(.#{$prefix}haslabel) {
+    border-radius: 50%;
+  }
+
+  // Buttons with labels and icons
+  // icons should be the base color
+  &.#{$prefix}haslabel .#{$prefix}button-icon:not(.#{$prefix}hidden) {
+    color: $base-color;
+  }
+
+  // Buttons being pressed with labels and icons
+  // icons should be visible on the colored background of the button
+  &.#{$prefix}haslabel.#{$prefix}button-pressing .#{$prefix}button-icon:not(.#{$prefix}hidden) {
+    color: $reverse-color;
+  }
+
+  &.#{$prefix}haslabel .#{$prefix}button-icon:not(.#{$prefix}hidden) + .#{$prefix}button-label {
+    padding-left: 16px;
+    text-align: left;
+  }
+
+}
+
+.#{$prefix}button-icon.#{$prefix}shown {
+  display: flex;
+}
+
+.#{$prefix}button-pressing {
+  color: $background-color;
+  transition: background-color .2s 0.28s cubic-bezier(0.4, 0, 0.2, 1), color .2s 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.#{$prefix}segmentedbutton .#{$prefix}button {
+  color: $reverse-color;
+
+  &.#{$prefix}button-pressed {
+    background-color: $base-dark-color;
+  }
+}
+
+// Raised Buttons
+@include button-raised-ui;
+.#{$prefix}button-raised {
+  @include material-shadow();
+
+  &.#{$prefix}button-pressing {
+    background-color: $base-pressed-color;
+    @include material-shadow(2);
+  }
+
+  &.#{$prefix}button-decline {
+    color: $background-color;
+    background-color: $alert-color;
+  }
+
+  &.#{$prefix}button-confirm {
+    color: $background-color;
+    background-color: $confirm-color;
+  }
+}
+
+/* Floating Action Buttons
+{
+  xtype: 'button',
+  ui: 'fab',
+  bottom: 16,
+  right: 16,
+  iconCls: 'md-icon-add'
+}*/
+.#{$prefix}button-fab {
+  color: $background-color;
+  display: flex;
+  width: 56px;
+  height: 56px;
+  background-color: $accent-color;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  @include material-shadow(2);
+
+  &.#{$prefix}button-pressing {
+    background-color: $accent-pressed-color;
+    @include material-shadow(3);
+  }
+}
+
+.#{$prefix}button-decline {
+  color: $alert-color;
+}
+
+.#{$prefix}button-confirm {
+  color: $confirm-color;
+}
+
+.#{$prefix}docked-top {
+  .#{$prefix}hasbadge .#{$prefix}badge {
+    top: -11px;
+  }
+}
+
+.#{$prefix}hasbadge {
+  .#{$prefix}badge {
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    text-align: center;
+    display: block;
+    overflow: hidden;
+
+    @include material-font-style('caption');
+    line-height: inherit;
+
+    @include material-shadow(1);
+  }
+}
+
+// Ripple Effects
+
+.md-ripple-wrap {
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.md-ripple {
+  @include animation(none);
+}
+
+.md-ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  @include scale(1);
+  opacity: .4;
+
+  @include animation(md-ripple-animation .5s ease-out forwards);
+}
+
+@include keyframes(md-ripple-animation) {
+  0% {
+    @include scale(0);
+    opacity: 0.4;
+  }
+  75% {
+    @include scale(1.5);
+    opacity: .2;
+  }
+  100% {
+    @include scale(1.5);
+    opacity: 0;
+  }
+}

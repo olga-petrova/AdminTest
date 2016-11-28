@@ -14,12 +14,12 @@ $form-clear-size: 2.2em;
     }
 }
 
-.x-field-text,
-.x-field-textarea,
-.x-field-search,
-.x-field-select,
-.x-field-number {
-    .x-component-outer {
+.x-textfield,
+.x-textareafield,
+.x-searchfield,
+.x-pickerfield,
+.x-numberfield {
+    .x-field-body {
         border-bottom: 1px solid $foreground-color;
 
         &:before,
@@ -41,7 +41,7 @@ $form-clear-size: 2.2em;
     }
 
     &.x-field-focused {
-        .x-component-outer {
+        .x-field-body {
             border-bottom-color: $base-color;
 
             &:before {
@@ -57,7 +57,7 @@ $form-clear-size: 2.2em;
     }
 }
 
-.x-field-search .x-component-outer .x-field-input {
+.x-searchfield .x-field-body .x-input {
     padding-left: 14px;
 
     &::before {
@@ -76,7 +76,7 @@ $form-clear-size: 2.2em;
     }
 }
 
-.x-field-input {
+.x-input {
     .x-clear-icon {
         width: 20px;
         height: 20px;
@@ -112,7 +112,7 @@ $form-clear-size: 2.2em;
 }
 
 
-.x-field-search .x-input-el  {
+.x-searchfield .x-input-el  {
   padding: .4em .4em .4em 1em;
 }
 
@@ -121,7 +121,7 @@ $form-clear-size: 2.2em;
 }
 
 .x-item-disabled {
-  .x-form-label,
+  .x-field-label,
   input,
   .x-input-el,
   .x-spinner-body,
@@ -138,21 +138,21 @@ $form-clear-size: 2.2em;
     color: $foreground-color;
 }
 
-.x-item-disabled .x-form-label {
+.x-item-disabled .x-field-label {
     color: #aaa;
 }
 
-.x-item-disabled .x-form-label:after {
+.x-item-disabled .x-field-label:after {
     color: #666 !important;
 }
 
-.x-field-text,
-.x-field-textarea,
-.x-field-search,
-.x-field-select,
-.x-field-number {
+.x-textfield,
+.x-textareafield,
+.x-searchfield,
+.x-pickerfield,
+.x-numberfield {
   &.x-item-disabled {
-    .x-component-outer {
+    .x-field-body {
       border-bottom-color: $secondary-color;
 
       &:before {
@@ -168,8 +168,8 @@ $form-clear-size: 2.2em;
     }
 }
 
-.x-field-select {
-    .x-component-outer .x-field-input {
+.x-pickerfield {
+    .x-field-body .x-input {
         overflow: hidden;
 
         &::before {
@@ -187,7 +187,7 @@ $form-clear-size: 2.2em;
     }
 
     &.x-item-disabled {
-        .x-component-outer .x-field-input {
+        .x-field-body .x-input {
             &::before {
                 border-bottom-color: $secondary-color;
             }

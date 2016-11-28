@@ -2,8 +2,8 @@
  * @class Ext.field.Search
  */
 
-.x-field-search {
-    .x-field-input {
+.x-searchfield {
+    .x-input {
         position: relative;
 
         @include font-icon($fa-var-search 1.2em FontAwesome);
@@ -17,7 +17,7 @@
             right: auto;
         }
 
-        .x-form-field {
+        .x-input-el {
             padding-left: 1.5em;
         }
     }

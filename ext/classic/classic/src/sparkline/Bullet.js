@@ -58,6 +58,7 @@ Ext.define('Ext.sparkline.Bullet', {
     applyValues: function(newValues) {
         newValues = Ext.Array.map(Ext.Array.from(newValues), this.normalizeValue);
         this.disabled = !(newValues && newValues.length);
+        this.applyConfigChange();
         return newValues;
     },
 

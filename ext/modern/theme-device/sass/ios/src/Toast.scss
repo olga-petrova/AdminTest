@@ -1,0 +1,20 @@
+@if ($include-ios) {
+  #{$ios-selector} {
+    .#{$prefix}toast {
+      @include border-radius(7px);
+      padding: 0px;
+      margin: 0px;
+      max-width: 19em;
+      border: 1px;
+      background-color: #fff;
+      border-color: #dbdbe0;
+
+      .#{$prefix}toast-text {
+        padding: 2em;
+        color: $primary-color-ios;
+        font-size: .9em;
+        font-weight: 400;
+      }
+    }
+  }
+}

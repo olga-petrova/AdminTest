@@ -38,3 +38,20 @@ $radiofield-checked-checkbox-icon: dynamic($fa-var-dot-circle-o $radiofield-chec
  * The radio checkbox color
  */
 $radiofield-checkbox-color: dynamic($checkboxfield-checkbox-color);
+
+/**
+ * @var {color}
+ * The radio checkbox color in "checked" state
+ */
+$radiofield-checked-checkbox-color: dynamic($checkboxfield-checked-checkbox-color);
+
+/**
+ * @var {color}
+ * The radio checkbox color in "disabled" state
+ */
+$radiofield-disabled-checkbox-color: dynamic($checkboxfield-disabled-checkbox-color);
+
+
+// NEW
+$radiofield-body-padding: dynamic($checkboxfield-body-padding);
+$radiofield-body-padding-big: dynamic($checkboxfield-body-padding-big);

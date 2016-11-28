@@ -1,4 +1,3 @@
-
 /**
  * German translation by Daniel Grana
  *

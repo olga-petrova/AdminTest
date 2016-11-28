@@ -1,0 +1,71 @@
+@if ($include-ios) {
+  #{$ios-selector} {
+    .#{$prefix}list {
+      background-color: #fff;
+
+      .#{$prefix}list-disclosure {
+        border: 0px;
+        background-color: transparent;
+        margin: 10px 15px 10px;
+
+        &:before {
+          @include absolute-position(0, 0, 0, 0);
+          content: '!';
+          font-family: 'iOS7';
+          color: #ccc;
+          font-size: 14px;
+          text-align: center;
+          background-color: transparent;
+          line-height: 26px;
+          padding-left: 2px;
+        }
+      }
+
+      .#{$prefix}list-item {
+        color: $text-color-ios;
+        font-weight: 400;
+        border-top: 1px solid transparent;
+
+        &.#{$prefix}item-pressed {
+          background-color: $list-item-pressed-color-ios;
+        }
+
+        &.#{$prefix}item-selected.#{$prefix}list-item-tpl {
+          background-color: $list-item-selected-color-ios;
+          .#{$prefix}list-disclosure {
+            background-color: transparent;
+          }
+        }
+
+        .#{$prefix}list-item-body,
+        &.#{$prefix}list-item-tpl .#{$prefix}innerhtml {
+          padding: .7em 1em;
+        }
+
+        &.#{$prefix}list-item-tpl:before {
+          content: '';
+          display: block;
+          position: absolute;
+          bottom: -1px;
+          left: 1em;
+          right: 0px;
+          border-bottom: solid 1px $list-item-border-color-ios;
+        }
+
+        &.#{$prefix}item-pressed.#{$prefix}list-item-tpl:before, &.#{$prefix}item-selected.#{$prefix}list-item-tpl:before, &.#{$prefix}list-footer-wrap.#{$prefix}list-item-tpl:before {
+          border-bottom: solid 1px transparent;
+        }
+      }
+    }
+
+    .#{$prefix}list .#{$prefix}list-header {
+      background-color: $list-header-color-ios;
+      border: 0px;
+      padding: 0em 1em;
+      .#{$prefix}innerhtml {
+        font-size: 1.2em;
+        font-weight: 600;
+      }
+    }
+  }
+}

@@ -1,0 +1,88 @@
+/**
+ * @class Ext.field.Toggle
+ */
+
+/**
+ * @var {measurement} $form-toggle-size
+ * Thumb size minus padding for inset thumbs like in a Toggle element.
+ */
+$toggle-thumb-size: dynamic(2.2em);
+$toggle-thumb-border: dynamic($slider-thumb-border);
+$toggle-thumb-border-radius: dynamic($slider-thumb-border-radius);
+$toggle-thumb-background-color: dynamic($slider-thumb-background-color);
+$toggle-thumb-background-gradient: dynamic($slider-thumb-background-gradient);
+$toggle-thumb-on-background-color: dynamic($toggle-thumb-background-color);
+$toggle-thumb-on-background-gradient: dynamic($toggle-thumb-background-gradient);
+$toggle-thumb-padding: dynamic(.35em);
+$toggle-thumb-top: dynamic($toggle-thumb-padding/2);
+$toggle-thumb-left: dynamic($toggle-thumb-padding/2);
+
+$toggle-height: dynamic($toggle-thumb-size + ($toggle-thumb-padding/2));
+$toggle-width: dynamic($toggle-thumb-size * 2);
+$toggle-border: dynamic(1px solid darken(#ddd, 15%));
+$toggle-border-radius: dynamic(($toggle-height - $toggle-thumb-padding) /2);
+$toggle-background-color: dynamic(#ddd);
+$toggle-background-gradient: dynamic('recessed');
+$toggle-on-background-color: dynamic($confirm-color);
+$toggle-on-background-gradient: dynamic('recessed');
+
+@mixin toggle-ui(
+  $ui: null,
+  $width: null,
+  $height: null,
+  $border: null ,
+  $border-radius: null,
+  $background-color: null,
+  $background-gradient: null,
+  $on-background-color: null,
+  $on-background-gradient: null,
+  $thumb-size: null,
+  $thumb-border: null,
+  $thumb-border-radius: null,
+  $thumb-background-color: null,
+  $thumb-background-gradient: null,
+  $thumb-on-background-color: null,
+  $thumb-on-background-gradient: null,
+  $thumb-top: null,
+  $thumb-left: null,
+  $thumb-padding: null
+) {
+
+  $ui-suffix: ui-suffix($ui);
+
+  .#{$prefix}toggle#{$ui-suffix} {
+    width: $width;
+    height: $height;
+    border: $border;
+
+    @include background-gradient($background-color, $background-gradient);
+    @if $enable-border-radius {
+      @include border-radius($border-radius);
+    }
+
+    .#{$prefix}thumb {
+      height: $thumb-size;
+      width: $thumb-size;
+      background-color: transparent;
+      border: 0;
+
+      // Thumb Handle
+      &:after {
+        border: $thumb-border;
+        @include insertion($thumb-size - $thumb-padding, $thumb-size - $thumb-padding, $thumb-top, $thumb-left);
+        @include background-gradient($thumb-background-color, $thumb-background-gradient);
+        @if $enable-border-radius {
+          @include border-radius($thumb-border-radius);
+        }
+      }
+    }
+
+    &.#{$prefix}toggle-on {
+      @include background-gradient($on-background-color, $on-background-gradient);
+
+      .#{$prefix}thumb:after {
+        @include background-gradient($thumb-on-background-color, $thumb-on-background-gradient);
+      }
+    }
+  }
+}

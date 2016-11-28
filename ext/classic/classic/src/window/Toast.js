@@ -107,7 +107,6 @@ Ext.define('Ext.window.Toast', {
      * Set this to `false` to make toasts appear and disappear without animation.
      * This is helpful with applications' unit and integration testing.
      */
-    animate: true,
 
     // Pixels between each notification
     spacing: 6,
@@ -125,10 +124,17 @@ Ext.define('Ext.window.Toast', {
     slideBackDuration: 500,
     hideDuration: 500,
     autoCloseDelay: 3000,
-    stickOnClick: true,
+    
+    /**
+     * @cfg {Boolean} [stickOnClick]
+     * This config will prevent the Toast from closing when you click on it. If this is set to `true`,
+     * closing the Toast will have to be handled some other way (e.g., Setting `closable: true`).
+     */
+    stickOnClick: false,
     stickWhileHover: true,
     closeOnMouseDown: false,
     closable: false,
+    focusable: false,
 
     // Private. Do not override!
     isHiding: false,
@@ -140,13 +146,24 @@ Ext.define('Ext.window.Toast', {
     xPos: 0,
     yPos: 0,
 
+    constructor: function(config) {
+        config = config || {};
+        if (config.animate === undefined) {
+            config.animate = Ext.isBoolean(this.animate) ? this.animate : Ext.enableFx;
+        }
+        this.enableAnimations = config.animate;
+        delete config.animate;
+
+        this.callParent([config]);
+    },
+
     initComponent: function() {
         var me = this;
 
         // Close tool is not really helpful to sight impaired users
         // when Toast window is set to auto-close on timeout; however
         // if it's forced, respect that.
-        if (me.autoClose && !me.hasOwnProperty('closable')) {
+        if (me.autoClose && me.closable == null) {
             me.closable = false;
         }
         
@@ -427,7 +444,7 @@ Ext.define('Ext.window.Toast', {
 
         Ext.Array.include(activeToasts, me);
 
-        if (me.animate) {
+        if (me.enableAnimations) {
             // Repeating from coordinates makes sure the windows does not flicker
             // into the center of the viewport during animation
             xy = el.getXY();
@@ -487,7 +504,7 @@ Ext.define('Ext.window.Toast', {
 
             me.stopAnimation();
             
-            if (me.animate) {
+            if (me.enableAnimations) {
                 el.animate({
                     to: {
                         x: me.xPos,
@@ -592,7 +609,7 @@ Ext.define('Ext.window.Toast', {
             me.cancelAutoClose();
 
             if (el) {
-                if (me.animate) {
+                if (me.enableAnimations) {
                     el.fadeOut({
                         opacity: 0,
                         easing: 'easeIn',

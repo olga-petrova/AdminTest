@@ -230,9 +230,7 @@ Ext.define('Ext.form.field.File', {
         inputEl.dom.name = ''; 
         
         // Some browsers will show a blinking cursor in the field, even if it's readonly. If we do happen
-        // to receive focus, forward it on to our focusEl. Also note that in IE, the file input is treated as
-        // 2 elements for tabbing purposes (the text, then the button). So as you tab through, it will take 2
-        // tabs to get to the next field. As far as I know there's no way around this in any kind of reasonable way.
+        // to receive focus, forward it on to our focusEl.
         inputEl.on('focus', me.onInputFocus, me);
         inputEl.on('mousedown', me.onInputMouseDown, me);
 
@@ -362,7 +360,7 @@ Ext.define('Ext.form.field.File', {
     },
 
     getButtonMarginProp: function() {
-        return 'margin-left:';
+        return this.getInherited().rtl ? 'margin-right:' : 'margin-left:';
     },
     
     onInputFocus: function(e) {

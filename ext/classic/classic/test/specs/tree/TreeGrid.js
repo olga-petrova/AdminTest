@@ -141,7 +141,13 @@ describe("Ext.tree.TreeGrid", function() {
         },
         synchronousLoad = true,
         treeStoreLoad = Ext.data.TreeStore.prototype.load,
-        loadStore;
+        loadStore = function() {
+            treeStoreLoad.apply(this, arguments);
+            if (synchronousLoad) {
+                this.flushLoad.apply(this, arguments);
+            }
+            return this;
+        };
     
     function makeTreeGrid(cfg, storeCfg) {
         tree = new Ext.tree.Panel(Ext.apply({
@@ -170,13 +176,7 @@ describe("Ext.tree.TreeGrid", function() {
 
     beforeEach(function() {
         // Override so that we can control asynchronous loading
-        loadStore = Ext.data.TreeStore.prototype.load = function() {
-            treeStoreLoad.apply(this, arguments);
-            if (synchronousLoad) {
-                this.flushLoad.apply(this, arguments);
-            }
-            return this;
-        };
+        Ext.data.TreeStore.prototype.load = loadStore;
     });
 
     afterEach(function(){
@@ -324,6 +324,43 @@ describe("Ext.tree.TreeGrid", function() {
 
             // Expanding a node should not scroll.
             expect(tree.view.getScrollY()).toEqual(40);
+        });
+        it("should not not scroll horizontally upon node toggle", function() {
+            // MUST be no scroll so that the non buffered rendering pathway is used
+            // and the row count changes and a layout is triggered.
+            tree.setHeight(600);
+            tree.collapseAll();
+            tree.columns[0].setWidth(200);
+
+            rootNode.expand();
+            tree.view.setScrollX(40);
+            tree.getRootNode().childNodes[1].expand();
+
+            // We cannot wait for an event. We are expecting nothing to happen
+            // if all goes well. The scroll caused by the header layout will
+            // be undone, and then 50ms later, scroll listening will be restored
+            waits(100);
+
+            // Expanding a node should not scroll.
+            runs(function() {
+                expect(tree.view.getScrollX()).toEqual(40);
+
+                // Another operation should also not scroll.
+                // https://sencha.jira.com/browse/EXTJS-21084
+                // Saved scroll position was being discarded by restoreState
+                // even though it may be needed multiple times.
+                tree.getRootNode().childNodes[1].collapse();
+            });
+
+            // We cannot wait for an event. We are expecting nothing to happen
+            // if all goes well. The scroll caused by the header layout will
+            // be undone, and then 50ms later, scroll listening will be restored
+            waits(100);
+
+            // Expanding a node should not scroll.
+            runs(function() {
+                expect(tree.view.getScrollX()).toEqual(40);
+            });
         });
     });
 

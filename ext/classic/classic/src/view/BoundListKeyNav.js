@@ -174,7 +174,11 @@ Ext.define('Ext.view.BoundListKeyNav', {
         }
 
         // Stop propagation of the ENTER keydown event so that any Editor which owns the field
-        // does not completeEdit.
+        // does not completeEdit, but we also need to still fire the specialkey event for ENTER, 
+        // so lets add fromBoundList to eOpts, and this will be handled by CellEditor#onSpecialKey.
+        field.fireEvent('specialkey', field, e, {
+            fromBoundList: true
+        });
         return false;
     },
 

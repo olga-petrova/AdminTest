@@ -55,5 +55,9 @@
 Ext.define('Ext.layout.HBox', {
     extend: 'Ext.layout.FlexBox',
 
-    alias: 'layout.hbox'
+    alias: 'layout.hbox',
+
+    cls: [ Ext.baseCSSPrefix + 'layout-box', Ext.baseCSSPrefix + 'layout-hbox' ],
+
+    itemCls: [ Ext.baseCSSPrefix + 'layout-box-item', Ext.baseCSSPrefix + 'layout-hbox-item' ]
 });

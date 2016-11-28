@@ -1,0 +1,35 @@
+$field-background-color: dynamic($background-color);
+
+$field-border-color: dynamic($divider-color);
+
+$field-label-color: dynamic($highlight-color);
+$field-label-border-color: dynamic(null);
+$field-label-background-color: dynamic(null);
+$field-label-padding: dynamic(4px 0);
+$field-label-padding-big: dynamic($field-label-padding);
+
+$field-label-font-weight: dynamic($material-label-font-weight);
+$field-label-font-size: dynamic($material-label-font-size);
+$field-label-line-height: dynamic(16px);
+$field-label-line-height-big: dynamic($field-label-line-height);
+
+$field-label-focused-color: dynamic($base-color);
+
+$field-input-color: dynamic($color);
+$field-input-empty-color: dynamic($disabled-color);
+
+$field-item-disabled-color: dynamic($disabled-color);
+
+$field-required-indicator-font-weight: dynamic($material-caption-font-weight);
+$field-required-indicator-font-size: dynamic($material-caption-font-size);
+$field-required-indicator-font-family: dynamic($font-icon-font-family);
+
+$field-required-indicator-position: dynamic(relative);
+$field-required-indicator-top: dynamic(-3px);
+$field-required-indicator-padding: dynamic($content-padding/4);
+
+$field-vertical-spacing: dynamic(12px);
+$field-vertical-spacing-big: dynamic($field-vertical-spacing);
+
+$field-separator-vertical-spacing: dynamic($field-vertical-spacing);
+$field-separator-vertical-spacing-big: dynamic($field-vertical-spacing-big);

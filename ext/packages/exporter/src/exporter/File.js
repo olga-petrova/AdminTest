@@ -2,40 +2,179 @@
  * This class has methods for file manipulation.
  */
 Ext.define('Ext.exporter.File', {
-    singleton: true
+    singleton: true,
 
     /**
-     * Save a file locally using the content and name provided.
+     * @property {String} url
+     *
+     * Default url to use for server file downloading.
+     */
+    url: null,
+    /**
+     * @property {Boolean} forceDownload
+     *
+     * Set to `true` to always download files from the server instead of saving
+     * files using browser features.
+     */
+    forceDownload: false,
+
+    /**
+     * Save a binary file locally using either [Blob][1] or server side script.
+     *
+     * [1]: https://developer.mozilla.org/en/docs/Web/API/Blob
+     *
+     * Browser compatibility when using [Blob][1]:
+     *
+     * - Firefox 20+: max blob size 800 MB
+     * - Chrome: max blob size 500 MB
+     * - Chrome for Android: max blob size 500 MB
+     * - Edge: max blob size n/a
+     * - IE 10+: max blob size 600 MB
+     * - Opera 15+: max blob size 500 MB
+     *
+     * For all other browsers it falls back to server side script.
+     *
+     * @param {String} content File content
+     * @param {String} filename Name of the file including the extension
+     * @param {String} [mimeType='application/octet-stream'] Mime type of the file
+     */
+    saveBinaryAs: function(content, filename, mimeType){
+        var me = this,
+            pt = Ext.platformTags,
+            force = me.forceDownload || pt.phone || pt.tablet,
+            saveAs = me.downloadBinaryAs;
+
+        if(!force && !Ext.isSafari && me.saveBlobAs){
+            saveAs = me.saveBlobAs;
+        }
+
+        // The method saveBlobAs exists only if the browser supports Blob
+        saveAs.call(me, content, filename, mimeType);
+    },
+
+    /**
+     * Save a binary file using a server side script. The file content, file name and mime-type are uploaded
+     * to the server side script and a download is forced from the server.
+     *
+     * This method can be used when the browser doesn't support [Blobs][1].
+     *
+     * [1]: https://developer.mozilla.org/en/docs/Web/API/Blob
+     *
+     * @param {String} content File content
+     * @param {String} filename Name of the file including the extension
+     * @param {String} [mimeType='application/octet-stream'] Mime type of the file
+     */
+    downloadBinaryAs: function(content, filename, mimeType){
+        var inputs, markup;
+
+        //<debug>
+        if(!this.url){
+            Ext.raise('Cannot download file since no URL was defined!');
+            return;
+        }
+        //</debug>
+
+        inputs = [{
+            tag: 'input',
+            type: 'hidden',
+            name: 'content',
+            value: Ext.util.Base64.encode(content)
+        },{
+            tag: 'input',
+            type: 'hidden',
+            name: 'filename',
+            value: filename
+        },{
+            tag: 'input',
+            type: 'hidden',
+            name: 'mime',
+            value: mimeType || 'application/octet-stream'
+        }];
+
+        markup = Ext.dom.Helper.markup({
+            tag: 'html',
+            children: [
+                {tag: 'head'},
+                {
+                    tag: 'body',
+                    children: [
+                        {
+                            tag: 'form',
+                            method: 'POST',
+                            action: this.url,
+                            children: inputs
+                        },
+                        {
+                            tag: 'script',
+                            type: 'text/javascript',
+                            children: 'document.getElementsByTagName("form")[0].submit();'
+                        }
+                    ]
+                }
+            ]
+        });
+
+        window.open('', 'FileDownload_' + Date.now()).document.write(markup);
+    }
+
+    /**
+     * Save a text file locally using the content and name provided.
      *
      * Browser	compatibility:
      *
-     * - Firefox 20+: max file size 800 MiB
-     * - Chrome: max file size 345 MiB
-     * - Chrome for Android: max file size n/a
-     * - IE 10+: max file size 600 MiB
+     * - Firefox 20+: max blob size 800 MB
+     * - Chrome: max blob size 500 MB
+     * - Chrome for Android: max blob size 500 MB
+     * - Edge: max blob size n/a
+     * - IE 10+: max blob size 600 MB
      * - IE < 10: Files are saved as text/html and max file size n/a
-     * - Opera 15+: max file size 345 MiB
-     * - Opera < 15: max file size n/a
-     * - Safari 6.1+: max file size n/a; Blobs may be opened instead of saved sometimes—you may have
+     * - Opera 15+: max blob size 500 MB
+     * - Opera < 15: max blob size n/a
+     * - Safari 6.1+: max blob size n/a; Blobs may be opened instead of saved sometimes—you may have
      * to direct your Safari users to manually press ⌘+S to save the file after it is opened.
      * Using the application/octet-stream MIME type to force downloads can cause issues in Safari.
-     * - Safari < 6: max file size n/a
+     * - Safari < 6: max blob size n/a
+     *
+     * **Note:** For IE < 10, available file extensions are ".htm/.html/.txt", any other text based file will
+     * be appended with ".txt" file extension automatically. For example, "test.csv" will be saved as "test_csv.txt".
      *
      * @method saveAs
      * @param {String} content File content
      * @param {String} filename Name of the file including the extension
-     * @param {String} [charset="UTF-8"] File's charset
+     * @param {String} [charset='UTF-8'] File's charset
+     */
+
+
+    /**
+     * Save a binary file locally using [Blobs][1].
+     *
+     * Browser compatibility:
+     *
+     * - Firefox 20+: max blob size 800 MB
+     * - Chrome: max blob size 500 MB
+     * - Chrome for Android: max blob size 500 MB
+     * - Edge: max blob size n/a
+     * - IE 10+: max blob size 600 MB
+     * - Opera 15+: max blob size 500 MB
+     *
+     * [1]: https://developer.mozilla.org/en/docs/Web/API/Blob
+     *
+     * @method saveBlobAs
+     * @param {String} content File content
+     * @param {String} filename Name of the file including the extension
+     * @param {String} [mimeType='application/octet-stream'] Mime type of the file
+     * @private
      */
 
 }, function(File){
     /* FileSaver.js
      *  A saveAs() & saveTextAs() FileSaver implementation.
-     *  2014-06-24
+     * 1.1.20160328
      *
      *  Modify by Brian Chen
-     *  Author: Eli Grey, http://eligrey.com
-     *  License: X11/MIT
-     *    See https://github.com/eligrey/FileSaver.js/blob/master/LICENSE.md
+     * By Eli Grey, http://eligrey.com
+     * License: MIT
+     *   See https://github.com/eligrey/FileSaver.js/blob/master/LICENSE.md
      */
 
     /*global self */
@@ -43,57 +182,63 @@ Ext.define('Ext.exporter.File', {
 
     /*! @source http://purl.eligrey.com/github/FileSaver.js/blob/master/FileSaver.js */
     var navigator = window.navigator,
-            saveAs = window.saveAs
-            // IE 10+ (native saveAs)
-        || (typeof navigator !== "undefined" &&
-        navigator.msSaveOrOpenBlob && navigator.msSaveOrOpenBlob.bind(navigator))
-            // Everyone else
-        || (function (view) {
+        saveAs = window.saveAs || (function(view) {
             "use strict";
             // IE <10 is explicitly unsupported
-            if (typeof navigator !== "undefined" &&
-                /MSIE [1-9]\./.test(navigator.userAgent)) {
+            if (typeof navigator !== "undefined" && /MSIE [1-9]\./.test(navigator.userAgent)) {
                 return;
             }
             var
                 doc = view.document
             // only get URL when necessary in case Blob.js hasn't overridden it yet
-                , get_URL = function () {
+                , get_URL = function() {
                     return view.URL || view.webkitURL || view;
                 }
                 , save_link = doc.createElementNS("http://www.w3.org/1999/xhtml", "a")
-                , can_use_save_link = !view.externalHost && "download" in save_link
-                , click = function (node) {
-                    var event = doc.createEvent("MouseEvents");
-                    event.initMouseEvent(
-                        "click", true, false, view, 0, 0, 0, 0, 0
-                        , false, false, false, false, 0, null
-                    );
+                , can_use_save_link = "download" in save_link
+                , click = function(node) {
+                    var event = new MouseEvent("click");
                     node.dispatchEvent(event);
                 }
+                , is_safari = /Version\/[\d\.]+.*Safari/.test(navigator.userAgent)
                 , webkit_req_fs = view.webkitRequestFileSystem
                 , req_fs = view.requestFileSystem || webkit_req_fs || view.mozRequestFileSystem
-                , throw_outside = function (ex) {
-                    (view.setImmediate || view.setTimeout)(function () {
+                , throw_outside = function(ex) {
+                    (view.setImmediate || view.setTimeout)(function() {
                         throw ex;
                     }, 0);
                 }
                 , force_saveable_type = "application/octet-stream"
                 , fs_min_size = 0
-                , deletion_queue = []
-                , process_deletion_queue = function () {
-                    var i = deletion_queue.length;
-                    while (i--) {
-                        var file = deletion_queue[i];
+            // the Blob API is fundamentally broken as there is no "downloadfinished" event to subscribe to
+                , arbitrary_revoke_timeout = 1000 * 40 // in ms
+                , revoke = function(file) {
+                    var revoker = function() {
                         if (typeof file === "string") { // file is an object URL
                             get_URL().revokeObjectURL(file);
                         } else { // file is a File
                             file.remove();
                         }
-                    }
-                    deletion_queue.length = 0; // clear queue
+                    };
+                    /* // Take note W3C:
+                     var
+                     uri = typeof file === "string" ? file : file.toURL()
+                     , revoker = function(evt) {
+                     // idealy DownloadFinishedEvent.data would be the URL requested
+                     if (evt.data === uri) {
+                     if (typeof file === "string") { // file is an object URL
+                     get_URL().revokeObjectURL(file);
+                     } else { // file is a File
+                     file.remove();
+                     }
+                     }
+                     }
+                     ;
+                     view.addEventListener("downloadfinished", revoker);
+                     */
+                    setTimeout(revoker, arbitrary_revoke_timeout);
                 }
-                , dispatch = function (filesaver, event_types, event) {
+                , dispatch = function(filesaver, event_types, event) {
                     event_types = [].concat(event_types);
                     var i = event_types.length;
                     while (i--) {
@@ -107,7 +252,17 @@ Ext.define('Ext.exporter.File', {
                         }
                     }
                 }
-                , FileSaver = function (blob, name) {
+                , auto_bom = function(blob) {
+                    // prepend BOM for UTF-8 XML and text/* types (including HTML)
+                    if (/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(blob.type)) {
+                        return new Blob(["\ufeff", blob], {type: blob.type});
+                    }
+                    return blob;
+                }
+                , FileSaver = function(blob, name, no_auto_bom) {
+                    if (!no_auto_bom) {
+                        blob = auto_bom(blob);
+                    }
                     // First try a.download, then web filesystem, then object URLs
                     var
                         filesaver = this
@@ -115,36 +270,49 @@ Ext.define('Ext.exporter.File', {
                         , blob_changed = false
                         , object_url
                         , target_view
-                        , get_object_url = function () {
-                            var object_url = get_URL().createObjectURL(blob);
-                            deletion_queue.push(object_url);
-                            return object_url;
-                        }
-                        , dispatch_all = function () {
+                        , dispatch_all = function() {
                             dispatch(filesaver, "writestart progress write writeend".split(" "));
                         }
                     // on any filesys errors revert to saving with object URLs
-                        , fs_error = function () {
+                        , fs_error = function() {
+                            if (target_view && is_safari && typeof FileReader !== "undefined") {
+                                // Safari doesn't allow downloading of blob urls
+                                var reader = new FileReader();
+                                reader.onloadend = function() {
+                                    var base64Data = reader.result;
+                                    target_view.location.href = "data:attachment/file" + base64Data.slice(base64Data.search(/[,;]/));
+                                    filesaver.readyState = filesaver.DONE;
+                                    dispatch_all();
+                                };
+                                reader.readAsDataURL(blob);
+                                filesaver.readyState = filesaver.INIT;
+                                return;
+                            }
                             // don't create more object URLs than needed
                             if (blob_changed || !object_url) {
-                                object_url = get_object_url(blob);
+                                object_url = get_URL().createObjectURL(blob);
                             }
                             if (target_view) {
                                 target_view.location.href = object_url;
                             } else {
-                                window.open(object_url, "_blank");
+                                var new_tab = view.open(object_url, "_blank");
+                                if (new_tab === undefined && is_safari) {
+                                    //Apple do not allow window.open, see http://bit.ly/1kZffRI
+                                    view.location.href = object_url
+                                }
                             }
                             filesaver.readyState = filesaver.DONE;
                             dispatch_all();
+                            revoke(object_url);
                         }
-                        , abortable = function (func) {
-                            return function () {
+                        , abortable = function(func) {
+                            return function() {
                                 if (filesaver.readyState !== filesaver.DONE) {
                                     return func.apply(this, arguments);
                                 }
                             };
                         }
-                        , create_if_not_found = { create: true, exclusive: false }
+                        , create_if_not_found = {create: true, exclusive: false}
                         , slice
                         ;
                     filesaver.readyState = filesaver.INIT;
@@ -152,17 +320,22 @@ Ext.define('Ext.exporter.File', {
                         name = "download";
                     }
                     if (can_use_save_link) {
-                        object_url = get_object_url(blob);
-                        save_link.href = object_url;
-                        save_link.download = name;
-                        click(save_link);
-                        filesaver.readyState = filesaver.DONE;
-                        dispatch_all();
+                        object_url = get_URL().createObjectURL(blob);
+                        setTimeout(function() {
+                            save_link.href = object_url;
+                            save_link.download = name;
+                            click(save_link);
+                            dispatch_all();
+                            revoke(object_url);
+                            filesaver.readyState = filesaver.DONE;
+                        });
                         return;
                     }
                     // Object and web filesystem URLs have a problem saving in Google Chrome when
                     // viewed in a tab, so I force save with application/octet-stream
                     // http://code.google.com/p/chromium/issues/detail?id=91158
+                    // Update: Google errantly closed 91158, I submitted it again:
+                    // https://code.google.com/p/chromium/issues/detail?id=389642
                     if (view.chrome && type && type !== force_saveable_type) {
                         slice = blob.slice || blob.webkitSlice;
                         blob = slice.call(blob, 0, blob.size, force_saveable_type);
@@ -182,28 +355,28 @@ Ext.define('Ext.exporter.File', {
                         return;
                     }
                     fs_min_size += blob.size;
-                    req_fs(view.TEMPORARY, fs_min_size, abortable(function (fs) {
-                        fs.root.getDirectory("saved", create_if_not_found, abortable(function (dir) {
-                            var save = function () {
-                                dir.getFile(name, create_if_not_found, abortable(function (file) {
-                                    file.createWriter(abortable(function (writer) {
-                                        writer.onwriteend = function (event) {
+                    req_fs(view.TEMPORARY, fs_min_size, abortable(function(fs) {
+                        fs.root.getDirectory("saved", create_if_not_found, abortable(function(dir) {
+                            var save = function() {
+                                dir.getFile(name, create_if_not_found, abortable(function(file) {
+                                    file.createWriter(abortable(function(writer) {
+                                        writer.onwriteend = function(event) {
                                             target_view.location.href = file.toURL();
-                                            deletion_queue.push(file);
                                             filesaver.readyState = filesaver.DONE;
                                             dispatch(filesaver, "writeend", event);
+                                            revoke(file);
                                         };
-                                        writer.onerror = function () {
+                                        writer.onerror = function() {
                                             var error = writer.error;
                                             if (error.code !== error.ABORT_ERR) {
                                                 fs_error();
                                             }
                                         };
-                                        "writestart progress write abort".split(" ").forEach(function (event) {
+                                        "writestart progress write abort".split(" ").forEach(function(event) {
                                             writer["on" + event] = filesaver["on" + event];
                                         });
                                         writer.write(blob);
-                                        filesaver.abort = function () {
+                                        filesaver.abort = function() {
                                             writer.abort();
                                             filesaver.readyState = filesaver.DONE;
                                         };
@@ -211,11 +384,11 @@ Ext.define('Ext.exporter.File', {
                                     }), fs_error);
                                 }), fs_error);
                             };
-                            dir.getFile(name, { create: false }, abortable(function (file) {
+                            dir.getFile(name, {create: false}, abortable(function(file) {
                                 // delete file if it already exists
                                 file.remove();
                                 save();
-                            }), abortable(function (ex) {
+                            }), abortable(function(ex) {
                                 if (ex.code === ex.NOT_FOUND_ERR) {
                                     save();
                                 } else {
@@ -226,11 +399,21 @@ Ext.define('Ext.exporter.File', {
                     }), fs_error);
                 }
                 , FS_proto = FileSaver.prototype
-                , saveAs = function (blob, name) {
-                    return new FileSaver(blob, name);
+                , saveAs = function(blob, name, no_auto_bom) {
+                    return new FileSaver(blob, name, no_auto_bom);
                 }
                 ;
-            FS_proto.abort = function () {
+            // IE 10+ (native saveAs)
+            if (typeof navigator !== "undefined" && navigator.msSaveOrOpenBlob) {
+                return function(blob, name, no_auto_bom) {
+                    if (!no_auto_bom) {
+                        blob = auto_bom(blob);
+                    }
+                    return navigator.msSaveOrOpenBlob(blob, name || "download");
+                };
+            }
+
+            FS_proto.abort = function() {
                 var filesaver = this;
                 filesaver.readyState = filesaver.DONE;
                 dispatch(filesaver, "abort");
@@ -248,11 +431,6 @@ Ext.define('Ext.exporter.File', {
                                     FS_proto.onwriteend =
                                         null;
 
-            view.addEventListener("unload", process_deletion_queue, false);
-            saveAs.unload = function () {
-                process_deletion_queue();
-                view.removeEventListener("unload", process_deletion_queue, false);
-            };
             return saveAs;
         }(
             typeof self !== "undefined" && self
@@ -263,10 +441,10 @@ Ext.define('Ext.exporter.File', {
 // while `this` is nsIContentFrameMessageManager
 // with an attribute `content` that corresponds to the window
 
-    if (typeof module !== "undefined" && module !== null) {
-        module.exports = saveAs;
-    } else if ((typeof define !== "undefined" && define !== null) && (define.amd != null)) {
-        define([], function () {
+    if (typeof module !== "undefined" && module.exports) {
+        module.exports.saveAs = saveAs;
+    } else if ((typeof define !== "undefined" && define !== null) && (define.amd !== null)) {
+        define([], function() {
             return saveAs;
         });
     }
@@ -313,8 +491,30 @@ Ext.define('Ext.exporter.File', {
                 saveTxtWindow.close();
                 return retValue;
             }
-        })
+        });
 
-    File.saveAs = saveTextAs;
+    File.saveAs = function(content, filename, charset){
+        if(this.forceDownload){
+            this.downloadBinaryAs(content, filename, 'text/plain');
+        }else{
+            saveTextAs(content, filename, charset);
+        }
+    };
+
+    if(saveAs && Blob){
+        File.saveBlobAs = function(textContent, fileName, mimeType){
+            var uint8 = new Uint8Array(textContent.length),
+                len = uint8.length,
+                bType = { type : mimeType || 'application/octet-stream'},
+                blob, i;
+
+            for (i = 0; i <  len; i++){
+                uint8[i] = textContent.charCodeAt(i);
+            }
+
+            blob = new Blob([uint8], bType);
+            saveAs(blob, fileName);
+        };
+    }
 });
 

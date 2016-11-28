@@ -12,8 +12,8 @@ $button-icon-color: dynamic($neutral-dark-color);
 
 @mixin button-action-ui {
     @include button-ui(
-    $ui: 'action',
-    $background-color: $base-color,
-    $color: $light-color
+        $ui: 'action',
+        $background-color: $base-color,
+        $color: $light-color
     );
 }

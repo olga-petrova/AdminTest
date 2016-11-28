@@ -22,6 +22,8 @@ Ext.define('Ext.draw.sprite.AttributeParser', {
     },
     
     number: function (n) {
+        // Numbers as strings will be converted to numbers,
+        // null will be converted to 0.
         if (Ext.isNumber(+n)) {
             return n;
         }
@@ -30,7 +32,7 @@ Ext.define('Ext.draw.sprite.AttributeParser', {
     /**
      * Normalize angle to the [-180,180) interval.
      * @param n Angle in radians.
-     * @returns {Number/undefined} Normalized angle or undefined.
+     * @return {Number/undefined} Normalized angle or undefined.
      */
     angle: function (n) {
         if (Ext.isNumber(n)) {

@@ -71,12 +71,9 @@ Ext.define('Ext.field.Password', {
 	    }
     },
 
-    isPassword: true,
+    classCls: Ext.baseCSSPrefix + 'passwordfield',
 
-    initialize: function() {
-        this.callParent(arguments);
-        this.addCls(Ext.baseCSSPrefix + 'field-password');
-    },
+    isPassword: true,
 
     updateRevealable: function(newValue, oldValue) {
         if (this.$revealIcon) {

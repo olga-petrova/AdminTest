@@ -148,7 +148,7 @@ Ext.define('Ext.slider.Widget', {
     },
 
     getThumbPositionStyle: function() {
-        return this.getVertical() ? 'bottom' : (this.rtl && Ext.rtl ? 'right' : 'left');
+        return this.getVertical() ? 'bottom' : this.horizontalProp;
     },
 
 //    // TODO: RTL
@@ -174,6 +174,33 @@ Ext.define('Ext.slider.Widget', {
 
         for (i = 0; i < len; i++) {
             this.thumbs[i].dom.style[me.getThumbPositionStyle()] = me.calculateThumbPosition(values[i]) + '%';
+        }
+    },
+
+    updateMaxValue: function (maxValue) {
+        this.onRangeAdjustment(maxValue, 'min');
+    },
+
+    updateMinValue: function (minValue) {
+        this.onRangeAdjustment(minValue, 'max');
+    },
+
+    /**
+     * @private
+     * Conditionally updates value of slider when minValue or maxValue are updated
+     * @param {Number} rangeValue The new min or max value
+     * @param {String} compareType The comparison type (e.g., min/max)
+     */
+    onRangeAdjustment: function (rangeValue, compareType) {
+        var value = this._value,
+            newValue;
+
+        if (!isNaN(value)) {
+            newValue = Math[compareType](value, rangeValue);
+        }
+        
+        if (newValue !== undefined) {
+            this.setValue(newValue);
         }
     },
 
@@ -489,7 +516,7 @@ Ext.define('Ext.slider.Widget', {
      * If the point is outside the range of the Slider's track, the return value is `undefined`
      * @param {Number[]} xy The point to calculate the track point for
      */
-    getTrackpoint : function(xy) {
+    getTrackpoint: function(xy) {
         var me = this,
             vertical = me.getVertical(),
             sliderTrack = me.innerEl,
@@ -499,12 +526,15 @@ Ext.define('Ext.slider.Widget', {
         if (vertical) {
             positionProperty = 'top';
             trackLength = sliderTrack.getHeight();
-        } else {
-            positionProperty = 'left';
+        }
+        else {
+            positionProperty = me.horizontalProp;
             trackLength = sliderTrack.getWidth();
         }
+        
         xy = me.transformTrackPoints(sliderTrack.translatePoints(xy));
         result = Ext.Number.constrain(xy[positionProperty], 0, trackLength);
+        
         return vertical ? trackLength - result : result;
     },
 

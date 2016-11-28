@@ -1,17 +1,18 @@
 /**
- * The AbstractPlugin class is the base class from which user-implemented plugins should inherit.
+ * The AbstractPlugin class is the base class from which user-implemented plugins should
+ * inherit.
  *
- * This class defines the essential API of plugins as used by Components by defining the following methods:
+ * This class defines the essential API of plugins as used by Components by defining the
+ * following methods:
  *
- *   - `init` : The plugin initialization method which the owning Component calls at Component initialization time.
+ *  - `init` : The plugin initialization method which the owning Component calls at
+ *     Component initialization time. The Component passes itself as the sole parameter.
+ *     Subclasses should set up bidirectional links between the plugin and its client
+ *     Component here.
  *
- *     The Component passes itself as the sole parameter.
- *
- *     Subclasses should set up bidirectional links between the plugin and its client Component here.
- *
- *   - `destroy` : The plugin cleanup method which the owning Component calls at Component destruction time.
- *
- *     Use this method to break links between the plugin and the Component and to free any allocated resources.
+ *  - `destroy` : The plugin cleanup method which the owning Component calls at Component
+ *     destruction time. Use this method to break links between the plugin and the
+ *     Component and to free any allocated resources.
  */
 Ext.define('Ext.plugin.Abstract', {
     alternateClassName: 'Ext.AbstractPlugin',

@@ -18,7 +18,7 @@ $grid-cell-background-color: dynamic($list-item-background-color);
  * @var {color}
  * Grid cell background-color
  */
-$grid-cell-border-color: dynamic($list-item-border-color);
+$grid-cell-border-color: dynamic(null null $list-item-border-color null);
 
 /**
  * @var {color}
@@ -96,7 +96,7 @@ $grid-group-header-background-color: dynamic($list-group-header-background-color
  * @var {color}
  * Grid group header border-color
  */
-$grid-group-header-border-color: dynamic($list-group-header-border-color);
+$grid-group-header-border-color: dynamic(null null $list-group-header-border-color null);
 
 /**
  * @var {string/number}
@@ -211,3 +211,25 @@ $grid-summary-row-cell-padding: dynamic($grid-cell-padding);
  * Grid summary row cell padding in the {@link Global_CSS#$enable-big big} sizing scheme
  */
 $grid-summary-row-cell-padding-big: dynamic($grid-cell-padding-big);
+
+/**
+ * @var {color}
+ * Grid column resize marker background-color
+ */
+$grid-column-resize-marker-background-color: dynamic(#ccc);
+
+$grid-pagingtoolbar-color: dynamic(null);
+
+$grid-cell-selected-color: dynamic(null);
+$grid-cell-border-width: dynamic(null null 1px null);
+$grid-cell-border-style: dynamic(null null solid null);
+
+$grid-group-header-border-width: dynamic(null null 1px null);
+$grid-group-header-border-style: dynamic(null null solid null);
+
+
+$gridviewoptions-sortablehandle-icon: dynamic($fa-var-bars $gridviewoptions-icon-font-size FontAwesome);
+$gridviewoptions-visibleindicator-icon: dynamic($fa-var-eye $gridviewoptions-icon-font-size FontAwesome);
+$gridviewoptions-groupindicator-icon: dynamic($fa-var-eye $gridviewoptions-icon-font-size FontAwesome);
+$gridviewoptions-folder-icon: dynamic($fa-var-folder $gridviewoptions-icon-font-size FontAwesome);
+$gridviewoptions-leaf-icon: dynamic($fa-var-folder $gridviewoptions-icon-font-size FontAwesome);

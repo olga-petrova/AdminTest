@@ -119,6 +119,7 @@ Ext.define('Ext.mixin.Observable', function(Observable) {
             },
             
             /**
+             * @method
              * @private
              */
             captureArgs: function(o, fn, scope) {
@@ -320,7 +321,15 @@ Ext.define('Ext.mixin.Observable', function(Observable) {
             }
             me.$observableInitialized = true;
 
-            me.hasListeners = new me.HasListeners();
+            // This double assignment is intentional - it works around a strange JIT
+            // bug that prevents this.hasListeners from being assigned in some cases on
+            // some versions of iOS and iOS simulator.
+            // (This bug manifests itself in the unit tests for Ext.data.NodeInterface
+            // where we repeatedly create tree nodes in each spec.  Sometimes node.hasListeners
+            // is undefined immediately after node construction).
+            // A similar issue occurs with the data property of Ext.data.Model (see
+            // constructor)
+            me.hasListeners = me.hasListeners = new me.HasListeners();
 
             me.eventedBeforeEventNames = {};
 
@@ -650,7 +659,7 @@ Ext.define('Ext.mixin.Observable', function(Observable) {
          * An order of `'before'` is equivalent to a priority of `99.5`, while an order of
          * `'after'` is equivalent to a priority of `-99.5`.  See the `priority` option
          * of `{@link Ext.util.Observable#addListener addListener}` for more details.
-         * @deprecated 5.5 Use {@link #fireEventAction} instead.
+         * @deprecated 5.5 Use {@link #fireEventedAction} instead.
          */
         fireAction: function(eventName, args, fn, scope, options, order) {
             // The historical behaviour has been to default the scope to `this`.
@@ -1411,11 +1420,13 @@ Ext.define('Ext.mixin.Observable', function(Observable) {
         resumeEvent: function() {
             var events = this.events || 0,
                 len = events && arguments.length,
-                i, event;
+                i, event, ename;
 
             for (i = 0; i < len; i++) {
+                ename = Ext.canonicalEventName(arguments[i]);
+                event = events[ename];
+                
                 // If it exists, and is an Event object (not still a boolean placeholder), resume it
-                event = events[arguments[i]];
                 if (event && event.resume) {
                     event.resume();
                 }
@@ -1601,7 +1612,8 @@ Ext.define('Ext.mixin.Observable', function(Observable) {
         privates: {
             doAddListener: function(ename, fn, scope, options, order, caller, manager) {
                 var me = this,
-                    event, managedListeners, priority;
+                    ret = false,
+                    event, priority;
 
                 order = order || (options && options.order);
 
@@ -1624,40 +1636,32 @@ Ext.define('Ext.mixin.Observable', function(Observable) {
                 }
                 //</debug>
 
-                if (!manager && (scope && scope.isObservable && (scope !== me))) {
-                    manager = scope;
-                }
-
-                if (manager) {
-                    // if scope is an observable, the listener will be automatically managed
-                    // this eliminates the need to call mon() in a majority of cases
-                    managedListeners = manager.managedListeners = manager.managedListeners || [];
-
-                    managedListeners.push({
-                        item: me,
-                        ename: ename,
-                        fn: fn,
-                        scope: scope,
-                        options: options
-                    });
-                }
-
                 event = (me.events || (me.events = {}))[ename];
                 if (!event || !event.isEvent) {
                     event = me._initEvent(ename);
                 }
 
                 if (fn !== emptyFn) {
+                    // Check whether the listener should be managed.
+                    // Event#addListener will add it to the manager's managedListeners stack 
+                    // upon successful add of the listener to the event.
+                    if (!manager && (scope && scope.isObservable && (scope !== me))) {
+                        manager = scope;
+                    }
                     if (event.addListener(fn, scope, options, caller, manager)) {
                         // If a new listener has been added (Event.addListener rejects duplicates of the same fn+scope)
                         // then increment the hasListeners counter
                         me.hasListeners._incr_(ename);
+                        ret = true;
                     }
                 }
+
+                return ret;
             },
 
             doRemoveListener: function(ename, fn, scope) {
                 var me = this,
+                    ret = false,
                     events = me.events,
                     event;
 
@@ -1674,8 +1678,11 @@ Ext.define('Ext.mixin.Observable', function(Observable) {
                 if (event && event.isEvent) {
                     if (event.removeListener(fn, scope)) {
                         me.hasListeners._decr_(ename);
+                        ret = true;
                     }
                 }
+
+                return ret;
             },
 
             _initEvent: function(eventName) {

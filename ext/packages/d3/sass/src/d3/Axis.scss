@@ -1,0 +1,15 @@
+/**
+ * @class Ext.d3.Axis
+ */
+
+.#{$d3-prefix}axis {
+  path, line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+  }
+
+  .#{$d3-prefix}axis-title {
+    font-weight: bold;
+  }
+}

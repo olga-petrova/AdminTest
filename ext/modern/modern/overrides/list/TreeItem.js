@@ -1,41 +1,55 @@
 Ext.define('Ext.overrides.list.TreeItem', {
     override: 'Ext.list.TreeItem',
 
-    createFloater: function () {
-        var me = this,
-            owner = me.getOwner(),
-            ui = owner.getUi(),
-            cls = Ext.baseCSSPrefix + 'treelist',
-            floater;
-
-        if (ui) {
-            cls += ' ' + cls + '-' + ui;
-        }
-
-        me.floater = floater = new Ext.Container({
-            cls: cls + ' ' + Ext.baseCSSPrefix + 'treelist-floater',
-            width: 200,
-            top: 0,
-            listeners: {
-                element: 'element',
-                click: function (e) {
-                    return owner.onClick(e);
-                }
-            }
-        });
-
-        Ext.Viewport.add(floater);
-        floater.add(me);
-        floater.alignTo(me.getToolElement(), 'tl-tr');
-
-        return floater;
-    },
-
     runAnimation: function(animation) {
         return this.itemContainer.animate(animation);
     },
 
     stopAnimation: function(animation) {
         animation.end();
+    },
+
+    privates: {
+        applyFloated: function (floated, wasFloated) {
+            this.initialized = true;
+            this.callParent([floated, wasFloated]);
+            return floated;
+        },
+
+        updateFloated: function (floated, wasFloated) {
+            var me = this,
+                ownerTree,
+                toolElement = me.getToolElement();
+
+            if (floated) {
+                me.wasExpanded = me.getExpanded();
+                me.nextElementSibling = me.el.dom.nextSibling;
+                me.setExpanded(true);
+            } else {
+                me.setExpanded(me.wasExpanded);
+            }
+            me.callParent([floated, wasFloated]);
+            if (floated) {
+                ownerTree = me.up('treelist');
+
+                // Need an extra wrapping el to carry the necessary CSS classes
+                // for the theming to apply to the item.
+                me.floatWrap = me.el.wrap({
+                    cls: ownerTree.self.prototype.element.cls + ' ' + ownerTree.uiPrefix + ownerTree.getUi() + ' ' + Ext.baseCSSPrefix + 'treelist-floater'
+                });
+                me.floatWrap.alignTo(toolElement, 'tl-tr');
+                me.floatWrap.on({
+                    click: ownerTree.onClick,
+                    mouseover: ownerTree.onMouseOver,
+                    scope: ownerTree
+                });
+            } else {
+                // Reinsert this el back into the tree
+                me.getOwner().rootItem.el.dom.insertBefore(me.el.dom, me.nextElementSibling);
+                me.floatWrap.destroy();
+                me.floatWrap = null;
+            }
+            toolElement.toggleCls(me.floatedToolCls, floated);
+        }
     }
 });

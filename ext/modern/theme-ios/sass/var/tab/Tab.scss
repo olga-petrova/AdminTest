@@ -1,0 +1,41 @@
+$tab-background-color: dynamic(transparent);
+$tab-active-background-color: dynamic(transparent);
+
+$tab-font-weight: dynamic($font-weight-normal);
+
+$tab-color: dynamic($highlight-color);
+$tab-active-color: dynamic($base-color);
+
+$tab-font-size: dynamic(0.846em);
+$tab-font-size-big: dynamic(0.6875em);
+
+$tab-line-height: dynamic(1.23em);
+$tab-line-height-big: dynamic(1.25em);
+
+$tab-padding: dynamic(0.171em 0.77em);
+$tab-padding-big: dynamic(0.3125em 0.625em);
+
+$tab-icon-size: dynamic(1.23rem);
+$tab-icon-font-size: dynamic($tab-icon-size);
+$tab-icon-size-big: dynamic(1.5rem);
+$tab-icon-font-size-big: dynamic($tab-icon-size-big);
+
+$tab-badge-font-size: dynamic(0.923rem);
+$tab-badge-font-size-big: dynamic(0.875rem);
+
+$tab-badge-border-radius: dynamic(10em);
+
+@mixin tab-icon-stroke($stroke-color) {
+    &:before {
+        color: transparent;
+        -webkit-text-stroke-width: 1px;
+        -webkit-text-stroke-color: $stroke-color;
+    }
+}
+
+@mixin tab-icon-no-stroke($color) {
+    &:before {
+        color: $color;
+        -webkit-text-stroke-width: 0;
+    }
+}

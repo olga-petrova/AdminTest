@@ -1,5 +1,5 @@
-.x-spinner {
-    .x-spinner-button {
+.x-spinnerfield {
+    .x-spinnerfield-button {
         margin-top: .25em;
         margin-bottom: .25em;
         width: 2em;
@@ -20,7 +20,7 @@
     }
 
     &.x-item-disabled {
-        .x-spinner-button {
+        .x-spinnerfield-button {
             background: $secondary-color;
             color: #b3b3b3 !important;
         }

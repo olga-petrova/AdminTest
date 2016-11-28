@@ -15,6 +15,13 @@
     }
 }
 
+.#{$prefix}panel-bodyWrap {
+    overflow: hidden;
+    position: static;
+    height: 100%;
+    width: 100%;
+}
+
 .#{$prefix}panel-body {
     overflow: hidden;
     position: relative;

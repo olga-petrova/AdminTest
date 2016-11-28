@@ -134,7 +134,13 @@ $button-icon-color: dynamic($button-color);
  * @var {color}
  * Button icon color when pressed.
  */
-$button-pressed-icon-color: dynamic(button-color($button-pressed-background-color));
+$button-pressed-icon-color: dynamic($button-pressed-color);
+
+/**
+ * @var {color}
+ * Button icon color when disabled.
+ */
+$button-disabled-icon-color: dynamic($button-disabled-color);
 
 /**
  * @var {number}
@@ -188,6 +194,12 @@ $button-icon-vertical-spacing: dynamic(.2em);
  * in the {@link Global_CSS#$enable-big big} sizing scheme
  */
 $button-icon-vertical-spacing-big: dynamic($button-icon-vertical-spacing);
+
+/**
+ * @var {color}
+ * Button color when disabled
+ */
+$button-disabled-color: dynamic(null);
 
 /**
  * @var {number}
@@ -296,31 +308,37 @@ $button-badge-padding: dynamic(.1em .3em);
  * @var {boolean}
  * `true` to include the "action" button UI
  */
-$button-action-ui: dynamic($include-default-uis);
+$button-action-ui: dynamic($enable-default-uis);
 
 /**
  * @var {boolean}
  * `true` to include the "confirm" button UI
  */
-$button-confirm-ui: dynamic($include-default-uis);
+$button-confirm-ui: dynamic($enable-default-uis);
 
 /**
  * @var {boolean}
  * `true` to include the "decline" button UI
  */
-$button-decline-ui: dynamic($include-default-uis);
+$button-decline-ui: dynamic($enable-default-uis);
 
 /**
  * @var {boolean}
  * `true` to include the "round" button UI
  */
-$button-round-ui: dynamic($include-default-uis);
+$button-round-ui: dynamic($enable-default-uis);
 
 /**
  * @var {boolean}
  * `true` to include the "small" button UI
  */
-$button-small-ui: dynamic($include-default-uis);
+$button-small-ui: dynamic($enable-default-uis);
+
+/**
+ * @var {boolean}
+ * `true` to include the "flat" button UI
+ */
+$button-flat-ui: dynamic($enable-default-uis);
 
 
 /**
@@ -398,7 +416,9 @@ $button-small-ui: dynamic($include-default-uis);
  * @param {color} $pressed-icon-color
  * Button icon color when pressed.
  *
- * @param {number} $icon-size
+ * @param {color} $disabled-icon-color
+ * Button icon color when disabled.
+ *
  * @param {number} $icon-size
  * Button icon size
  *
@@ -424,6 +444,9 @@ $button-small-ui: dynamic($include-default-uis);
  * @param {number} $icon-vertical-spacing-big
  * The space between the button icon and text when the icon is vertically aligned
  * in the {@link Global_CSS#$enable-big big} sizing scheme
+ *
+ * @param {color} $disabled-color
+ * Button color when disabled
  *
  * @param {number} $disabled-opacity
  * Button opacity when disabled
@@ -512,6 +535,7 @@ $button-small-ui: dynamic($include-default-uis);
 
     $icon-color: null,
     $pressed-icon-color: null,
+    $disabled-icon-color: null,
     $icon-size: null,
     $icon-size-big: null,
     $icon-font-size: null,
@@ -521,6 +545,7 @@ $button-small-ui: dynamic($include-default-uis);
     $icon-vertical-spacing: null,
     $icon-vertical-spacing-big: null,
 
+    $disabled-color: null,
     $disabled-opacity: null,
 
     $badge-background-color: null,
@@ -592,7 +617,7 @@ $button-small-ui: dynamic($include-default-uis);
         @include font($font-weight, $font-size, $line-height, $font-family);
         @include border($border-width, $border-style, $border-color);
 
-        @if $include-border-radius {
+        @if $enable-border-radius {
             @include border-radius($border-radius);
         }
 
@@ -628,6 +653,20 @@ $button-small-ui: dynamic($include-default-uis);
                     font-size: $icon-font-size-big;
                 }
             }
+
+            @include button-icon-stroke($icon-color);
+        }
+
+        &.x-button-pressing, &.x-button-pressed {
+            .x-button-icon {
+                color: $pressed-icon-color;
+                @include button-icon-stroke($pressed-icon-color);
+            }
+        }
+
+        &.x-item-disabled .x-button-icon {
+            color: $disabled-icon-color;
+            @include button-icon-stroke($disabled-icon-color);
         }
 
         &.x-iconalign-left .x-button-icon {
@@ -688,11 +727,11 @@ $button-small-ui: dynamic($include-default-uis);
             }
 
             &.x-iconalign-right > .x-button-label {
-                padding-left: calc(#{$size} + #{$horz-spacing});
+                padding-left: calc(#{$size or $default-calc-value} + #{$horz-spacing or $default-calc-value});
             }
 
             &.x-iconalign-left > .x-button-label {
-                padding-right: calc(#{$size} + #{$horz-spacing});
+                padding-right: calc(#{$size or $default-calc-value} + #{$horz-spacing or $default-calc-value});
             }
         }
 
@@ -710,19 +749,26 @@ $button-small-ui: dynamic($include-default-uis);
 
             &.x-iconalign-right > .x-button-label {
                 .x-big & {
-                    padding-left: calc(#{$size} + #{$horz-spacing});
+                    padding-left: calc(#{$size or $default-calc-value} + #{$horz-spacing or $default-calc-value});
                 }
             }
 
             &.x-iconalign-left > .x-button-label {
                 .x-big & {
-                    padding-right: calc(#{$size} + #{$horz-spacing});
+                    padding-right: calc(#{$size or $default-calc-value} + #{$horz-spacing or $default-calc-value});
                 }
             }
         }
 
         &.x-item-disabled {
-            opacity: $disabled-opacity;
+            @if $disabled-opacity != $button-disabled-opacity {
+                @if $disabled-opacity == null {
+                    $disabled-opacity: 1;
+                }
+
+                opacity: $disabled-opacity;
+            }
+            color: $disabled-color;
         }
 
         .x-badge {
@@ -741,7 +787,7 @@ $button-small-ui: dynamic($include-default-uis);
 
             @include background-gradient($badge-background-color, $badge-background-gradient);
 
-            @if $include-border-radius {
+            @if $enable-border-radius {
                 @include border-radius($badge-border-radius);
             }
         }
@@ -759,8 +805,8 @@ $button-small-ui: dynamic($include-default-uis);
  */
 @mixin button-action-ui {
     @include button-ui(
-    $ui: 'action',
-    $background-color: $base-highlight-color
+        $ui: 'action',
+        $background-color: $base-highlight-color
     );
 }
 
@@ -775,8 +821,8 @@ $button-small-ui: dynamic($include-default-uis);
  */
 @mixin button-confirm-ui {
     @include button-ui(
-    $ui: 'confirm',
-    $background-color: desaturate(darken($confirm-color, 10%), 5%)
+        $ui: 'confirm',
+        $background-color: desaturate(darken($confirm-color, 10%), 5%)
     );
 }
 
@@ -791,8 +837,8 @@ $button-small-ui: dynamic($include-default-uis);
  */
 @mixin button-decline-ui {
     @include button-ui(
-    $ui: 'decline',
-    $background-color: desaturate(darken($alert-color, 10%), 5%)
+        $ui: 'decline',
+        $background-color: desaturate(darken($alert-color, 10%), 5%)
     );
 }
 
@@ -807,9 +853,26 @@ $button-small-ui: dynamic($include-default-uis);
  */
 @mixin button-round-ui {
     @include button-ui(
-    $ui: 'round',
-    $border-radius: 10000px,
-    $border-radius-big: 20000px
+        $ui: 'round',
+        $border-radius: 10000px,
+        $border-radius-big: 20000px
+    );
+}
+
+/**
+ * Generates style rules for the "flat" button UI. This mixin is invoked automatically
+ * when {@link #$button-flat-ui} is `true`.
+ *
+ * Can be overridden in derived themes to customize the look and feel of the "flat" UI.
+ *
+ * @member Ext.Button
+ * @protected
+ */
+@mixin button-flat-ui {
+    @include button-ui(
+        $ui: 'flat',
+        $border-width: 0,
+        $background-color: transparent
     );
 }
 
@@ -833,8 +896,14 @@ $button-small-ui: dynamic($include-default-uis);
  */
 @mixin sencha-button-ui($ui-label, $color, $gradient: $button-background-gradient) {
     @include button-ui(
-    $ui: $ui-label,
-    $background-color: $color,
-    $background-gradient: $gradient
+        $ui: $ui-label,
+        $background-color: $color,
+        $background-gradient: $gradient
     );
 }
+
+/**
+ * @private
+ * Hook for iOS theme
+ */
+@mixin button-icon-stroke($stroke-color) {}

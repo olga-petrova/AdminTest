@@ -38,7 +38,8 @@ Ext.define('Ext.util.Event', function() {
             observable = me.observable,
             eventName = me.name,
             listeners, listener, priority, isNegativePriority, highestNegativePriorityIndex,
-            hasNegativePriorityIndex, length, index, i, listenerPriority;
+            hasNegativePriorityIndex, length, index, i, listenerPriority,
+            managedListeners;
 
         //<debug>
         if (scope && !Ext._namedScopes[scope] && (typeof fn === 'string') && (typeof scope[fn] !== 'function')) {
@@ -112,6 +113,20 @@ Ext.define('Ext.util.Event', function() {
                     options.delegated !== false,
                     options.capture
                 );
+            }
+
+            // If the listener was passed with a manager, add it to the manager's list.
+            if (manager) {
+                // if scope is an observable, the listener will be automatically managed
+                // this eliminates the need to call mon() in a majority of cases
+                managedListeners = manager.managedListeners || (manager.managedListeners = []);
+                managedListeners.push({
+                    item: me.observable,
+                    ename: (options && options.managedName) || me.name,
+                    fn: fn,
+                    scope: scope,
+                    options: options
+                });
             }
 
             added = true;
@@ -202,7 +217,7 @@ Ext.define('Ext.util.Event', function() {
 
         index = index || me.findListener(fn, scope);
 
-        if (index != -1) {
+        if (index !== -1) {
             listener = me.listeners[index];
             options = listener.o;
             highestNegativePriorityIndex = me._highestNegativePriorityIndex;
@@ -211,7 +226,9 @@ Ext.define('Ext.util.Event', function() {
                 me.listeners = me.listeners.slice(0);
             }
 
-            // cancel and remove a buffered handler that hasn't fired yet
+            // cancel and remove a buffered handler that hasn't fired yet.
+            // When the buffered listener is invoked, it must check whether
+            // it still has a task.
             if (listener.task) {
                 listener.task.cancel();
                 delete listener.task;
@@ -311,6 +328,7 @@ Ext.define('Ext.util.Event', function() {
 
     fire: function() {
         var me = this,
+            CQ = Ext.ComponentQuery,
             listeners = me.listeners,
             count = listeners.length,
             observable = me.observable,
@@ -376,8 +394,7 @@ Ext.define('Ext.util.Event', function() {
                             } else {
                                 continue;
                             }
-                        } else if (isComponent &&
-                                !firingObservable.is('#' + observable.id + ' ' + options.delegate)) {
+                        } else if (isComponent && !CQ.is(firingObservable, delegate, observable)) {
                             continue;
                         }
                     }
@@ -525,18 +542,23 @@ Ext.define('Ext.util.Event', function() {
     createBuffered: function (handler, listener, o, scope, wrapped) {
         listener.task = new Ext.util.DelayedTask();
         return function() {
-            var fireInfo;
+            // If the listener is removed during the event call, the listener stays in the
+            // list of listenes to be invoked in the fire method, but the task is deleted
+            // So if we get here with no task, it's because the listener has been removed.
+            if (listener.task) {
+                var fireInfo;
 
-            if (!wrapped) {
-                fireInfo = listener.ev.getFireInfo(listener, true);
-                handler = fireInfo.fn;
-                scope = fireInfo.scope;
-                
-                // We don't want to keep closure and scope references on the Event prototype!
-                fireInfo.fn = fireInfo.scope = null;
+                if (!wrapped) {
+                    fireInfo = listener.ev.getFireInfo(listener, true);
+                    handler = fireInfo.fn;
+                    scope = fireInfo.scope;
+
+                    // We don't want to keep closure and scope references on the Event prototype!
+                    fireInfo.fn = fireInfo.scope = null;
+                }
+
+                listener.task.delay(o.buffer, handler, scope, toArray(arguments));
             }
-
-            listener.task.delay(o.buffer, handler, scope, toArray(arguments));
         };
     },
 
@@ -565,13 +587,18 @@ Ext.define('Ext.util.Event', function() {
     createSingle: function (handler, listener, o, scope, wrapped) {
         return function() {
             var event = listener.ev,
+                observable = event.observable,
+                fn = listener.fn,
                 fireInfo;
 
-
-            if (event.removeListener(listener.fn, scope) && event.observable) {
-                // Removing from a regular Observable-owned, named event (not an anonymous
-                // event such as Ext's readyEvent): Decrement the listeners count
-                event.observable.hasListeners[event.name]--;
+            // If we have an observable, use that to clean up because there
+            // can be special cases that need handling. For example element
+            // listeners may bind multiple events (mousemove+touchmove) and they
+            // need to act in tandem.
+            if (observable) {
+                observable.removeListener(event.name, fn, scope);
+            } else {
+                event.removeListener(fn, scope);
             }
 
             if (!wrapped) {

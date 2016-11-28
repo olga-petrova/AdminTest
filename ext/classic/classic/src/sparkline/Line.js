@@ -113,6 +113,7 @@ Ext.define('Ext.sparkline.Line', {
         if (valueSpots && !valueSpots.get) {
             valueSpots = new Ext.sparkline.RangeMap(valueSpots);
         }
+        this.applyConfigChange();
         return valueSpots;
     },
 

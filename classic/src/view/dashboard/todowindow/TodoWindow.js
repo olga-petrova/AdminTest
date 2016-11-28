@@ -18,7 +18,7 @@ Ext.define('Admin.view.dashboard.todowindow.TodoWindow', {
     },
 
     controller: 'todowindow',
-
+    title: 'ToDo Window',
     items: [
         {
             xtype: 'form',

@@ -488,6 +488,7 @@ Ext.define('Ext.direct.RemotingProvider', {
                     });
 
                     me.fireEvent('data', me, event);
+                    me.fireEvent('exception', me, event);
 
                     if (transaction && me.fireEvent('beforecallback', me, event, transaction) !== false) {
                         me.runCallback(transaction, event, false);

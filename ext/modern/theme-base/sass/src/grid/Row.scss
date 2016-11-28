@@ -1,0 +1,14 @@
+.#{$prefix}grid-row {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.#{$prefix}grid-row-cells {
+  display: table;
+  table-layout: fixed;
+  // An explicit width is required for table-layout: fixed to be applied, even if the columns
+  // have their own explicit widths set
+  // http://www.w3.org/TR/CSS21/tables.html#fixed-table-layout
+  width: 0;
+}

@@ -1,0 +1,27 @@
+.#{$prefix}indexbar {
+  transition: .4s opacity;
+}
+
+// Material Indicator
+.#{$prefix}indexbar-indicator {
+  width: 92px;
+  height: 92px;
+  background-color: #2196f3;
+  position: absolute;
+  top: 0;
+  right: 42px;
+  border-top-left-radius: 92px;
+  border-bottom-left-radius: 92px;
+  border-top-right-radius: 92px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  @include rotate(-45);
+  @include material-shadow(2);
+
+  .#{$prefix}indexbar-indicator-inner {
+    color: $reverse-color;
+    @include rotate(45);
+    @include material-font-style('subhead');
+  }
+}

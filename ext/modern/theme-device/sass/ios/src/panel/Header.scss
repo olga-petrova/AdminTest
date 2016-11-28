@@ -1,0 +1,22 @@
+@if ($include-ios) {
+  #{$ios-selector} {
+    .#{$prefix}floating {
+      .#{$prefix}panel-header {
+        min-height: 2.85em;
+        background-color: #f8f9f9;
+        border-bottom: 1px solid #ccc;
+        display: flex;
+        justify-content: center;
+        align-items: center
+      }
+
+      .#{$prefix}panel-title-text {
+        text-align: center;
+      }
+
+      .#{$prefix}docked-top.#{$prefix}panel-header {
+        border-radius: 7px 7px 0 0;
+      }
+    }
+  }
+}

@@ -1,0 +1,31 @@
+$picker-background-color: dynamic($overlay-color);
+
+$picker-item-display: dynamic(flex);
+$picker-item-align-items: dynamic(center);
+$picker-item-justify-content: dynamic(center);
+$picker-item-color: dynamic($color);
+$picker-item-height: dynamic(50px);
+$picker-item-height-big: dynamic($picker-item-height);
+$picker-item-padding: dynamic(null);
+$picker-title-font-width: dynamic($material-subhead-font-weight);
+$picker-title-font-size: dynamic($material-subhead-font-size);
+$picker-title-font-line-height: dynamic($material-subhead-line-height);
+$picker-title-font-family: dynamic($font-family);
+
+$picker-bar-background-color: dynamic(null);
+$picker-bar-border-width: dynamic(null);
+$picker-bar-border-style: dynamic(null);
+$picker-bar-border-color: dynamic(null);
+
+$picker-title-height: dynamic(55px);
+$picker-title-color: dynamic($color);
+$picker-title-border-width: dynamic(null null 2px null);
+$picker-title-border-style: dynamic(null null solid null);
+$picker-title-border-color: dynamic(null null $divider-color null);
+$picker-title-font-width: dynamic($material-title-font-weight);
+$picker-title-font-size: dynamic($material-title-font-size);
+$picker-title-font-line-height: dynamic($material-title-line-height);
+$picker-title-font-family: dynamic($font-family);
+
+$picker-item-selected-color: dynamic($accent-color);
+$picker-item-selected-font-size: dynamic($material-title-font-size);

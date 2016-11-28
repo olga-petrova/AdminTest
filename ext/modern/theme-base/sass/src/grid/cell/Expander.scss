@@ -1,0 +1,20 @@
+.#{$prefix}grid-row-expander-column {
+  width: $row-expander-width;
+}
+
+.#{$prefix}grid-expander-cell {
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+  width: $row-expander-width;
+  cursor: $row-expander-cursor;
+  color: $row-expander-glyph-color;
+
+  @include font-icon($row-expander-expand-glyph);
+}
+
+.#{$prefix}row-expanded {
+  .#{$prefix}grid-expander-cell{
+    @include font-icon($row-expander-collapse-glyph);
+  }
+}

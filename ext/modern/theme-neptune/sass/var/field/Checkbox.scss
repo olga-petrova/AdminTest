@@ -38,3 +38,20 @@ $checkboxfield-checked-checkbox-icon: dynamic($fa-var-check-square-o $checkboxfi
  * The checkbox color
  */
 $checkboxfield-checkbox-color: dynamic($neutral-dark-color);
+
+/**
+ * @var {color}
+ * The checkbox color in "checked" state
+ */
+$checkboxfield-checked-checkbox-color: dynamic(null);
+
+/**
+ * @var {color}
+ * The checkbox color in "disabled" state
+ */
+$checkboxfield-disabled-checkbox-color: dynamic(null);
+
+
+// NEW
+$checkboxfield-body-padding: dynamic(null);
+$checkboxfield-body-padding-big: dynamic(null);

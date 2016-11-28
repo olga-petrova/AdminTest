@@ -9,18 +9,55 @@
  *
  * Example usage:
  *
+ *
  *      {
- *          xtype: 'pivot',
+ *          xtype: 'pivotgrid',
  *          plugins: [{
  *              ptype: 'pivotexporter'
  *          }]
  *      }
  *
  *      pivot.saveDocumentAs({
- *          type: 'excel',
+ *          type: 'xlsx',
  *          title: 'My export',
- *          fileName: 'myExport.xml'
+ *          fileName: 'myExport.xlsx'
  *      });
+ *
+ *
+ * When the exported data needs to be formatted then the {@link Ext.pivot.dimension.Item#exportStyle exportStyle}
+ * can be used on either left axis or aggregate dimensions.
+ *
+ *      {
+ *          xtype: 'pivotgrid',
+ *
+ *          aggregate: [{
+ *              dataIndex:  'value',
+ *              header:     'Total',
+ *              aggregator: 'sum',
+ *              exportStyle: {
+ *                  format: 'Currency',
+ *                  alignment: {
+ *                      horizontal: 'Right'
+ *                  }
+ *              }
+ *          }],
+ *
+ *          leftAxis: [{
+ *              dataIndex:  'date',
+ *              header:     'Transaction date',
+ *              exportStyle: {
+ *                  format: 'Short Date',
+ *                  alignment: {
+ *                      horizontal: 'Right'
+ *                  }
+ *              }
+ *          },{
+ *              dataIndex:  'company',
+ *              header:     'Company',
+ *              sortable:   false
+ *          }]
+ *          // ...
+ *      }
  *
  */
 Ext.define('Ext.pivot.plugin.Exporter', {
@@ -33,11 +70,24 @@ Ext.define('Ext.pivot.plugin.Exporter', {
         'plugin.mzexcelexport'
     ],
 
-    extend: 'Ext.AbstractPlugin',
+    extend: 'Ext.exporter.Plugin',
 
-    requires: [
-        'Ext.exporter.Excel'
-    ],
+    /**
+     * @event beforedocumentsave
+     * Fires on the pivot grid before a document is exported and saved.
+     * @param {Ext.pivot.Grid} pivotGrid Reference to the pivot grid
+     */
+    /**
+     * @event documentsave
+     * Fires on the pivot grid whenever a document is exported and saved.
+     * @param {Ext.pivot.Grid} pivotGrid Reference to the pivot grid
+     */
+    /**
+     * @event dataready
+     * Fires on the pivot grid when the {Ext.exporter.data.Table data object} is ready.
+     * You could adjust styles or data before the document is generated and saved.
+     * @param {Ext.pivot.Grid} pivotGrid Reference to the pivot grid
+     */
 
     /**
      *  `"both"` (the default) - The plugin is added to both grids
@@ -49,147 +99,71 @@ Ext.define('Ext.pivot.plugin.Exporter', {
      */
     lockableScope:  'top',
 
-    init: function (grid) {
+    init: function (cmp) {
         var me = this;
 
         //<debug>
         // this plugin is available only for the pivot grid
-        if (!grid.isPivotGrid) {
+        if (!cmp.isPivotGrid) {
             Ext.raise('This plugin is only compatible with Ext.pivot.Grid');
         }
         //</debug>
 
-        grid.saveDocumentAs = Ext.bind(me.saveDocumentAs, me);
-        grid.getDocumentData = Ext.bind(me.getDocumentData, me);
-        me.pivot = grid;
-
-        return me.callParent(arguments);
-    },
-
-    destroy: function () {
-        var me = this;
-
-        me.pivot.saveDocumentAs = me.pivot.getDocumentData = me.pivot = me.matrix = null;
-        return me.callParent(arguments);
+        return me.callParent([cmp]);
     },
 
     /**
-     * Save the export file. This method is added to the grid panel as "saveDocumentAs".
-     *
-     * Pass in exporter specific configs to the config parameter.
-     *
-     * @param {Ext.exporter.Base} config Config object used to initialize the proper exporter
-     * @param {String} config.type Type of the exporter as defined in the exporter alias. Default is `excel`.
-     * @param {Boolean} [config.onlyExpandedNodes] True to export only what is visible in the grid. False to export everything.
-     * @param {Boolean} [config.showSummary] True to export group summaries
-     * @param {String} [config.title] Title added to the export document
-     * @param {String} [config.author] Who exported the document?
-     * @param {String} [config.fileName] Name of the exported file, including the extension
-     * @param {String} [config.charset] Exported file's charset
-     *
+     * @inheritdoc
      */
-    saveDocumentAs: function(config){
-        var exporter;
-
-        if(this.disabled){
-            return;
-        }
-
-        exporter = this.getExporter.apply(this, arguments);
-        exporter.saveAs();
-        Ext.destroy(exporter);
-    },
-
-    /**
-     * Fetch the export data. This method is added to the grid panel as "getDocumentData".
-     *
-     * Pass in exporter specific configs to the config parameter.
-     *
-     * @param {Ext.exporter.Base} config Config object used to initialize the proper exporter
-     * @param {String} config.type Type of the exporter as defined in the exporter alias. Default is `excel`.
-     * @param {Boolean} [config.onlyExpandedNodes] True to export only what is visible in the grid. False to export everything.
-     * @param {Boolean} [config.showSummary] True to export group summaries
-     * @param {String} [config.title] Title added to the export document
-     * @param {String} [config.author] Who exported the document?
-     * @returns {String}
-     *
-     */
-    getDocumentData: function(config){
-        var exporter, ret;
-
-        if(this.disabled){
-            return;
-        }
-
-        exporter = this.getExporter.apply(this, arguments);
-        ret = exporter.getContent();
-        Ext.destroy(exporter);
-
-        return ret;
-    },
-
-    /**
-     * Builds the exporter object and returns it.
-     *
-     * @param config
-     * @returns {Ext.exporter.Base}
-     *
-     * @private
-     */
-    getExporter: function(config){
-        var me = this;
-
-        config = config || {};
-        me.matrix = me.pivot.getMatrix();
-        me.onlyExpandedNodes = config.onlyExpandedNodes;
-        delete(config.onlyExpandedNodes);
-
-        return Ext.Factory.exporter(Ext.apply({
-            type: 'excel',
-            data: me.prepareData()
-        }, config));
-    },
-
-    /**
-     * This method creates the data object that will be consumed by the exporter.
-     * @returns {Object}
-     *
-     * @private
-     */
-    prepareData: function(){
+    prepareData: function(config){
         var me = this,
-            matrix = me.matrix,
-            group, columns, headers, record, i, dataIndexes;
+            table = new Ext.exporter.data.Table(),
+            matrix, group, columns, headers, total, i, j, dLen, tLen, dataIndexes, row;
+
+        me.matrix = matrix = me.cmp.getMatrix();
+        me.onlyExpandedNodes = (config && config.onlyExpandedNodes);
 
         if(!me.onlyExpandedNodes){
             me.setColumnsExpanded(matrix.topAxis.getTree(), true);
         }
 
         columns = Ext.clone(matrix.getColumnHeaders());
-        headers = me.getColumnHeaders(columns);
+        headers = me.getColumnHeaders(columns, config);
         dataIndexes = me.getDataIndexColumns(columns);
 
         if(!me.onlyExpandedNodes){
             me.setColumnsExpanded(matrix.topAxis.getTree());
         }
 
-        group = me.extractGroups(matrix.leftAxis.getTree(), dataIndexes);
-
-        Ext.apply(group, {
-            summary:        [],
-            text:           ''
+        group = table.addGroup({
+            text: ''
         });
+        me.extractGroups(group, matrix.leftAxis.getTree(), dataIndexes);
 
-        group.summary.push(matrix.textGrandTotalTpl);
-        record = matrix.preparePivotStoreRecordData({key: matrix.grandTotalKey});
-        for(i = 1; i < dataIndexes.length; i++){
-            group.summary.push( (Ext.isEmpty(record[dataIndexes[i]]) || (matrix.showZeroAsBlank && record[dataIndexes[i]] === 0) ) ? '' : record[dataIndexes[i]] );
+        tLen = matrix.totals.length;
+        dLen = dataIndexes.length;
+
+        for(i = 0; i < tLen; i++){
+            total = matrix.totals[i];
+
+            row = group.addSummary();
+            row.addCell({
+                value: total.title
+            });
+
+            for(j = 1; j < dLen; j++){
+                row.addCell({
+                    value: me.getRecordValue(total.record, dataIndexes[j])
+                });
+            }
         }
 
-        return {
-            columns:    headers,
-            groups:     [group]
-        };
+        me.matrix = me.onlyExpandedNodes = null;
+
+        table.addGroup(group);
+        table.setColumns(headers);
+
+        return table;
     },
 
     /**
@@ -219,28 +193,45 @@ Ext.define('Ext.pivot.plugin.Exporter', {
     /**
      * Returns an array of column headers to be used in the export file
      *
-     * @param columns
+     * @param {Array} columns
+     * @param {Object} config
      *
-     * @returns {Array}
+     * @return {Array}
      *
      * @private
      */
-    getColumnHeaders: function(columns){
+    getColumnHeaders: function(columns, config){
         var cols = [],
-            i, obj;
+            length = columns.length,
+            i, obj, col, doExtract;
 
-        for(i = 0; i < columns.length; i++){
-            obj = {
-                text:   columns[i].text
-            };
+        for(i = 0; i < length; i++){
+            col = columns[i];
 
-            if(columns[i].columns){
-                obj.columns = this.getColumnHeaders(columns[i].columns);
+            doExtract = this.onlyExpandedNodes ? ( !col.group || col.group.expanded || (!col.group.expanded && col.subTotal) ) : true;
+
+            if(doExtract){
+                obj = {
+                    text: (col.subTotal && col.group.expanded ? col.group.getTextTotal() : col.text)
+                };
+
+                if(col.columns){
+                    obj.columns = this.getColumnHeaders(col.columns, config);
+                }else{
+                    obj.width = col.dimension ? col.dimension.getWidth() : col.width || 100;
+                    obj.style = col.dimension ? this.getExportStyle(col.dimension.getExportStyle(), config) : null;
+                }
+                cols.push(obj);
             }
-            cols.push(obj);
         }
 
         return cols;
+    },
+
+    getRecordValue: function(record, obj){
+        var data = record.data;
+
+        return (Ext.isEmpty(data[obj.dataIndex]) || (this.matrix.showZeroAsBlank && data[obj.dataIndex] === 0) ) ? '' : data[obj.dataIndex];
     },
 
     /**
@@ -253,13 +244,22 @@ Ext.define('Ext.pivot.plugin.Exporter', {
      * @private
      */
     getDataIndexColumns: function(columns){
-        var cols = [], i;
+        var cols = [], i, col, doExtract;
 
         for(i = 0; i < columns.length; i++){
-            if(columns[i].dataIndex){
-                cols.push(columns[i].dataIndex);
-            }else if (Ext.isArray(columns[i].columns)){
-                cols = Ext.Array.merge(cols, this.getDataIndexColumns(columns[i].columns));
+            col = columns[i];
+            doExtract = this.onlyExpandedNodes ? ( !col.group || col.group.expanded || (!col.group.expanded && col.subTotal) ) : true;
+
+            if(doExtract) {
+
+                if (col.dataIndex) {
+                    cols.push({
+                        dataIndex: col.dataIndex,
+                        agg: col.dimension ? col.dimension.getId() : null
+                    });
+                } else if (col.columns) {
+                    cols = Ext.Array.merge(cols, this.getDataIndexColumns(col.columns));
+                }
             }
         }
 
@@ -269,6 +269,7 @@ Ext.define('Ext.pivot.plugin.Exporter', {
     /**
      * Extract data from left axis groups.
      *
+     * @param group
      * @param items
      * @param columns
      *
@@ -276,46 +277,45 @@ Ext.define('Ext.pivot.plugin.Exporter', {
      *
      * @private
      */
-    extractGroups: function(items, columns){
-        var matrix = this.matrix,
-            group = {},
-            i, j, doExtract, item, row, record;
+    extractGroups: function(group, items, columns){
+        var i, j, iLen, cLen, doExtract, item, row, subGroup, record;
 
-        for(i = 0; i < items.length; i++){
+        iLen = items.length;
+        for(i = 0; i < iLen; i++){
             item = items[i];
 
             if(item.record){
-                group.rows = group.rows || [];
-
-                row = [];
+                row = group.addRow();
                 for(j = 0; j < columns.length; j++){
-                    row.push( (Ext.isEmpty(item.record.get(columns[j])) || (matrix.showZeroAsBlank && item.record.get(columns[j]) === 0) ) ? '' : item.record.get(columns[j]) );
+                    row.addCell({
+                        value: this.getRecordValue(item.record, columns[j])
+                    });
                 }
-                group.rows.push(row);
-
             }else if(item.children){
-                group.groups = group.groups || [];
-                row = {};
-
+                subGroup = group.addGroup({
+                    text: item.name
+                });
                 doExtract = this.onlyExpandedNodes ? item.expanded : true;
-                if(doExtract){
-                    row = this.extractGroups(item.children, columns);
+
+                if(doExtract) {
+                    this.extractGroups(subGroup, item.children, columns);
                 }
 
-                Ext.apply(row, {
-                    summary:    [],
-                    text:       item.name
+                row = subGroup.addSummary();
+                row.addCell({
+                    value: (doExtract ? item.getTextTotal() : item.value)
                 });
 
-                row.summary.push(item.getTextTotal());
-                record = matrix.preparePivotStoreRecordData(item);
-                for(j = 1; j < columns.length; j++){
-                    row.summary.push((Ext.isEmpty(record[columns[j]]) || (matrix.showZeroAsBlank && record[columns[j]] === 0) ) ? '' : record[columns[j]]);
+                record = (item.expanded ? item.records.expanded : item.records.collapsed);
+                cLen = columns.length;
+                for(j = 1; j < cLen; j++){
+                    row.addCell({
+                        value: this.getRecordValue(record, columns[j])
+                    });
                 }
 
-                group.groups.push(row);
+                group.addGroup(subGroup);
             }
-
         }
 
         return group;

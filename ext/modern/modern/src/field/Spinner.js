@@ -52,12 +52,6 @@ Ext.define('Ext.field.Spinner', {
 
     config: {
         /**
-         * @cfg
-         * @inheritdoc
-         */
-        cls: Ext.baseCSSPrefix + 'spinner',
-
-        /**
          * @cfg {Number} [minValue=-infinity] The minimum allowed value.
          * @accessor
          */
@@ -137,6 +131,9 @@ Ext.define('Ext.field.Spinner', {
         }
     },
 
+    classCls: Ext.baseCSSPrefix + 'spinnerfield',
+    groupedButtonsCls: Ext.baseCSSPrefix + 'field-grouped-buttons',
+
     syncEmptyCls: Ext.emptyFn,
 
     /**
@@ -144,7 +141,7 @@ Ext.define('Ext.field.Spinner', {
      */
     updateComponent: function(newComponent) {
         var me = this,
-            cls = me.getCls();
+            cls = me.classCls;
 
         me.callParent(arguments);
 
@@ -164,20 +161,20 @@ Ext.define('Ext.field.Spinner', {
 
     updateGroupButtons: function(newGroupButtons, oldGroupButtons) {
         var me = this,
-            innerElement = me.innerElement,
-            cls = me.getBaseCls() + '-grouped-buttons';
+            inputElement = me.getComponent().element,
+            cls = me.groupedButtonsCls;
 
         me.getComponent();
 
         if (newGroupButtons != oldGroupButtons) {
             if (newGroupButtons) {
                 me.addCls(cls);
-                innerElement.appendChild(me.spinDownButton);
-                innerElement.appendChild(me.spinUpButton);
+                inputElement.appendChild(me.spinDownButton);
+                inputElement.appendChild(me.spinUpButton);
             } else {
                 me.removeCls(cls);
-                innerElement.insertFirst(me.spinDownButton);
-                innerElement.appendChild(me.spinUpButton);
+                inputElement.insertFirst(me.spinDownButton);
+                inputElement.appendChild(me.spinUpButton);
             }
         }
     },

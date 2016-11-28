@@ -1,0 +1,55 @@
+@if ($include-ios) {
+  #{$ios-selector} {
+    .#{$prefix}spinnerfield {
+      .#{$prefix}spinnerfield-button {
+        margin-top: .25em;
+        margin-bottom: .25em;
+        width: 2em;
+
+        &.#{$prefix}spinnerfield-button-down {
+          color: $negative-color-ios;
+
+          &.#{$prefix}button-pressed {
+            color: $negative-color-light-ios;
+          }
+        }
+
+        &.#{$prefix}spinnerfield-button-up {
+          color: $positive-color-ios;
+          &.#{$prefix}button-pressed {
+            color: $positive-color-light-ios;
+          }
+        }
+      }
+
+      .#{$prefix}spinnerfield-button-down {
+        @include material-icon('remove_circle');
+      }
+      .#{$prefix}spinnerfield-button-up {
+        @include material-icon('add_circle');
+      }
+
+      .#{$prefix}input-el {
+        color: black;
+        -webkit-text-fill-color: black;
+      }
+
+      &.#{$prefix}item-disabled {
+        .#{$prefix}input-el {
+          color: #B3B3B3;
+          -webkit-text-fill-color: #B3B3B3;
+        }
+
+        .#{$prefix}spinnerfield-button {
+          &.#{$prefix}spinnerfield-button-down {
+            color: $negative-color-light-ios;
+          }
+
+          &.#{$prefix}spinnerfield-button-up {
+            color: $positive-color-light-ios;
+          }
+        }
+      }
+    }
+  }
+}

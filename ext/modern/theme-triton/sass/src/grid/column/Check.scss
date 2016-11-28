@@ -1,0 +1,46 @@
+.#{$prefix}check-column {
+    .#{$prefix}innerhtml {
+
+        .#{$prefix}checkcolumn-checkbox:after {
+            display: inline-block;
+            color: #b0b0b0;
+            height: 1em;
+            width: 1em;
+            font-size: 1.24rem;
+            content: "\f096";
+            font: 1.24rem/1 FontAwesome;
+        }
+    }
+}
+
+.#{$prefix}check-column.#{$prefix}checkcolumn-allchecked {
+    .#{$prefix}innerhtml {
+
+        .#{$prefix}checkcolumn-checkbox:after {
+            content: "\f046";
+        }
+    }
+}
+
+.#{$prefix}grid-checkcell {
+
+    .#{$prefix}checkcell-checkbox:after {
+        display: inline-block;
+        color: #b0b0b0;
+        height: 1em;
+        width: 1em;
+        font-size: 1.24rem;
+        content: "\f096";
+        font: 1.24rem/1 FontAwesome;
+    }
+}
+
+.#{$prefix}checkcell-checked {
+
+    .#{$prefix}grid-cell-inner {
+
+        .#{$prefix}checkcell-checkbox:after {
+            content: "\f046";
+        }
+    }
+}

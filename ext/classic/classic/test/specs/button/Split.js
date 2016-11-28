@@ -36,12 +36,18 @@ describe("Ext.button.Split", function() {
     });
     
     describe("arrowEl", function() {
-        beforeEach(function() {
-            makeButton();
-        });
-        
         it("should render arrowEl", function() {
+            makeButton();
             expect(button.arrowEl.dom.nodeName).toBe('SPAN');
+            expect(button.arrowEl.isVisible()).toBe(true);
+        });
+
+        it("should hide arrowEl when arrowVisible:false", function() {
+            makeButton({
+                arrowVisible: false
+            });
+            expect(button.arrowEl.dom.nodeName).toBe('SPAN');
+            expect(button.arrowEl.isVisible()).toBe(false);
         });
     });
     
@@ -597,7 +603,7 @@ describe("Ext.button.Split", function() {
                 it("should stop the keydown event", function() {
                     var args = enterSpy.mostRecentCall.args;
                     
-                    expect(args[0].isStopped).toBe(true);
+                    expect(args[0].stopped).toBe(true);
                 });
                 
                 it("should return false to stop propagation", function() {
@@ -617,7 +623,7 @@ describe("Ext.button.Split", function() {
                 it("should stop the keydown event", function() {
                     var args = enterSpy.mostRecentCall.args;
                     
-                    expect(args[0].isStopped).toBeTruthy();
+                    expect(args[0].stopped).toBeTruthy();
                 });
                 
                 it("should return false to stop propagation", function() {
@@ -637,7 +643,7 @@ describe("Ext.button.Split", function() {
                 it("should NOT stop the keydown event", function() {
                     var args = downSpy.mostRecentCall.args;
                     
-                    expect(args[0].isStopped).toBeFalsy();
+                    expect(args[0].stopped).toBeFalsy();
                 });
                 
                 it("should NOT return false to stop propagation", function() {

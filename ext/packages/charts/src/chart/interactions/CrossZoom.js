@@ -161,7 +161,13 @@ Ext.define('Ext.chart.interactions.CrossZoom', {
             dblclick: 'onDoubleTap'
         },
 
-        undoButton: {}
+        undoButton: {},
+
+        touchAction: {
+            panX: false,
+            panY: false,
+            doubleTapZoom: false
+        }
     },
 
     stopAnimationBeforeSync: false,
@@ -245,6 +251,8 @@ Ext.define('Ext.chart.interactions.CrossZoom', {
             xy = chart.getEventXY(e),
             x = xy[0],
             y = xy[1];
+
+        e.claimGesture();
 
         if (me.zoomAnimationInProgress) {
             return;

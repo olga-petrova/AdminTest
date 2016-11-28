@@ -2,8 +2,7 @@
  * @class Ext.layout.Float
  */
 
-.x-center,
-.x-centered {
+.x-center {
     @include absolute-position();
     @include st-box();
     @include st-box-align(center);

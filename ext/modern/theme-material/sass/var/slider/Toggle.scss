@@ -1,0 +1,19 @@
+$toggle-thumb-size: dynamic(18px);
+$toggle-thumb-border: dynamic(none);
+$toggle-thumb-border-radius: dynamic(50%);
+$toggle-thumb-background-color: dynamic($faded-color);
+$toggle-thumb-background-gradient: dynamic(null);
+$toggle-thumb-on-background-color: dynamic($base-color);
+$toggle-thumb-on-background-gradient: dynamic(null);
+$toggle-thumb-padding: dynamic(0);
+$toggle-thumb-top: dynamic(-1.5px);
+$toggle-thumb-left: dynamic(0);
+
+$toggle-height: dynamic($content-padding);
+$toggle-width: dynamic($content-padding * 2);
+$toggle-border: dynamic(none);
+$toggle-border-radius: dynamic(($toggle-height - $toggle-thumb-padding) /2);
+$toggle-background-color: dynamic($divider-color);
+$toggle-background-gradient: dynamic(null);
+$toggle-on-background-color: dynamic($base-pressed-color);
+$toggle-on-background-gradient: dynamic(null);

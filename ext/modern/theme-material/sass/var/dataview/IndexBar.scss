@@ -1,0 +1,23 @@
+$index-bar-width: dynamic(32px);
+$index-bar-height: dynamic(100% !important);
+$index-bar-bg-color: dynamic(transparent);
+$index-bar-color: dynamic($color);
+$index-bar-margin: dynamic(0);
+
+$index-bar-display: dynamic(flex);
+$index-bar-align-items: dynamic(center);
+$index-bar-justify-content: dynamic(space-around);
+$index-bar-opacity: dynamic(0);
+
+$index-bar-pressed-background-color: dynamic(transparent);
+$index-bar-pressed-opacity: dynamic(1);
+
+$index-bar-item-width: dynamic(100%);
+$index-bar-item-height: dynamic(100%);
+$index-bar-item-display: dynamic(flex);
+$index-bar-item-justify-content: dynamic(center);
+$index-bar-item-align-items: dynamic(center);
+$index-bar-item-font-weight: dynamic($material-caption-font-weight);
+$index-bar-item-font-size: dynamic($material-caption-font-size);
+$index-bar-item-font-line-height: dynamic(inherit);
+$index-bar-item-font-family: dynamic($font-family);

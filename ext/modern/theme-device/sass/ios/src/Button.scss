@@ -1,0 +1,197 @@
+@if ($include-ios) {
+  #{$ios-selector} {
+    .#{$prefix}button {
+      height: 2.1em;
+      padding: 0 8px;
+      @include border-radius(6px);
+      background-color: #fff;
+      border-color: $primary-color-ios;
+    }
+
+    .#{$prefix}button-icon {
+      width: 1.5em;
+      height: 1.5em;
+      color: $primary-color-ios;
+
+      &:before {
+        font-size: 1.4em;
+        line-height: 1.15em;
+      }
+    }
+
+    .#{$prefix}button-pressing {
+      .#{$prefix}button-icon {
+        color: $primary-color-light-ios;
+      }
+    }
+
+    .#{$prefix}button-label {
+      font-weight: 400;
+      font-family: "Helvetica Neue", Helvetica, Arial;
+    }
+
+    // UIs
+
+    .#{$prefix}button-round,
+    .#{$prefix}button-decline-round,
+    .#{$prefix}button-confirm-round {
+      @include border-radius(1.8em);
+    }
+
+    .#{$prefix}button-small,
+    .#{$prefix}button-decline-small,
+    .#{$prefix}button-confirm-small {
+      height: 1.4em;
+      padding: 0 5px;
+
+      .#{$prefix}button-label {
+        font-size: 1em;
+      }
+    }
+
+    .#{$prefix}button,
+    .#{$prefix}button-round,
+    .#{$prefix}button-small,
+    .#{$prefix}button-forward {
+      border-color: $primary-color-ios;
+
+      .#{$prefix}button-label {
+        color: $primary-color-ios;
+      }
+
+      &.#{$prefix}button-pressing,
+      &.#{$prefix}button-pressed {
+        border-color: $primary-color-light-ios;
+
+        .#{$prefix}button-label {
+          color: $primary-color-light-ios;
+        }
+      }
+    }
+
+    .#{$prefix}button-decline,
+    .#{$prefix}button-decline-round,
+    .#{$prefix}button-decline-small {
+      border-color: $negative-color-ios;
+
+      .#{$prefix}button-label {
+        color: $negative-color-ios;
+      }
+
+      &.#{$prefix}button-pressing,
+      &.#{$prefix}button-pressed {
+        border-color: $negative-color-light-ios;
+
+        .#{$prefix}button-label {
+          color: $negative-color-light-ios;
+        }
+      }
+    }
+
+    .#{$prefix}button-confirm,
+    .#{$prefix}button-confirm-round,
+    .#{$prefix}button-confirm-small {
+      border-color: $positive-color-ios;
+
+      .#{$prefix}button-label {
+        color: $positive-color-ios;
+      }
+
+      &.#{$prefix}button-pressing,
+      &.#{$prefix}button-pressed {
+        border-color: $positive-color-light-ios;
+
+        .#{$prefix}button-label {
+          color: $positive-color-light-ios;
+        }
+      }
+    }
+
+    .#{$prefix}button {
+      &.#{$prefix}button-action,
+      &.#{$prefix}button-action-round,
+      &.#{$prefix}button-action-small {
+        border-color: $primary-color-ios;
+
+        .#{$prefix}button-label {
+          color: $primary-color-ios;
+        }
+
+        &.#{$prefix}button-pressing {
+          border-color: $primary-color-light-ios;
+
+          .#{$prefix}button-label {
+            color: $primary-color-light-ios;
+          }
+        }
+      }
+    }
+
+    .#{$prefix}button.#{$prefix}button-back {
+      border: 0px;
+      color: $primary-color-ios;
+      background-color: transparent;
+      margin: 0px;
+      padding: 0px;
+
+      &:before {
+        content: '"';
+        font-family: 'iOS7';
+        color: $primary-color-ios;
+        font-size: 1.3em;
+        text-align: center;
+        background-color: transparent;
+        line-height: 1.3em;
+        padding-left: 0px;
+      }
+
+      .#{$prefix}button-label {
+        font-size: 1.1em;
+        line-height: 1.3em;
+        font-weight: 300;
+        padding-left: 2px;
+      }
+
+      &.#{$prefix}button-pressing {
+        color: $primary-color-light-ios;
+
+        &:before {
+          color: $primary-color-light-ios;
+        }
+
+        .#{$prefix}button-label {
+          color: $primary-color-light-ios;
+        }
+      }
+    }
+
+    // Badges
+
+    .#{$prefix}hasbadge {
+      overflow: visible;
+
+      .#{$prefix}badge {
+        top: -5px;
+        right: -6px;
+        max-width: 55%;
+
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        text-align: center;
+        display: block;
+        overflow: hidden;
+
+        color: #fff !important;
+        min-width: 18px;
+        font-weight: bold;
+        text-shadow: 0 0 0 !important;
+        font-family: "Helvetica Neue", Helvetica, Arial;
+        font-size: 10px !important;
+        padding: 1px 2px 2px;
+        border: 0px;
+        @include border-radius(26px);
+        background-color: $negative-color-ios;
+      }
+    }
+  }
+}

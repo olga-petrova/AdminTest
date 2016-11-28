@@ -2,24 +2,52 @@
  * @class Ext.field.Field
  */
 
-.x-field {
+.#{$prefix}field {
     background: $field-background-color;
+    padding: $field-padding;
 
-    &:last-child {
-        border-bottom: 0;
+    &.#{$prefix}layout-auto-item,
+    &.#{$prefix}layout-vbox-item {
+        margin-bottom: $field-vertical-spacing;
+
+        @if $enable-big {
+            .#{$prefix}big & {
+                margin-bottom: $field-vertical-spacing-big;
+            }
+        }
+
+        &:last-child {
+            margin-bottom: 0;
+        }
     }
 }
 
-.x-form-label {
+.#{$prefix}input {
+    color: $field-input-color;
+
+    .#{$prefix}empty {
+        .#{$prefix}input-el {
+            -webkit-text-fill-color: $field-input-empty-color;
+        }
+    }
+}
+
+.#{$prefix}field-focused {
+
+    .#{$prefix}field-label {
+        color: $field-label-focused-color;
+    }
+}
+
+.#{$prefix}field-label {
     color: $field-label-color;
     background-color: $field-label-background-color;
 
     padding: $field-label-padding;
     @include font($field-label-font-weight, $field-label-font-size, $field-label-line-height, $field-label-font-family);
-    min-height: calc(#{$field-label-line-height} + #{vertical($field-label-padding)});
 
     @if $enable-big {
-        .x-big & {
+        .#{$prefix}big & {
             @if $field-label-padding-big != $field-label-padding {
                 padding: $field-label-padding-big;
             }
@@ -33,72 +61,30 @@
     }
 }
 
-.x-field-input {
-    .x-clear-icon {
-        width: $textfield-clear-icon-size;
-        height: $textfield-clear-icon-size;
-        top: 50%;
-        right: .4em;
-        color: $textfield-clear-icon-color;
-        margin-top: -($textfield-clear-icon-size / 2);
-        @include font-icon($textfield-clear-icon);
+.#{$prefix}field-required .#{$prefix}field-label:after {
+    @include font($field-required-indicator-font-weight, $field-required-indicator-font-size, $field-required-indicator-line-height, $field-required-indicator-font-family);
+    position: $field-required-indicator-position;
+    top: $field-required-indicator-top;
+    padding: $field-required-indicator-padding;
+}
+
+.#{$prefix}item-disabled {
+    .#{$prefix}field-label,
+    input,
+    .#{$prefix}input-el,
+    .#{$prefix}spinner-body,
+    select,
+    textarea,
+    .#{$prefix}field-clear-container {
+        color: $field-item-disabled-color;
+        pointer-events: none;
     }
 }
 
-.x-field-clearable,
-.x-field-revealable {
-    .x-input-el {
-        padding-right: calc(#{$textfield-clear-icon-font-size} + .6em);
-
-        @if $enable-big {
-            .x-big & {
-                padding-right: calc(#{$textfield-clear-icon-font-size-big} + .6em);
-            }
-        }
-    }
+.#{$prefix}item-disabled .#{$prefix}field-label {
+    color: $field-label-disabled-color;
 }
 
-.x-input-el {
-    background-color: $textfield-input-background-color;
-    padding: $textfield-input-padding;
-    @include font($textfield-input-font-weight, $textfield-input-font-size, $textfield-input-line-height, $textfield-input-font-family);
-    min-height: calc(#{$textfield-input-line-height} + #{vertical($textfield-input-padding)});
-
-    @if $enable-big {
-        .x-big & {
-            @if $textfield-input-padding-big != $textfield-input-padding {
-                padding: $textfield-input-padding-big;
-            }
-            @if $textfield-input-font-size-big != $textfield-input-font-size {
-                font-size: $textfield-input-font-size-big;
-            }
-            @if $textfield-input-line-height-big != $textfield-input-line-height {
-                line-height: $textfield-input-line-height-big;
-            }
-        }
-    }
-
-    border-width: 0;
-    -webkit-appearance: none;
-}
-
-.x-item-disabled {
-  .x-form-label,
-  input,
-  .x-input-el,
-  .x-spinner-body,
-  select,
-  textarea,
-  .x-field-clear-container {
-    color: #b3b3b3;
-    pointer-events: none;
-  }
-}
-
-.x-item-disabled .x-form-label {
-    color: #aaa;
-}
-
-.x-item-disabled .x-form-label:after {
+.#{$prefix}item-disabled .#{$prefix}field-label:after {
     color: #666 !important;
 }

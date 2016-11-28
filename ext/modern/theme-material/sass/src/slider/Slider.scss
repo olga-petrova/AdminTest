@@ -1,0 +1,15 @@
+.#{$prefix}slider {
+  .#{$prefix}thumb-pressing:after {
+    @include scale(1.5);
+  }
+}
+
+.#{$prefix}thumb {
+  &:after {
+    transition: transform .15s ease-out;
+  }
+
+  &:before {
+    @include transform(none);
+  }
+}

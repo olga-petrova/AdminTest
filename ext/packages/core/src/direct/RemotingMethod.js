@@ -103,8 +103,7 @@ Ext.define('Ext.direct.RemotingMethod', {
                         args.push(params[paramOrder[i]]);
                     }
                 }
-                else if (paramsAsHash) {
-                    // If paramsAsHash was specified, add all the params as a single object argument.
+                else {
                     args.push(params);
                 }
             }

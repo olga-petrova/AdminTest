@@ -11,7 +11,7 @@
 		display: none;
 	}
 
-	.x-field .x-field-input,
+	.x-field .x-input,
 	.x-field .x-input-el {
 		font-weight: 300;
 	}
@@ -22,13 +22,13 @@
 		}
 	}
 
-	.x-field .x-field-input {
+	.x-field .x-input {
 		border: 0px;
 		background-color: transparent;
 	}
 }
 
-.x-form-label {
+.x-field-label {
 	padding: .6em .6em .6em 1em;
 
 	span {

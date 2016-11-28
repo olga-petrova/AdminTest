@@ -31,7 +31,7 @@ describe("TODO window UI unit test suite", function() {
         });
     });
     
-    xit("ToDo window should match the expected screenshot", function(done) {
+    it("ToDo window should match the expected screenshot", function(done) {
         ST.screenshot('todowindow', done);
     }, 30000);
 
@@ -40,7 +40,9 @@ describe("TODO window UI unit test suite", function() {
         Dash.toDoWindow()
         .rendered()
         .and(function (window) {
-            window.on('close', done);
+            window.on('close', function () {
+                done();
+            });
             Dash.cancelButton().click();
         });
     });  

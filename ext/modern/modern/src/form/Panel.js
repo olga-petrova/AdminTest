@@ -130,9 +130,10 @@
  */
 Ext.define('Ext.form.Panel', {
     alternateClassName: 'Ext.form.FormPanel',
-    extend  : 'Ext.Panel',
-    xtype   : 'formpanel',
+    extend: 'Ext.Panel',
+    xtype: 'formpanel',
     requires: ['Ext.XTemplate', 'Ext.field.Checkbox', 'Ext.Ajax'],
+    mixins: ['Ext.form.FieldContainer'],
 
     /**
      * @event submit
@@ -1196,9 +1197,13 @@ Ext.define('Ext.form.Panel', {
             }
         };
 
-        this.getItems().each(getFieldsFrom);
+        this.fieldQuery().forEach(getFieldsFrom);
 
         return (byName) ? (fields[byName] || []) : fields;
+    },
+
+    fieldQuery: function() {
+        return this.getItems().getRange();
     },
 
     /**

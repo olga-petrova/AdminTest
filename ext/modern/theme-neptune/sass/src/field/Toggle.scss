@@ -1,0 +1,10 @@
+/**
+ * @class Ext.field.Toggle
+ */
+
+.x-togglefield {
+  border: $togglefield-border;
+  .x-field-body {
+    padding: $togglefield-padding;
+  }
+}

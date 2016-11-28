@@ -3,14 +3,14 @@
  */
 /*
 Some Fashion error here, checkmark mixin is not taking effect like it does for checkbox.scss
-.x-field-radio .x-field-mask {
+.x-radiofield .x-input-mask {
   &::after {
     @include checkmark(#ccc);
   }
 }
 */
 
-.x-field-radio .x-field-mask {
+.x-radiofield .x-input-mask {
   &::after {
     position: absolute;
     top: 0;
@@ -26,16 +26,16 @@ Some Fashion error here, checkmark mixin is not taking effect like it does for c
   }
 }
 
-.x-input-radio {
+.x-radio {
   visibility: hidden;
 }
 
-.x-input-radio:checked + .x-field-mask::after {
+.x-radio:checked + .x-input-mask::after {
   color: $ios7-blue;
 }
 
 .x-item-disabled {
-  .x-input-radio:checked + .x-field-mask::after {
+  .x-radio:checked + .x-input-mask::after {
     color: lighten($ios7-blue, 20%);
   }
 }

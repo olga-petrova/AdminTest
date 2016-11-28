@@ -120,6 +120,7 @@ Ext.define('Ext.sparkline.Bar', {
                 me.colorMapByValue = new Ext.sparkline.RangeMap(colorMap);
             }
         }
+        me.applyConfigChange();
         return colorMap;
     },
 

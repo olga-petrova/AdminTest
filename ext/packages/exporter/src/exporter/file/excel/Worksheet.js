@@ -53,7 +53,7 @@ Ext.define('Ext.exporter.file.excel.Worksheet', {
         '<tpl if="this.exists(protection)"> ss:Protected="{protection:this.toNumber}"</tpl>',
         '<tpl if="this.exists(rightToLeft)"> ss:RightToLeft="{rightToLeft:this.toNumber}"</tpl>',
         '>\n',
-        '<tpl for="tables">{[values.render()]}</tpl>',
+        '<tpl if="tables"><tpl for="tables.getRange()">{[values.render()]}</tpl></tpl>',
         '       <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">\n',
         '          <PageSetup>\n',
         '              <Layout x:CenterHorizontal="1" x:Orientation="Portrait" />\n',
@@ -88,8 +88,8 @@ Ext.define('Ext.exporter.file.excel.Worksheet', {
     ],
 
     destroy: function(){
-        this.getTables().destroy();
-        return this.callParent(arguments);
+        this.callParent();
+        this.setTables(null);
     },
 
     applyTables: function(data, dataCollection){
@@ -117,12 +117,6 @@ Ext.define('Ext.exporter.file.excel.Worksheet', {
     applyName: function(value){
         // Excel limits the worksheet name to 31 chars
         return Ext.String.ellipsis(String(value), 31);
-    },
-
-    getRenderData: function(){
-        return Ext.apply(this.callParent(arguments), {
-            tables: this.getTables().getRange()
-        });
     }
 
 });

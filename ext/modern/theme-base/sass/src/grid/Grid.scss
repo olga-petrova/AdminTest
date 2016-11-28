@@ -23,18 +23,6 @@
     text-overflow: ellipsis;
 }
 
-.#{$prefix}grid-row {
-    position: absolute;
-    left: 0;
-    top: 0;
-    display: table;
-    table-layout: fixed;
-    // An explicit width is required for table-layout: fixed to be applied, even if the columns
-    // have their own explicit widths set
-    // http://www.w3.org/TR/CSS21/tables.html#fixed-table-layout
-    width: 0;
-}
-
 .#{$prefix}grid-cell {
     display: table-cell;
     vertical-align: middle;
@@ -133,4 +121,12 @@
 .#{$prefix}grid-grouped .#{$prefix}grid-row.#{$prefix}grid-header-wrap .#{$prefix}dock-horizontal,
 .#{$prefix}grid-grouped .#{$prefix}grid-row-tpl.#{$prefix}grid-header-wrap {
     border-top: 0;
+}
+
+.#{$prefix}grid-resize-marker {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 100%;
 }

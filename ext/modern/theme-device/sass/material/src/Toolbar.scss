@@ -1,0 +1,99 @@
+@if ($include-material) {
+  #{$material-selector} {
+
+    .#{$prefix}toolbar {
+      @include css-color-variable('primary-color-md', 'background-color');
+      @include css-color-variable('text-color-reverse-md');
+      height: 56px;
+      padding: 0 $content-padding-md 0 $content-padding-md;
+      border: 0;
+
+      &.#{$prefix}docked-top {
+        @include material-shadow(1);
+      }
+
+      //Buttons in Toolbars
+      .#{$prefix}button {
+        @include css-color-variable('text-color-reverse-md');
+      }
+
+      //Button in Toolbars on the Left
+      .#{$prefix}toolbar-left .#{$prefix}button:first-child {
+        margin-left: -($content-padding-md/2);
+      }
+
+      //Button in Toolbars on the Right
+      .#{$prefix}toolbar-right .#{$prefix}button:last-child {
+        margin-right: -($content-padding-md/2);
+      }
+
+      // Titles in Toolbars
+      .#{$prefix}title {
+        @include material-font-style('title');
+        transition: .25s padding ease-out;
+
+        &.#{$prefix}title-align-left {
+          padding-left: 0;
+        }
+      }
+
+      // Titles in toolbars next to visible Buttons
+      .#{$prefix}button:not(.#{$prefix}hidden-display) + .#{$prefix}title {
+        padding-left: 8px;
+      }
+
+      // toolbar inputs
+
+      .#{$prefix}field {
+        @include css-color-variable('text-color-reverse-lighter-md', 'border-bottom-color');
+      }
+
+      .#{$prefix}field-label {
+        @include css-color-variable('accent-color-md');
+      }
+
+      .#{$prefix}field-focused {
+        @include css-color-variable('accent-color-md', 'border-bottom-color');
+      }
+
+      .#{$prefix}input {
+        .#{$prefix}clear-icon {
+          @include css-color-variable('text-color-reverse-md');
+        }
+
+        // Normal text inputs
+        .#{$prefix}input-el {
+          @include css-color-variable('text-color-reverse-md', '-webkit-text-fill-color');
+        }
+      }
+
+      //Toggle Buttons in toolbars
+      .#{$prefix}toggle-on {
+        @include css-color-variable('accent-color-pressed-md', 'background-color');
+
+        .#{$prefix}thumb {
+          &:after {
+            @include css-color-variable('accent-color-md', 'background-color');
+          }
+        }
+      }
+
+    }
+
+    .#{$prefix}floating .#{$prefix}toolbar.#{$prefix}docked-bottom {
+      padding: 8px 16px;
+      @include css-color-variable('background-color-md', 'background-color');
+      @include css-color-variable('text-color-base-md');
+      height: auto;
+
+      .#{$prefix}button {
+        @include css-color-variable('primary-color-md');
+        height: 36px;
+
+        &:last-child {
+          margin-right: -8px;
+        }
+      }
+    }
+  }
+}

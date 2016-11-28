@@ -481,7 +481,7 @@
     //</feature>
 
     Ext.createRuleFn = function (code) {
-        return new Function('$c', 'with($c) { return (' + code + '); }');
+        return new Function('$c', 'with($c) { try { return (' + code + '); } catch(e) { return false;}}');
     };
     Ext.expressionCache = new Ext.util.Cache({
         miss: Ext.createRuleFn
@@ -573,69 +573,7 @@
      * To adjust configs based on dynamic conditions, see `{@link Ext.mixin.Responsive}`.
      */
     ExtClass.registerPreprocessor('platformConfig', function(Class, data, hooks) {
-        var platformConfigs = data.platformConfig,
-            config = data.config,
-            added, classConfigs, configs, configurator, hoisted, keys, name, value,
-            i, ln;
-
-        delete data.platformConfig;
-
-        
-        //<debug>
-        if (platformConfigs instanceof Array) {
-            throw new Error('platformConfigs must be specified as an object.');
-        }
-        //</debug>
-
-        configurator = Class.getConfigurator();
-        classConfigs = configurator.configs;
-
-        // Get the keys shortest to longest (ish).
-        keys = Ext.getPlatformConfigKeys(platformConfigs);
-
-        // To leverage the Configurator#add method, we want to generate potentially
-        // two objects to pass in: "added" and "hoisted". For any properties in an
-        // active platformConfig rule that set proper Configs in the base class, we
-        // need to put them in "added". If instead of the proper Config coming from
-        // a base class, it comes from this class's config block, we still need to
-        // put that config in "added" but we also need move the class-level config
-        // out of "config" and into "hoisted".
-        //
-        // This will ensure that the config defined at the class level is added to
-        // the Configurator first.
-        for (i = 0, ln = keys.length; i < ln; ++i) {
-            configs = platformConfigs[keys[i]];
-            hoisted = added = null;
-
-            for (name in configs) {
-                value = configs[name];
-
-                // We have a few possibilities for each config name:
-
-                if (config && name in config) {
-                    //  It is a proper Config defined by this class.
-
-                    (added || (added = {}))[name] = value;
-                    (hoisted || (hoisted = {}))[name] = config[name];
-                    delete config[name];
-                } else if (name in classConfigs) {
-                    //  It is a proper Config defined by a base class.
-
-                    (added || (added = {}))[name] = value;
-                } else {
-                    //  It is just a property to put on the prototype.
-
-                    data[name] = value;
-                }
-            }
-
-            if (hoisted) {
-                configurator.add(hoisted);
-            }
-            if (added) {
-                configurator.add(added);
-            }
-        }
+        Class.addPlatformConfig(data);
     });
     //</feature>
 

@@ -409,14 +409,14 @@ Ext.define('Ext.draw.Color', {
          * @return {Ext.draw.Color}
          * @static
          */
-        fly: function (r, g, b, a) {
+        fly: function (red, green, blue, alpha) {
             switch (arguments.length) {
                 case 1:
-                    flyColor.setFromString(r);
+                    flyColor.setFromString(red);
                     break;
                 case 3:
                 case 4:
-                    flyColor.setRGB(r, g, b, a);
+                    flyColor.setRGB(red, green, blue, alpha);
                     break;
                 default:
                     return null;
@@ -586,7 +586,7 @@ Ext.define('Ext.draw.Color', {
          *
          * @param {Number} h Hue component [0..360)
          * @param {Number} s Saturation component [0..1]
-         * @param {Number} l Value component [0..1]
+         * @param {Number} v Value component [0..1]
          * @return {Ext.draw.Color}
          * @static
          */
@@ -606,12 +606,12 @@ Ext.define('Ext.draw.Color', {
          *
          * If the string is not recognized, fromString returns rgba(0,0,0,0).
          *
-         * @param {String} Color Color as string.
+         * @param {String} color Color as string.
          * @return {Ext.draw.Color}
          * @static
          */
-        fromString: function (string) {
-            return (new this(0, 0, 0, 0)).setFromString(string);
+        fromString: function (color) {
+            return (new this(0, 0, 0, 0)).setFromString(color);
         },
 
         /**

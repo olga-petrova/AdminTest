@@ -38,6 +38,10 @@ Ext.define('Ext.draw.sprite.Instancing', {
             }
             template = Ext.create(template.xclass || 'sprite.' + template.type, template);
         }
+        var surface = template.getSurface();
+        if (surface) {
+            surface.remove(template);
+        }
         template.setParent(this);
         return template;
     },
@@ -164,7 +168,7 @@ Ext.define('Ext.draw.sprite.Instancing', {
         return result;
     },
 
-    render: function (surface, ctx, clipRect, rect) {
+    render: function (surface, ctx, rect) {
         //<debug>
         if (!this.getTemplate()) {
             Ext.raise('An instancing sprite must have a template.');
@@ -172,29 +176,28 @@ Ext.define('Ext.draw.sprite.Instancing', {
         //</debug>
         var me = this,
             template = me.getTemplate(),
+            surfaceRect = surface.getRect(),
             mat = me.attr.matrix,
             originalAttr = template.attr,
             instances = me.instances,
-            i, ln = me.position;
+            ln = me.position,
+            i;
 
         mat.toContext(ctx);
-        template.preRender(surface, ctx, clipRect, rect);
-        template.useAttributes(ctx, rect);
-        for (i = 0; i < ln; i++) {
-            if (instances[i].dirtyZIndex) {
-                break;
-            }
-        }
+        template.preRender(surface, ctx, rect);
+        template.useAttributes(ctx, surfaceRect);
+
         for (i = 0; i < ln; i++) {
             if (instances[i].hidden) {
                 continue;
             }
             ctx.save();
             template.attr = instances[i];
-            template.useAttributes(ctx, rect);
-            template.render(surface, ctx, clipRect, rect);
+            template.useAttributes(ctx, surfaceRect);
+            template.render(surface, ctx, rect);
             ctx.restore();
         }
+
         template.attr = originalAttr;
     },
 

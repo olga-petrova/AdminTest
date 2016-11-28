@@ -1,0 +1,35 @@
+/**
+ * @class Ext.d3.hierarchy.TreeMap
+ */
+
+.#{$d3-prefix}treemap {
+
+  .#{$d3-prefix}node {
+    stroke-width: 1px;
+    stroke: #779;
+    fill: #99A;
+
+    &.#{$d3-prefix}parent {
+      .#{$d3-prefix}label {
+        fill: black;
+        text-anchor: start;
+        dominant-baseline: text-before-edge;
+      }
+    }
+
+    .#{$d3-prefix}label {
+      font-size: 1em;
+      fill: black;
+      stroke: none;
+      text-anchor: middle;
+      // IE and Edge don't support this CSS property.
+      dominant-baseline: central;
+    }
+
+    &.#{$d3-prefix}selected {
+      stroke: #779;
+    }
+
+  }
+
+}

@@ -30,6 +30,7 @@
 
     $icon-color: $button-icon-color,
     $pressed-icon-color: $button-pressed-icon-color,
+    $disabled-icon-color: $button-disabled-icon-color,
     $icon-size: $button-icon-size,
     $icon-size-big: $button-icon-size-big,
     $icon-font-size: $button-icon-font-size,
@@ -39,6 +40,7 @@
     $icon-vertical-spacing: $button-icon-vertical-spacing,
     $icon-vertical-spacing-big: $button-icon-vertical-spacing-big,
 
+    $disabled-color: $button-disabled-color,
     $disabled-opacity: $button-disabled-opacity,
 
     $badge-background-color: $button-badge-background-color,
@@ -75,6 +77,10 @@
     @include button-round-ui;
 }
 
+@if $button-flat-ui {
+    @include button-flat-ui;
+}
+
 // TODO: refactor toolbar, plain, and segmented
 // Toolbar button styling
 //.x-toolbar .x-button {
@@ -109,7 +115,7 @@
     height: 1.9em;
     padding: 0 0.5em;
 
-    @if $include-border-radius {
+    @if $enable-border-radius {
         @include border-radius(none);
     }
 
@@ -130,7 +136,7 @@
 .x-segmentedbutton .x-button {
     margin: 0;
 
-    @if $include-border-radius {
+    @if $enable-border-radius {
         @include border-radius(0);
 
         &.x-first {

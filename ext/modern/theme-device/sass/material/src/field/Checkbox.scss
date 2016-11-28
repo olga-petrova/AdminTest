@@ -1,0 +1,23 @@
+@if ($include-material) {
+    #{$material-selector} {
+        .#{$prefix}checkboxfield {
+            .#{$prefix}input-mask {
+                @include material-icon('check_box_outline_blank');
+                @include css-color-variable('text-color-light-md');
+            }
+
+            .#{$prefix}input-el:checked + .#{$prefix}input-mask {
+                @include css-color-variable('primary-color-md');
+                &::after {
+                    content: 'check_box';
+                }
+            }
+
+            &.#{$prefix}item-disabled {
+                .#{$prefix}input-el:checked + .#{$prefix}input-mask, .#{$prefix}input-mask {
+                    @include css-color-variable('text-color-lighter-md');
+                }
+            }
+        }
+    }
+}

@@ -482,8 +482,8 @@ Ext.define('Ext.dataview.DataView', {
 
         me.on(me.getTriggerCtEvent(), me.onContainerTrigger, me);
 
-        container = me.container = this.add(new Ext.dataview[me.getUseComponents() ? 'component' : 'element'].Container({
-            baseCls: this.getBaseCls()
+        container = me.container = me.add(new Ext.dataview[me.getUseComponents() ? 'component' : 'element'].Container({
+            baseCls: me.getBaseCls()
         }));
         container.dataview = me;
 
@@ -565,8 +565,8 @@ Ext.define('Ext.dataview.DataView', {
     },
 
     // apply to the selection model to maintain visual UI cues
-    onItemTrigger: function(me, index) {
-        if (!this.destroyed) {
+    onItemTrigger: function(me, index, target, record, e) {
+        if (!e.stopSelection && !this.destroyed) {
             this.selectWithEvent(this.getStore().getAt(index));
         }
     },
@@ -931,7 +931,8 @@ Ext.define('Ext.dataview.DataView', {
      * @return {Ext.dom.Element[]/Ext.dataview.component.DataItem[]} Array of Items.
      */
     getViewItems: function() {
-        return this.container.getViewItems();
+        var container = this.container;
+        return container ? container.getViewItems() : [];
     },
 
     doRefresh: function(me) {

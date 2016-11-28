@@ -14,8 +14,8 @@ Ext.define('Ext.theme.blackberry.field.Picker', {
             reference: 'element',
             className: Ext.baseCSSPrefix + 'container',
             children: [{
-                reference: 'innerElement',
-                cls: Ext.baseCSSPrefix + 'component-outer',
+                reference: 'bodyElement',
+                cls: Ext.baseCSSPrefix + 'field-body',
                 children: [{
                     reference: 'label',
                     cls: Ext.baseCSSPrefix + 'form-label',

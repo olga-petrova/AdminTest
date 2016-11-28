@@ -1,4 +1,9 @@
 .x-dataview-inlineblock {
+    > .x-domscroller > .x-dataview-inner {
+
+        // The innerElement must stretch to accommodate the inline-block items
+        display: table;
+    }
     .x-dataview-item, .x-data-item {
         display: inline-block;
     }

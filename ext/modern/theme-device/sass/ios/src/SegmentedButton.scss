@@ -1,0 +1,28 @@
+@if ($include-ios) {
+  #{$ios-selector} {
+    .#{$prefix}toolbar .#{$prefix}segmentedbutton, .#{$prefix}segmentedbutton {
+      .#{$prefix}button {
+        margin: 0 !important;
+        border: 1px solid $primary-color-ios;
+        border-right: 0;
+        @include border-radius(0);
+
+        &.#{$prefix}button-pressed {
+          background-color: #157efb;
+          .#{$prefix}button-label {
+            color: #fff;
+          }
+        }
+      }
+
+      .#{$prefix}first {
+        @include border-left-radius(6px);
+      }
+
+      .#{$prefix}last {
+        @include border-right-radius(6px);
+        border-right: 1px solid $primary-color-ios;
+      }
+    }
+  }
+}

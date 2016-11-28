@@ -88,14 +88,16 @@ Ext.define('Ext.pivot.matrix.Local', {
         me.localDelayedTask = new Ext.util.DelayedTask(me.delayedProcess, me);
         me.newRecordsDelayedTask = new Ext.util.DelayedTask(me.onOriginalStoreAddDelayed, me);
         me.updateRecordsDelayedTask = new Ext.util.DelayedTask(me.onOriginalStoreUpdateDelayed, me);
-        
+
+        me.initializeStore({store: me.store});
+
         me.callParent(arguments);
     },
-    
-    onReconfigure: function(config){
+
+    initializeStore: function(config){
         var me = this,
             store, newStore;
-        
+
         if(config.store){
             // a new store was passed to
             newStore = config.store;
@@ -110,7 +112,7 @@ Ext.define('Ext.pivot.matrix.Local', {
                 }
             }
         }
-        
+
         if(newStore){
             store = Ext.getStore(newStore || '');
             if(Ext.isEmpty(store) && Ext.isString(newStore)){
@@ -120,11 +122,11 @@ Ext.define('Ext.pivot.matrix.Local', {
 
         if(store && store.isStore){
             Ext.destroy(me.storeListeners);
-            
+
             if(me.store && me.store.autoDestroy && store != me.store){
                 Ext.destroy(me.store);
             }
-            
+
             // let's initialize the store (if needed)
             me.store = store;
             // add listeners to the store
@@ -139,9 +141,16 @@ Ext.define('Ext.pivot.matrix.Local', {
                 scope:          me,
                 destroyable:    true
             });
+
+            if(store.isLoaded()){
+                me.startProcess();
+            }
         }
-        
-        me.callParent(arguments);
+    },
+    
+    onReconfigure: function(config){
+        this.initializeStore(config);
+        this.callParent(arguments);
     },
     
     onDestroy: function(){
@@ -254,7 +263,7 @@ Ext.define('Ext.pivot.matrix.Local', {
         // for all records find out if there's a new axis value
         this.leftAxis.dimensions.each(function(dimension){
             Ext.Array.forEach(records, function(record){
-                found = (record && record.isModel && dimension.values.containsKey(record.get(dimension.dataIndex)));
+                found = (record && record.isModel && dimension.getValues().containsKey(record.get(dimension.dataIndex)));
                 return found;
             });
             return found;
@@ -324,14 +333,33 @@ Ext.define('Ext.pivot.matrix.Local', {
      * @private
      */
     updateRecordToPivotStore: function(item){
+        var me = this,
+            dataIndex, data;
+
         if(!item.children){
             if(item.record){
-                item.record.set(this.preparePivotStoreRecordData(item));
+                data = me.preparePivotStoreRecordData(item);
+                delete(data['id']);
+                item.record.set(data);
             }
         }else{
-            Ext.Array.each(item.children, function(child){
-                this.updateRecordToPivotStore(child);
-            }, this);
+            // update all pivot store records of this item
+            if(item.records){
+                dataIndex = (me.viewLayoutType == 'outline' ? item.dimensionId : me.compactViewKey);
+                data = me.preparePivotStoreRecordData(item);
+                delete(data['id']);
+                delete(data[dataIndex]);
+                item.records.collapsed.set(data);
+                if(me.rowSubTotalsPosition == 'first'){
+                    item.records.expanded.set(data);
+                }else{
+                    if(me.rowSubTotalsPosition == 'last') {
+                        item.records.footer.set(data);
+                    }
+                }
+            }
+
+            Ext.Array.each(item.children, me.updateRecordToPivotStore, me);
         }
     },
     
@@ -339,11 +367,11 @@ Ext.define('Ext.pivot.matrix.Local', {
         var me = this;
         
         // if we don't have a store then do nothing
-        if(!me.store || (me.store && !me.store.isStore) || me.isDestroyed){
+        if(!me.store || (me.store && !me.store.isStore) || me.isDestroyed || me.store.isLoading()){
             // nothing to do
             return;
         }
-        
+
         me.clearData();
         
         me.localDelayedTask.delay(50);
@@ -363,7 +391,7 @@ Ext.define('Ext.pivot.matrix.Local', {
         }
         
         me.statusInProgress = false;
-        
+
         me.processRecords(0);
     },
     

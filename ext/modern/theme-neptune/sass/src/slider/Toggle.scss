@@ -1,27 +1,20 @@
-/**
- * @class Ext.slider.Toggle
- */
-
-.x-toggle {
-    width: $form-thumb-size * 2;
-    border: 1px solid darken(#ddd, 15%);
-
-    @include background-gradient(#ddd, 'recessed');
-    @if $include-border-radius {
-        @include border-radius($form-thumb-size/2);
-    }
-
-    .x-thumb {
-        &.x-dragging {
-            opacity: 1;
-        }
-
-        &:before {
-            top: ($form-thumb-size - $form-toggle-size) / 2;
-        }
-    }
-}
-
-.x-toggle-on {
-    @include background-gradient($confirm-color, 'recessed');
-}
+@include toggle-ui(
+$width: $toggle-width,
+$height: $toggle-height,
+$border: $toggle-border,
+$border-radius: $toggle-border-radius,
+$background-color: $toggle-background-color,
+$background-gradient: $toggle-background-gradient,
+$on-background-color: $toggle-on-background-color,
+$on-background-gradient: $toggle-on-background-gradient,
+$thumb-size: $toggle-thumb-size,
+$thumb-border: $toggle-thumb-border,
+$thumb-border-radius: $toggle-thumb-border-radius,
+$thumb-background-color: $toggle-thumb-background-color,
+$thumb-background-gradient: $toggle-thumb-background-gradient,
+$thumb-on-background-color: $toggle-thumb-on-background-color,
+$thumb-on-background-gradient: $toggle-thumb-on-background-gradient,
+$thumb-top: $toggle-thumb-top,
+$thumb-left: $toggle-thumb-left,
+$thumb-padding: $toggle-thumb-padding
+);

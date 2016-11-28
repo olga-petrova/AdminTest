@@ -1,0 +1,6 @@
+/* remove shadows from toolbars that are docked into nested lists
+.#{$prefix}nested-list.#{$prefix}dock-item {
+    .#{$prefix}toolbar {
+        @include material-shadow(0);
+    }
+}*/

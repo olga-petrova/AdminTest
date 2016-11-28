@@ -1,0 +1,44 @@
+@if ($include-ios) {
+  #{$ios-selector} {
+    .#{$prefix}form {
+      .#{$prefix}scroll-container {
+        background-color: #edebf1;
+      }
+
+      > input[type=submit] {
+        display: none;
+      }
+
+      .#{$prefix}field .#{$prefix}input,
+      .#{$prefix}field .#{$prefix}input-el {
+        font-weight: 300;
+      }
+
+      &.#{$prefix}floating {
+        .#{$prefix}input-el {
+          padding-top: .5em;
+        }
+      }
+
+      .#{$prefix}field .#{$prefix}input {
+        border: 0px;
+        background-color: transparent;
+      }
+    }
+
+    .#{$prefix}field-label {
+      padding: .6em .6em .6em 1em;
+
+      span {
+        font-size: 1.1em;
+        font-weight: 400;
+      }
+    }
+
+    .#{$prefix}form-fieldset .#{$prefix}form-fieldset-inner {
+      border-top: 1px solid #d9d9d9;
+      border-bottom: 1px solid #d9d9d9;
+      overflow: hidden;
+    }
+  }
+}

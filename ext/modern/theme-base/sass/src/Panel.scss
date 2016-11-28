@@ -21,3 +21,10 @@
 .x-form.x-floating > .x-dock {
     z-index: 1;
 }
+
+.x-anchor, .x-anchor:after {
+    position: absolute;
+    height: 0;
+    width: 0;
+    content: "";
+}

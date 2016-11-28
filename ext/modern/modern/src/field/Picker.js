@@ -8,6 +8,7 @@
  */
 Ext.define('Ext.field.Picker', {
     extend: 'Ext.field.Text',
+    xtype: 'pickerfield',
 
     config: {
 
@@ -56,6 +57,8 @@ Ext.define('Ext.field.Picker', {
          */
         pickerSlotAlign: 'center'
     },
+
+    classCls: Ext.baseCSSPrefix + 'pickerfield',
 
     /**
      * @private

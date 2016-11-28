@@ -1,4 +1,3 @@
-
 /**
  * French translation by Daniel Grana
  *

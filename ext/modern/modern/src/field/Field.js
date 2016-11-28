@@ -45,12 +45,6 @@ Ext.define('Ext.field.Field', {
 
     config: {
         /**
-         * @cfg
-         * @inheritdoc
-         */
-        baseCls: Ext.baseCSSPrefix + 'field',
-
-        /**
          * The label of this field
          * @cfg {String} label
          * @accessor
@@ -63,6 +57,21 @@ Ext.define('Ext.field.Field', {
          * @accessor
          */
         labelAlign: 'left',
+
+        /**
+         * @cfg {'top'/'right'/'bottom'/'left'}
+         *
+         * Text alignment of this field's label
+         */
+        labelTextAlign: 'left',
+
+        /**
+         * @cfg {'start'/'center'/'end'/'stretch'}
+         *
+         * The horizontal alignment of this field's {@link #component} within the body
+         * of the field
+         */
+        bodyAlign: 'start',
 
         /**
          * @cfg {Number/String} labelWidth The width to make this field's label.
@@ -162,7 +171,9 @@ Ext.define('Ext.field.Field', {
         inputCls: null
     },
 
-    noWrapCls: Ext.baseCSSPrefix + 'form-label-nowrap',
+    classCls: Ext.baseCSSPrefix + 'field',
+
+    noWrapCls: Ext.baseCSSPrefix + 'field-label-nowrap',
 
     /**
      * @cfg {Boolean} isFocused
@@ -179,18 +190,36 @@ Ext.define('Ext.field.Field', {
             children: [
                 {
                     reference: 'label',
-                    cls: prefix + 'form-label',
+                    cls: prefix + 'field-label',
                     children: [{
                         reference: 'labelspan',
                         tag: 'span'
                     }]
                 },
                 {
-                    reference: 'innerElement',
-                    cls: prefix + 'component-outer'
+                    reference: 'bodyElement',
+                    cls: prefix + 'field-body'
                 }
             ]
         };
+    },
+
+    initElement: function() {
+        this.callParent();
+        this.innerElement = this.bodyElement;
+    },
+
+    updateBodyAlign: function(bodyAlign, oldBodyAlign) {
+        var element = this.element,
+            prefix = Ext.baseCSSPrefix;
+
+        if (oldBodyAlign) {
+            element.removeCls(prefix + 'body-align-' + oldBodyAlign);
+        }
+
+        if (bodyAlign) {
+            element.addCls(prefix + 'body-align-' + bodyAlign);
+        }
     },
 
     /**
@@ -215,6 +244,10 @@ Ext.define('Ext.field.Field', {
         var renderElement = this.renderElement,
             prefix = Ext.baseCSSPrefix;
 
+        if (oldLabelAlign) {
+            renderElement.removeCls(prefix + 'label-align-' + oldLabelAlign);
+        }
+
         if (newLabelAlign) {
             renderElement.addCls(prefix + 'label-align-' + newLabelAlign);
 
@@ -224,9 +257,18 @@ Ext.define('Ext.field.Field', {
                 this.updateLabelWidth(this.getLabelWidth());
             }
         }
+    },
 
-        if (oldLabelAlign) {
-            renderElement.removeCls(prefix + 'label-align-' + oldLabelAlign);
+    updateLabelTextAlign: function(labelTextAlign, oldLabelTextAlign) {
+        var label = this.label,
+            prefix = Ext.baseCSSPrefix;
+
+        if (oldLabelTextAlign) {
+            label.removeCls(prefix + 'label-text-align-' + oldLabelTextAlign);
+        }
+
+        if (labelTextAlign) {
+            label.addCls(prefix + 'label-text-align-' + labelTextAlign);
         }
     },
 
@@ -262,7 +304,7 @@ Ext.define('Ext.field.Field', {
      * @private
      */
     updateLabelWrap: function(newLabelWrap, oldLabelWrap) {
-        this.toggleCls(this.noWrapCls, !newLabelWrap);
+        this.label.toggleCls(this.noWrapCls, !newLabelWrap);
     },
 
     /**

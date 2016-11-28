@@ -1,0 +1,17 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}floating {
+      .#{$prefix}panel-header {
+        @include css-color-variable('background-color-md', 'background-color');
+        @include css-color-variable('text-color-base-md');
+        height: auto;
+        padding: 24px 24px 20px 24px;
+        @include material-shadow(0);
+      }
+
+      .#{$prefix}panel-title {
+        @include material-font-style('title');
+      }
+    }
+  }
+}

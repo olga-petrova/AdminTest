@@ -1,0 +1,7 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}togglefield {
+      border: none;
+    }
+  }
+}

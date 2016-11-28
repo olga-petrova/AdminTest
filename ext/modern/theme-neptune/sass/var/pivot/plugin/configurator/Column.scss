@@ -1,0 +1,17 @@
+$pivot-grid-config-column-btn-width: 1em;
+$pivot-grid-config-column-btn-height: 1em;
+$pivot-grid-config-column-btn-color: $neutral-dark-color;
+$pivot-grid-config-column-btn-font-size: $gridviewoptions-icon-font-size;
+$pivot-grid-config-column-btn-font-size-big: $gridviewoptions-icon-font-size-big;
+
+$pivot-grid-config-column-btn-delete-icon: $fa-var-minus-circle FontAwesome;
+$pivot-grid-config-column-btn-delete-color: $pivot-grid-config-column-btn-color;
+
+$pivot-grid-config-column-btn-move-icon: $fa-var-bars FontAwesome;
+$pivot-grid-config-column-btn-move-color: $pivot-grid-config-column-btn-color;
+
+$pivot-grid-config-column-btn-sort-asc-icon: $fa-var-long-arrow-up FontAwesome;
+$pivot-grid-config-column-btn-sort-asc-color: $pivot-grid-config-column-btn-color;
+
+$pivot-grid-config-column-btn-sort-desc-icon: $fa-var-long-arrow-down FontAwesome;
+$pivot-grid-config-column-btn-sort-desc-color: $pivot-grid-config-column-btn-color;

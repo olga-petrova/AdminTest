@@ -1,0 +1,9 @@
+/**
+ * @class Ext.calendar.panel.Panel
+ */
+
+@include calendar-panel-ui(
+    $sidebar-list-margin: $calendar-panel-sidebar-list-margin,
+    $sheet-list-margin: $calendar-panel-sheet-list-margin,
+    $create-button-horizontal-padding: $calendar-panel-create-button-horizontal-padding
+);

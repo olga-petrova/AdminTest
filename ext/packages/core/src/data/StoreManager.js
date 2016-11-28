@@ -82,13 +82,13 @@ Ext.define('Ext.data.StoreManager', {
                 i,
                 len;
                 
-            if(expand){
+            if (expand) {
                 data = [];
                 for (i = 0, len = store.length; i < len; ++i) {
                     data.push([store[i]]);
                 }
             } else {
-                for(i = 2, len = store[0].length; i <= len; ++i){
+                for (i = 2, len = store[0].length; i <= len; ++i) {
                     fields.push('field' + i);
                 }
             }

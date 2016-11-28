@@ -1,0 +1,21 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}grid-column:after {
+      content: '';
+      width: 0;
+      @include css-color-variable('accent-color-light-md', 'background-color');
+      height: 100%;
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+
+    .#{$prefix}grid-column.#{$prefix}grid-column-resizing:after {
+      width: 16px;
+    }
+
+    .#{$prefix}grid-resize-marker {
+      @include css-color-variable('text-color-lightest-md', 'background-color');
+    }
+  }
+}

@@ -1,0 +1,95 @@
+.#{$prefix}toolbar {
+  height: 56px;
+
+  //Material overrides this from base so that button ripples can expand beyond the left/right edges of the toolbar
+  .#{$prefix}inner {
+    overflow: visible;
+  }
+
+  &.#{$prefix}docked-top {
+    @include material-shadow(1);
+  }
+
+  //Buttons in Toolbars
+  .#{$prefix}button {
+    color: $reverse-color;
+  }
+
+  //Button in Toolbars on the Left
+  .#{$prefix}toolbar-left .#{$prefix}button:first-child {
+    margin-left: -($content-padding/2);
+  }
+
+  //Button in Toolbars on the Right
+  .#{$prefix}toolbar-right .#{$prefix}button:last-child {
+    margin-right: -($content-padding/2);
+  }
+
+  // Titles in Toolbars
+  .#{$prefix}title {
+    transition: .25s padding ease-out;
+
+    &.#{$prefix}title-align-left {
+      padding-left: 0;
+    }
+  }
+
+  // Titles in toolbars next to visible Buttons
+  .#{$prefix}button:not(.#{$prefix}hidden-display) + .#{$prefix}title {
+    padding-left: $content-padding/2;
+  }
+
+  // toolbar inputs
+
+  .#{$prefix}field {
+    background-color: transparent;
+    border-bottom-color: $reverse-disabled-color;
+  }
+
+  .#{$prefix}field-label {
+    color: $accent-color;
+  }
+
+  .#{$prefix}field-focused {
+    border-bottom-color: $accent-color;
+  }
+
+  .#{$prefix}input {
+    .#{$prefix}clear-icon {
+      color: $reverse-color;
+    }
+
+    // Normal text inputs
+    .#{$prefix}input-el {
+      -webkit-text-fill-color: $reverse-color;
+    }
+  }
+
+  //Toggle Buttons in toolbars
+  .#{$prefix}toggle-on {
+    background-color: $accent-pressed-color;
+
+    .#{$prefix}thumb {
+      &:after {
+        background-color: $accent-color;
+      }
+    }
+  }
+}
+
+// This needs to be moved into a UI for toolbars that are floating and docked to the bottom
+.#{$prefix}floating .#{$prefix}toolbar.#{$prefix}docked-bottom, .#{$prefix}floated .#{$prefix}toolbar.#{$prefix}docked-bottom {
+  padding: $content-padding/2 $content-padding;
+  background-color: $background-color;
+  color: $color;
+  height: auto;
+
+  .#{$prefix}button {
+    color: $base-color;
+    height: 36px;
+
+    &:last-child {
+      margin-right: -$content-padding/2;
+    }
+  }
+}

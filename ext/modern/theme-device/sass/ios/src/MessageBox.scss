@@ -1,0 +1,101 @@
+@if ($include-ios) {
+  #{$ios-selector} {
+    .#{$prefix}msgbox {
+      padding: 0;
+      margin: 0;
+      max-width: 19em;
+      border: 0;
+      background-color: $background-color-ios;
+
+      .#{$prefix}icon {
+        margin: 0 0.8em 0 0.5em;
+        background: #fff;
+      }
+
+      .#{$prefix}msgbox-warning, .#{$prefix}msgbox-error {
+        .#{$prefix}button {
+          border-color: $negative-color-ios;
+          .#{$prefix}button-label {
+            color: $negative-color-ios;
+          }
+        }
+      }
+
+      .#{$prefix}body {
+        background: transparent !important;
+      }
+
+      .#{$prefix}panel-header + .#{$prefix}dock-body {
+        padding: 16px;
+      }
+
+      .#{$prefix}field {
+        padding-top: .5em;
+        min-height: .8em;
+        margin: 0 0 .6em 0;
+        background: transparent;
+        @include border-radius(0);
+      }
+
+      .#{$prefix}input {
+        padding-right: 2.2em;
+      }
+
+      .#{$prefix}input-el {
+        min-height: .8em;
+        padding: .3em;
+        padding-right: 0 !important;
+        -webkit-appearance: none;
+        background: transparent;
+      }
+    }
+
+    .#{$prefix}msgbox-text {
+      //padding: .6em 0;
+      // line-height: 1.4em;
+      color: #000;
+      font-size: .9em;
+      font-weight: 400;
+    }
+
+    .#{$prefix}msgbox {
+      @include border-radius(7px);
+      .#{$prefix}msgbox-buttons {
+        padding: 0;
+        height: auto;
+        min-height: auto;
+
+        .#{$prefix}toolbar-inner {
+          @include st-box-align(end);
+
+          .#{$prefix}button {
+            @include st-box-flex(1);
+            @include border-radius(0px);
+            background-color: transparent;
+            border-bottom-width: 0;
+            height: 40px;
+            margin: 0;
+
+            &:first-child {
+              border-left-width: 0;
+            }
+
+            &:last-child {
+              border-left-width: 0;
+              border-right-width: 0;
+            }
+
+            &.#{$prefix}button-pressing {
+              background-color: #fff;
+            }
+
+            & .#{$prefix}button-label {
+              font-size: .9em;
+              color: $primary-color-ios;
+            }
+          }
+        }
+      }
+    }
+  }
+}

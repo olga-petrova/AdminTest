@@ -407,7 +407,7 @@ var noArgs = [],
             //<debug>
             Ext.classSystemMonitor && Ext.classSystemMonitor(this, 'Ext.Base#triggerExtended', arguments);
             //</debug>
-        
+
             var callbacks = this.$onExtended,
                 ln = callbacks.length,
                 i, callback;
@@ -464,10 +464,11 @@ var noArgs = [],
          * @param {Object} members
          */
         addInheritableStatics: function(members) {
-            var inheritableStatics,
+            var me = this,
+                prototype = me.prototype,
+                inheritableStatics,
                 hasInheritableStatics,
-                prototype = this.prototype,
-                name, member;
+                name, member, current;
 
             inheritableStatics = prototype.$inheritableStatics;
             hasInheritableStatics = prototype.$hasInheritableStatics;
@@ -478,18 +479,23 @@ var noArgs = [],
             }
 
             //<debug>
-            var className = Ext.getClassName(this) + '.';
+            var className = Ext.getClassName(me) + '.';
             //</debug>
 
             for (name in members) {
                 if (members.hasOwnProperty(name)) {
                     member = members[name];
+                    current = me[name];
                     //<debug>
                     if (typeof member == 'function') {
                         member.name = className + name;
                     }
                     //</debug>
-                    this[name] = member;
+                    if (typeof current === 'function' && !current.$isClass && !current.$nullFn) {
+                        member.$previous = current;
+                    }
+
+                    me[name] = member;
 
                     if (!hasInheritableStatics[name]) {
                         hasInheritableStatics[name] = true;
@@ -498,7 +504,7 @@ var noArgs = [],
                 }
             }
 
-            return this;
+            return me;
         },
 
         /**
@@ -547,7 +553,7 @@ var noArgs = [],
                     privateStatics = privates.statics;
                     delete privates.statics;
                 }
-                
+
                 //<debug>
                 subPrivacy = privates.privacy || privacy || 'framework';
                 //</debug>
@@ -787,16 +793,20 @@ var noArgs = [],
                 delete members.inheritableStatics;
             }
 
+            if (members.platformConfig) {
+                me.addPlatformConfig(members);
+            }
+
             if (config) {
                 me.addConfig(config);
                 delete members.config;
             }
-            
+
             if (cachedConfig) {
                 me.addCachedConfig(cachedConfig);
                 delete members.cachedConfig;
             }
-            
+
             delete members.mixins;
 
             me.addMembers(members);
@@ -804,6 +814,73 @@ var noArgs = [],
                 me.mixin(mixins);
             }
             return me;
+        },
+
+        addPlatformConfig: function(data) {
+            var me = this,
+                platformConfigs = data.platformConfig,
+                config = data.config,
+                added, classConfigs, configs, configurator, hoisted, keys, name, value,
+                i, ln;
+
+            delete data.platformConfig;
+
+
+            //<debug>
+            if (platformConfigs instanceof Array) {
+                throw new Error('platformConfigs must be specified as an object.');
+            }
+            //</debug>
+
+            configurator = me.getConfigurator();
+            classConfigs = configurator.configs;
+
+            // Get the keys shortest to longest (ish).
+            keys = Ext.getPlatformConfigKeys(platformConfigs);
+
+            // To leverage the Configurator#add method, we want to generate potentially
+            // two objects to pass in: "added" and "hoisted". For any properties in an
+            // active platformConfig rule that set proper Configs in the base class, we
+            // need to put them in "added". If instead of the proper Config coming from
+            // a base class, it comes from this class's config block, we still need to
+            // put that config in "added" but we also need move the class-level config
+            // out of "config" and into "hoisted".
+            //
+            // This will ensure that the config defined at the class level is added to
+            // the Configurator first.
+            for (i = 0, ln = keys.length; i < ln; ++i) {
+                configs = platformConfigs[keys[i]];
+                hoisted = added = null;
+
+                for (name in configs) {
+                    value = configs[name];
+
+                    // We have a few possibilities for each config name:
+
+                    if (config && name in config) {
+                        //  It is a proper Config defined by this class.
+
+                        (added || (added = {}))[name] = value;
+                        (hoisted || (hoisted = {}))[name] = config[name];
+                        delete config[name];
+                    } else if (name in classConfigs) {
+                        //  It is a proper Config defined by a base class.
+
+                        (added || (added = {}))[name] = value;
+                    } else {
+                        //  It is just a property to put on the prototype.
+
+                        data[name] = value;
+                    }
+                }
+
+                if (hoisted) {
+                    configurator.add(hoisted);
+                }
+                if (added) {
+                    configurator.add(added);
+                }
+            }
         },
 
         /**
@@ -843,7 +920,9 @@ var noArgs = [],
          */
         mixin: function(name, mixinClass) {
             var me = this,
-                mixin, prototype, key, statics, i, ln, staticName, mixinValue, mixins;
+                mixin, prototype, key, statics, i, ln, 
+                mixinName, staticName, mixinValue, mixins,
+                mixinStatics;
 
             if (typeof name !== 'string') {
                 mixins = name;
@@ -857,7 +936,7 @@ var noArgs = [],
                     // mixins: {
                     //     foo: ...
                     // }
-                    for (var mixinName in mixins) {
+                    for (mixinName in mixins) {
                         me.mixin(mixinName, mixins[mixinName]);
                     }
                 }
@@ -895,7 +974,7 @@ var noArgs = [],
                     // mixin's methods win, we also want its reference to be preserved.
                     Ext.applyIf(prototype.mixins, mixinValue);
                 }
-                else if (!(key === 'mixinId' || key === 'config') && (prototype[key] === undefined)) {
+                else if (!(key === 'mixinId' || key === 'config' || key === '$inheritableStatics') && (prototype[key] === undefined)) {
                     prototype[key] = mixinValue;
                 }
             }
@@ -905,13 +984,15 @@ var noArgs = [],
             statics = mixin.$inheritableStatics;
 
             if (statics) {
+                mixinStatics = {};
                 for (i = 0, ln = statics.length; i < ln; i++) {
                     staticName = statics[i];
 
                     if (!me.hasOwnProperty(staticName)) {
-                        me[staticName] = mixinClass[staticName];
+                        mixinStatics[staticName] = mixinClass[staticName];
                     }
                 }
+                me.addInheritableStatics(mixinStatics);
             }
             //</feature>
 
@@ -936,7 +1017,7 @@ var noArgs = [],
          * Adds new config properties to this class. This is called for classes when they
          * are declared, then for any mixins that class may define and finally for any
          * overrides defined that target the class.
-         * 
+         *
          * @param {Object} config
          * @param {Ext.Class} [mixinClass] The mixin class if the configs are from a mixin.
          * @private
@@ -951,7 +1032,7 @@ var noArgs = [],
         addCachedConfig: function(config, isMixin) {
             var cached = {},
                 key;
-                
+
             for (key in config) {
                 cached[key] = {
                     cached: true,
@@ -963,7 +1044,7 @@ var noArgs = [],
 
         /**
          * Returns the `Ext.Configurator` for this class.
-         * 
+         *
          * @return {Ext.Configurator}
          * @private
          * @static
@@ -1067,7 +1148,7 @@ var noArgs = [],
          * @since 5.0.0
          */
         $configPrefixed: true,
-        
+
         /**
          * @property {Boolean} [$configStrict]
          * The value `true` instructs the `initConfig` method to only honor values for
@@ -1289,18 +1370,18 @@ var noArgs = [],
         },
 
         /**
-         * This method is used by an **override** to call the superclass method but 
-         * bypass any overridden method. This is often done to "patch" a method that 
+         * This method is used by an **override** to call the superclass method but
+         * bypass any overridden method. This is often done to "patch" a method that
          * contains a bug but for whatever reason cannot be fixed directly.
-         * 
+         *
          * Consider:
-         * 
+         *
          *      Ext.define('Ext.some.Class', {
          *          method: function () {
          *              console.log('Good');
          *          }
          *      });
-         * 
+         *
          *      Ext.define('Ext.some.DerivedClass', {
          *          extend: 'Ext.some.Class',
          *          
@@ -1312,10 +1393,10 @@ var noArgs = [],
          *              this.callParent();
          *          }
          *      });
-         * 
+         *
          * To patch the bug in `Ext.some.DerivedClass.method`, the typical solution is to create an
          * override:
-         * 
+         *
          *      Ext.define('App.patches.DerivedClass', {
          *          override: 'Ext.some.DerivedClass',
          *          
@@ -1327,11 +1408,11 @@ var noArgs = [],
          *              this.callSuper();
          *          }
          *      });
-         * 
-         * The patch method cannot use {@link #method-callParent} to call the superclass 
-         * `method` since that would call the overridden method containing the bug. In 
-         * other words, the above patch would only produce "Fixed" then "Good" in the 
-         * console log, whereas, using `callParent` would produce "Fixed" then "Bad" 
+         *
+         * The patch method cannot use {@link #method-callParent} to call the superclass
+         * `method` since that would call the overridden method containing the bug. In
+         * other words, the above patch would only produce "Fixed" then "Good" in the
+         * console log, whereas, using `callParent` would produce "Fixed" then "Bad"
          * then "Good".
          *
          * @protected
@@ -1520,11 +1601,11 @@ var noArgs = [],
         },
 
         /**
-         * Returns the initial configuration passed to the constructor when 
+         * Returns the initial configuration passed to the constructor when
          * instantiating this class.
-         * 
+         *
          * Given this example Ext.button.Button definition and instance:
-         * 
+         *
          *     Ext.define('MyApp.view.Button', {
          *         extend: 'Ext.button.Button',
          *         xtype: 'mybutton',
@@ -1532,22 +1613,22 @@ var noArgs = [],
          *         scale: 'large',
          *         enableToggle: true
          *     });
-         *     
+         *
          *     var btn = Ext.create({
          *         xtype: 'mybutton',
          *         renderTo: Ext.getBody(),
          *         text: 'Test Button'
          *     });
-         * 
-         * Calling `btn.getInitialConfig()` would return an object including the config 
+         *
+         * Calling `btn.getInitialConfig()` would return an object including the config
          * options passed to the `create` method:
-         * 
+         *
          *     xtype: 'mybutton',
          *     renderTo: // The document body itself
          *     text: 'Test Button'
-         * 
+         *
          * Calling `btn.getInitialConfig('text')`returns **'Test Button'**.
-         * 
+         *
          * @param {String} [name] Name of the config option to return.
          * @return {Object/Mixed} The full config object or a single config value
          * when `name` parameter specified.
@@ -1626,9 +1707,9 @@ var noArgs = [],
         destroy: function() {
             var me = this,
                 links = me.$links;
-            
+
             me.initialConfig = me.config = null;
-            
+
             me.destroy = Ext.emptyFn;
             // isDestroyed added for compat reasons
             me.isDestroyed = me.destroyed = true;

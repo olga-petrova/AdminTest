@@ -86,7 +86,8 @@ $progress-text-font-family: dynamic($font-family);
  * @var {boolean}
  * True to include the "default" ProgressBar UI
  */
-$include-progress-default-ui: dynamic($include-default-uis);
+$include-progress-default-ui: dynamic(null);
+$enable-progress-default-ui: dynamic($include-progress-default-ui or $enable-default-uis);
 
 /**
  * Creates a visual theme for an Ext.ProgressBar

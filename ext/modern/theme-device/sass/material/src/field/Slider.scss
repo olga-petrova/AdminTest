@@ -1,0 +1,7 @@
+@if ($include-material) {
+  #{$material-selector} {
+    .#{$prefix}sliderfield {
+      border: none;
+    }
+  }
+}

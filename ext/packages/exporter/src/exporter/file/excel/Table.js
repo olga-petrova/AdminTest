@@ -108,9 +108,9 @@ Ext.define('Ext.exporter.file.excel.Table', {
         '<tpl if="this.exists(topCell)"> ss:TopCell="{topCell}"</tpl>',
         '<tpl if="this.exists(styleId)"> ss:StyleID="{styleId}"</tpl>',
         '>\n',
-        '<tpl for="columns">{[values.render()]}</tpl>',
-        '<tpl if="this.exists(rows)">',
-        '<tpl for="rows">{[values.render()]}</tpl>',
+        '<tpl if="columns"><tpl for="columns.getRange()">{[values.render()]}</tpl></tpl>',
+        '<tpl if="rows">',
+        '<tpl for="rows.getRange()">{[values.render()]}</tpl>',
         '<tpl else>         <Row ss:AutoFitHeight="0"/>\n</tpl>',
         '       </Table>\n',
         {
@@ -121,9 +121,9 @@ Ext.define('Ext.exporter.file.excel.Table', {
     ],
 
     destroy: function(){
-        this.getColumns().destroy();
-        this.getRows().destroy();
-        return this.callParent(arguments);
+        this.callParent();
+        this.setColumns(null);
+        this.setRows(null);
     },
 
     applyColumns: function(data, dataCollection){
@@ -168,13 +168,6 @@ Ext.define('Ext.exporter.file.excel.Table', {
      */
     getRow: function(id){
         return this.getRows().get(id);
-    },
-
-    getRenderData: function(){
-        return Ext.apply(this.callParent(arguments), {
-            columns: this.getColumns().getRange(),
-            rows: this.getRows().getRange()
-        });
     }
 
 });

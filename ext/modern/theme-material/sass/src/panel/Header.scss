@@ -1,0 +1,12 @@
+.#{$prefix}floating {
+  .#{$prefix}panel-header {
+    background-color: $background-color;
+    color: $color;
+    height: auto;
+    @include material-shadow(0);
+  }
+
+  .#{$prefix}panel-title {
+    @include material-font-style('title');
+  }
+}

@@ -1,0 +1,14 @@
+@if ($include-ios) {
+  #{$ios-selector} {
+    .#{$prefix}grid .#{$prefix}grid-header {
+      background-color: $grid-header-color-ios;
+      border: 0;
+      padding: 0 1em;
+      .#{$prefix}innerhtml {
+        font-size: 1em;
+        font-weight: 400;
+        padding: 8px;
+      }
+    }
+  }
+}

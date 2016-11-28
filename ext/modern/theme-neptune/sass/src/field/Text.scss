@@ -1,0 +1,89 @@
+.#{$prefix}textfield {
+    .#{$prefix}clear-icon {
+        width: $textfield-clear-icon-size;
+        height: $textfield-clear-icon-size;
+        color: $textfield-clear-icon-color;
+        border-radius: $textfield-clear-icon-border-radius;
+        @include font-icon($textfield-clear-icon);
+
+        &.#{$prefix}pressing {
+            background-color: $textfield-clear-icon-pressing-background-color;
+            color: $textfield-clear-icon-pressing-color
+        }
+    }
+
+    $top-border-width: top($textfield-input-border-width) or 0;
+    $bottom-border-width: bottom($textfield-input-border-width) or 0;
+    $focused-top-border-width: top($textfield-focused-input-border-width) or $top-border-width;
+    $focused-bottom-border-width: bottom($textfield-focused-input-border-width) or $bottom-border-width;
+    $invalid-top-border-width: top($textfield-invalid-input-border-width) or $top-border-width;
+    $invalid-bottom-border-width: bottom($textfield-invalid-input-border-width) or $bottom-border-width;
+    $smallest-top-border: min($top-border-width, $focused-top-border-width, $invalid-top-border-width);
+    $smallest-bottom-border: min($bottom-border-width, $focused-bottom-border-width, $invalid-bottom-border-width);
+
+    .#{$prefix}input {
+        @include border($textfield-input-border-width, $textfield-input-border-style, $textfield-input-border-color);
+    }
+
+    .#{$prefix}input-el {
+        background-color: $textfield-input-background-color;
+        color: $textfield-input-color;
+        padding: $textfield-input-padding;
+        @include font($textfield-input-font-weight, $textfield-input-font-size, $textfield-input-line-height, $textfield-input-font-family);
+
+        @if $enable-big {
+            .#{$prefix}big & {
+                @if $textfield-input-padding-big != $textfield-input-padding {
+                    padding: $textfield-input-padding-big;
+                }
+                @if $textfield-input-font-size-big != $textfield-input-font-size {
+                    font-size: $textfield-input-font-size-big;
+                }
+                @if $textfield-input-line-height-big != $textfield-input-line-height {
+                    line-height: $textfield-input-line-height-big;
+                }
+            }
+        }
+
+        border-width: 0;
+        -webkit-appearance: none;
+
+        @if $top-border-width != $smallest-top-border {
+            margin-top: -($smallest-top-border - $top-border-width);
+        }
+
+        @if $bottom-border-width != $smallest-bottom-border {
+            margin-bottom: $smallest-bottom-border - $bottom-border-width;
+        }
+    }
+
+    &.#{$prefix}field-focused {
+        .#{$prefix}input {
+            @include border($textfield-focused-input-border-width, $textfield-focused-input-border-style, $textfield-focused-input-border-color);
+        }
+        .#{$prefix}input-el {
+            @if $focused-top-border-width != $smallest-top-border {
+                margin-top: -($smallest-top-border - $focused-top-border-width);
+            }
+
+            @if $focused-bottom-border-width != $smallest-bottom-border {
+                margin-bottom: $smallest-bottom-border - $focused-bottom-border-width;
+            }
+        }
+    }
+
+    &.#{$prefix}field-invalid {
+        .#{$prefix}input {
+            @include border($textfield-invalid-input-border-width, $textfield-invalid-input-border-style, $textfield-invalid-input-border-color);
+        }
+        .#{$prefix}input-el {
+            @if $invalid-top-border-width != $smallest-top-border {
+                margin-top: -($smallest-top-border - $invalid-top-border-width);
+            }
+
+            @if $invalid-bottom-border-width != $smallest-bottom-border {
+                margin-bottom: $smallest-bottom-border - $invalid-bottom-border-width;
+            }
+        }
+    }
+}

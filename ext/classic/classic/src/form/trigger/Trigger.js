@@ -36,7 +36,7 @@ Ext.define('Ext.form.trigger.Trigger', {
     /**
      * @cfg {Function/String} [handler=undefined]
      * Function to run when trigger is clicked or tapped.
-     * @declarativeHandler
+     * @controllable
      */
 
     /**
@@ -124,7 +124,9 @@ Ext.define('Ext.form.trigger.Trigger', {
 
     renderTpl: [
         '<div id="{triggerId}" class="{baseCls} {baseCls}-{ui} {cls} {cls}-{ui} {extraCls} ',
-                '{childElCls}"<tpl if="triggerStyle"> style="{triggerStyle}"</tpl>>',
+                '{childElCls}"<tpl if="triggerStyle"> style="{triggerStyle}"</tpl>',
+                '<tpl if="ariaRole"> role="{ariaRole}"<tpl else> role="presentation"</tpl>',
+            '>',
             '{[values.$trigger.renderBody(values)]}',
         '</div>'
     ],
@@ -179,6 +181,7 @@ Ext.define('Ext.form.trigger.Trigger', {
     },
 
     /**
+     * @method
      * Allows addition of data to the render data object for the {@link #bodyTpl}.
      * @protected
      * @return {Object}
@@ -390,7 +393,8 @@ Ext.define('Ext.form.trigger.Trigger', {
             cls: me.cls,
             triggerStyle: triggerStyle,
             extraCls: me.extraCls,
-            baseCls: me.baseCls
+            baseCls: me.baseCls,
+            ariaRole: me.ariaRole
         });
     },
 
