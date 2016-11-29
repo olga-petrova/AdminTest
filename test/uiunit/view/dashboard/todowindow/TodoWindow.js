@@ -31,9 +31,9 @@ describe("TODO window UI unit test suite", function() {
         });
     });
     
-    it("ToDo window should match the expected screenshot", function(done) {
-        ST.screenshot('todowindow', done);
-    }, 30000);
+    it("ToDo window should match the expected screenshot", function() {
+        ST.screenshot('todowindow');
+    });
 
         
     it('ToDo window should close on cancel button click', function (done) {
