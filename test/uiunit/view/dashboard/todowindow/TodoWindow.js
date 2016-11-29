@@ -31,7 +31,7 @@ describe("TODO window UI unit test suite", function() {
         });
     });
     
-    xit("ToDo window should match the expected screenshot", function(done) {
+    it("ToDo window should match the expected screenshot", function(done) {
         ST.screenshot('todowindow', done);
     }, 30000);
 

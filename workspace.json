@@ -47,7 +47,7 @@
             ]
         },
         "archiveServer": "http://localhost:1903",
-        "archiveRoot": "/developers"
+        "archiveRoot": "/devopts"
     },
     "name": "AdminTest"
 }
