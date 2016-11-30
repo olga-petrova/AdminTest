@@ -14,7 +14,8 @@
             "directory": "unit",
             "name": "Unit Tests",
             "launch": false,
-            "page": ""
+            "page": "",
+            "sandbox": false
         },
         {
             "libs": [],
@@ -22,14 +23,33 @@
             "directory": "uiunit",
             "name": "UI Unit Tests",
             "page": "",
-            "launch": false
+            "launch": false,
+            "sandbox": false
         },
         {
             "libs": [],
             "coverageFilters": [],
             "directory": "End-To-End Tests",
             "name": "Ext-to-End Tests",
-            "launch": true
+            "launch": true,
+            "sandbox": false
+        },
+        {
+            "libs": [],
+            "coverageFilters": [],
+            "sandbox": true,
+            "directory": "mpa",
+            "name": "Multi-Page Architecture",
+            "page": "/test/local-app.html"
+        },
+        {
+            "libs": [],
+            "coverageFilters": [],
+            "sandbox": true,
+            "directory": "sandbox",
+            "name": "WebDriver or The Sandbox",
+            "page": "http://examples.sencha.com/extjs/6.2.0/examples/kitchensink/#form-login",
+            "globals": "*"
         }
     ],
     "launchAppWatch": false

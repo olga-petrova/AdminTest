@@ -22,7 +22,7 @@ Ext.define('Admin.view.dashboard.todowindow.TodoWindow', {
     items: [
         {
             xtype: 'form',
-            padding: 5,
+            padding: 0,
             items: [
                 {
                     xtype: 'textfield',
