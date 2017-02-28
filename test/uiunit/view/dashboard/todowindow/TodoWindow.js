@@ -41,6 +41,7 @@ describe("TODO window UI unit test suite", function() {
         .rendered()
         .and(function (window) {
             window.on('close', function () {
+                console.log(done);
                 done();
             });
             Dash.cancelButton().click();
@@ -49,6 +50,7 @@ describe("TODO window UI unit test suite", function() {
     
     it('Save button should not be disabled initially', function () {
         expect(Dash.saveButton().enabled(400)).toBeTruthy();
+        
     });
     
     it('Save button should be disabled when textfield is empty', function () {

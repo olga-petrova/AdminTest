@@ -4,12 +4,12 @@ describe("ToDo store unit test suite", function() {
     
     beforeEach(function (done) {
         toDoStore = Ext.create('Admin.store.dashboard.Todo'); 
-        Ext.defer(done, 1000);
+        Ext.defer(done, 2000);
     });
     
     afterEach(function (done) {
         toDoStore = Ext.destroy(toDoStore);
-        Ext.defer(done, 1000);
+        Ext.defer(done, 2000);
     });
         
     it("should be able to add new ToDo item", function() {

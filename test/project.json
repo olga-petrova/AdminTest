@@ -29,10 +29,20 @@
         {
             "libs": [],
             "coverageFilters": [],
-            "directory": "End-To-End Tests",
-            "name": "Ext-to-End Tests",
+            "sandbox": false,
             "launch": true,
-            "sandbox": false
+            "globals": "*",
+            "directory": "Functional_Tests",
+            "name": "Functional Tests"
+        },
+        {
+            "libs": [],
+            "coverageFilters": [],
+            "sandbox": true,
+            "directory": "Application_Tests",
+            "name": "Application Tests",
+            "globals": "*",
+            "page": "http://localhost:1841/#dashboard"
         },
         {
             "libs": [],
@@ -50,6 +60,15 @@
             "name": "WebDriver or The Sandbox",
             "page": "http://examples.sencha.com/extjs/6.2.0/examples/kitchensink/#form-login",
             "globals": "*"
+        },
+        {
+            "libs": [],
+            "coverageFilters": [],
+            "sandbox": false,
+            "directory": "Test",
+            "name": "Application Tests 2",
+            "globals": "*",
+            "launch": true
         }
     ],
     "launchAppWatch": false

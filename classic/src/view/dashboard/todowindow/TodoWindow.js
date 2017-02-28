@@ -31,7 +31,7 @@ Ext.define('Admin.view.dashboard.todowindow.TodoWindow', {
                     bind: {
                         value: '{todoText}'
                     }
-                }    
+                }  
             ],
 
             buttons: [{

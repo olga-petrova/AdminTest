@@ -49,5 +49,6 @@
         "archiveServer": "http://localhost:1903",
         "archiveRoot": "/devopts"
     },
-    "name": "AdminTest"
+    "name": "AdminTest",
+    "storageKey": "devopts"
 }
