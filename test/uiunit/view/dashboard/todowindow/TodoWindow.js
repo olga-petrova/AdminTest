@@ -1,16 +1,5 @@
 describe("TODO window UI unit test suite", function() {
-    var toDoWindow,
-    Dash = {
-        toDoWindow: function () {
-            return ST.component('todowindow');    
-        },
-        saveButton: function () {
-            return ST.button('#saveButton');
-        },
-        cancelButton: function () {
-            return ST.button('#cancelButton');
-        }
-    };
+    var toDoWindow;
     
     //create todo window
     beforeEach(function () {
@@ -24,42 +13,27 @@ describe("TODO window UI unit test suite", function() {
     });
     
     it('ToDo window should open', function () {
-        Dash.toDoWindow()
+        stpo.dashboard.toDoWindow()
         .rendered()
         .and(function (window) {
             expect(window.el).toBeTruthy();    
         });
     });
-    
-    it("ToDo window should match the expected screenshot", function() {
-        ST.screenshot('todowindow');
-    });
 
         
     it('ToDo window should close on cancel button click', function (done) {
-        Dash.toDoWindow()
+        stpo.dashboard.toDoWindow()
         .rendered()
         .and(function (window) {
             window.on('close', function () {
-                console.log(done);
                 done();
             });
-            Dash.cancelButton().click();
+            stpo.dashboard.cancelButton().click();
         });
     });  
     
     it('Save button should not be disabled initially', function () {
-        expect(Dash.saveButton().enabled(400)).toBeTruthy();
-        
-    });
-    
-    it('Save button should be disabled when textfield is empty', function () {
-        Dash.toDoWindow()
-        .rendered()
-        .and(function (window) {
-            window.getViewModel().set('todoText', '');
-            expect(Dash.saveButton().disabled(400)).toBeTruthy();
-        });
+        expect(stpo.dashboard.saveButton().enabled(400)).toBeTruthy();
     });
     
     
@@ -71,7 +45,7 @@ describe("TODO window UI unit test suite", function() {
         toDoStore.on('load', function () {
             itemsCount = toDoStore.getCount();   
         });
-        Dash.toDoWindow()
+        stpo.dashboard.toDoWindow()
         .rendered()
         .and(function (window) {
             //mock ViewModel 
@@ -85,7 +59,7 @@ describe("TODO window UI unit test suite", function() {
                 done();
             });
             //click save button
-            Dash.saveButton().click();
+            stpo.dashboard.saveButton().click();
         });
     });
     

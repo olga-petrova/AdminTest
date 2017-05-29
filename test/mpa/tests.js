@@ -6,9 +6,6 @@ describe('mpa navigation', function () {
             ST.wait(300);
         }
 
-        go('http://www.saucelabs.com/');
-        go('http://www.bryntum.com/');
-        go('http://www.speedment.com/');
-        go('http://www.cnxcorp.com/');
-    });
+        go('http://www.google.com/');
+    }, 30*60);
 });

@@ -1,17 +1,6 @@
-describe('Expectations', function () {
-    it('get/and', function () {
-        ST.textField('textfield[name="user"]')
-        .type('foobar')
-        .get('id,value')
-        .and(function () {
-            expect(this.future.data.id).toBeDefined();
-            expect(this.future.data.value).toBe('foobar');
-        });
-    });
-});
-
 describe('White Box With Sand Box', function () {
     it('execute', function () {
+        
         ST.execute(function () {
             alert('I am over here in the browser!');
         });

@@ -23,6 +23,7 @@ Ext.define('Admin.view.dashboard.Todos', {
             header: false,
             title: 'My Grid Panel',
             hideHeaders: true,
+            padding: 10,
             scroll: 'none',
             bind: {
                 store: '{todos}'

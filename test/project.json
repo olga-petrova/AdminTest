@@ -15,7 +15,8 @@
             "name": "Unit Tests",
             "launch": false,
             "page": "",
-            "sandbox": false
+            "sandbox": false,
+            "globals": "*"
         },
         {
             "libs": [],
@@ -42,7 +43,8 @@
             "directory": "Application_Tests",
             "name": "Application Tests",
             "globals": "*",
-            "page": "http://localhost:1841/#dashboard"
+            "page": "http://localhost:1841/#dashboard",
+            "webdriverContext": "webdriver"
         },
         {
             "libs": [],
@@ -50,7 +52,9 @@
             "sandbox": true,
             "directory": "mpa",
             "name": "Multi-Page Architecture",
-            "page": "/test/local-app.html"
+            "page": "/test/local-app.html",
+            "webdriverContext": "webdriver",
+            "globals": "*"
         },
         {
             "libs": [],
@@ -59,7 +63,8 @@
             "directory": "sandbox",
             "name": "WebDriver or The Sandbox",
             "page": "http://examples.sencha.com/extjs/6.2.0/examples/kitchensink/#form-login",
-            "globals": "*"
+            "globals": "*",
+            "webdriverContext": "webdriver"
         },
         {
             "libs": [],
@@ -71,5 +76,15 @@
             "launch": true
         }
     ],
-    "launchAppWatch": false
+    "launchAppWatch": false,
+    "pageObjects": [
+        {
+            "name": "dashboard",
+            "url": "index.html"
+        },
+        {
+            "name": "dashboard",
+            "url": "index.html"
+        }
+    ]
 }
